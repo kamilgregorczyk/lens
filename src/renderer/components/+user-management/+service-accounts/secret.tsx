@@ -21,6 +21,9 @@ interface State {
 }
 
 export class ServiceAccountsSecret extends React.Component<Props, State> {
+  /**
+   * @internal
+   */
   public state: State = {
     showToken: false,
   };

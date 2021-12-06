@@ -4,13 +4,13 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import dockStoreInjectable from "../dock/store.injectable";
-import { DockTabCreateSpecific, TabKind } from "../dock/store";
+import { DockTabCreateOption, TabKind } from "../dock/store";
 
 const createTerminalTabInjectable = getInjectable({
   instantiate: (di) => {
     const dockStore = di.inject(dockStoreInjectable);
 
-    return (tabParams: DockTabCreateSpecific = {}) =>
+    return (tabParams: DockTabCreateOption = {}) =>
       dockStore.createTab({
         title: `Terminal`,
         ...tabParams,
