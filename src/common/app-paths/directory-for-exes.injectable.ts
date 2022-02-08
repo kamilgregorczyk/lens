@@ -3,11 +3,11 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { appPathsInjectionToken } from "../app-path-injection-token";
+import { appPathsInjectionToken } from "./app-path-injection-token";
 
-const directoryForDownloadsInjectable = getInjectable({
-  instantiate: (di) => di.inject(appPathsInjectionToken).downloads,
+const directoryForExesInjectable = getInjectable({
+  instantiate: (di) => di.inject(appPathsInjectionToken).exe,
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default directoryForDownloadsInjectable;
+export default directoryForExesInjectable;

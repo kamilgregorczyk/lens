@@ -4,13 +4,13 @@
  */
 
 import type { ClusterModel, ClusterPreferences, ClusterPrometheusPreferences } from "../../common/cluster-types";
-import { MigrationDeclaration, migrationLog } from "../helpers";
+import { MigrationDeclaration, migrationLog } from "../../main/utils/join-migrations";
 import { generateNewIdFor } from "../utils";
 import path from "path";
 import { moveSync, removeSync } from "fs-extra";
 import { getLegacyGlobalDiForExtensionApi } from "../../extensions/as-legacy-globals-for-extension-api/legacy-global-di-for-extension-api";
 import directoryForUserDataInjectable
-  from "../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
+  from "../../common/app-paths/directory-for-user-data.injectable";
 
 function mergePrometheusPreferences(left: ClusterPrometheusPreferences, right: ClusterPrometheusPreferences): ClusterPrometheusPreferences {
   if (left.prometheus && left.prometheusProvider) {

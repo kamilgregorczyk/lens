@@ -5,7 +5,7 @@
 
 import { docsUrl, slackUrl } from "../../common/vars";
 import type { WeblinkData } from "../../common/weblink-store";
-import type { MigrationDeclaration } from "../helpers";
+import type { MigrationDeclaration } from "../../main/utils/join-migrations";
 
 export default {
   version: "5.1.4",

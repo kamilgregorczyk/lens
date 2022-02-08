@@ -6,7 +6,7 @@
 // Cleans up a store that had the state related data stored
 import type { Hotbar } from "../../common/hotbar-types";
 import * as uuid from "uuid";
-import type { MigrationDeclaration } from "../helpers";
+import type { MigrationDeclaration } from "../../main/utils/join-migrations";
 
 export default {
   version: "5.0.0-alpha.2",

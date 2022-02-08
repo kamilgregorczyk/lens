@@ -13,8 +13,8 @@ import { computed, IObservableArray, observable } from "mobx";
 import type { ConfigurableDependencyInjectionContainer } from "@ogre-tools/injectable";
 import statusBarItemsInjectable from "./status-bar-items.injectable";
 import type { StatusBarRegistration } from "./status-bar-registration";
+import directoryForUserDataInjectable  from "../../../common/app-paths/directory-for-user-data.injectable";
 import { LensRendererExtension } from "../../../extensions/lens-renderer-extension";
-import directoryForUserDataInjectable from "../../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
 import rendererExtensionsInjectable from "../../../extensions/renderer-extensions.injectable";
 
 class SomeTestExtension extends LensRendererExtension {

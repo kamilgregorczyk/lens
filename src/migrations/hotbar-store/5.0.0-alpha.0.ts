@@ -4,7 +4,7 @@
  */
 
 // Cleans up a store that had the state related data stored
-import type { MigrationDeclaration } from "../helpers";
+import type { MigrationDeclaration } from "../../main/utils/join-migrations";
 import { catalogEntity } from "../../main/catalog-sources/general";
 import { getEmptyHotbar } from "../../common/hotbar-types";
 

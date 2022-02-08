@@ -5,7 +5,7 @@
 
 // Hotbar store migrations
 
-import { joinMigrations } from "../helpers";
+import { joinMigrations } from "../../main/utils/join-migrations";
 
 import version500alpha0 from "./5.0.0-alpha.0";
 import version500alpha2 from "./5.0.0-alpha.2";

@@ -8,39 +8,53 @@ import Config from "conf";
 import type { Options as ConfOptions } from "conf/dist/source/types";
 import { ipcMain, ipcRenderer } from "electron";
 import { IEqualsComparer, makeObservable, reaction, runInAction } from "mobx";
-import { getAppVersion, Singleton, toJS, Disposer } from "./utils";
+import { toJS, Disposer, getAppVersion } from "./utils";
 import logger from "../main/logger";
 import { broadcastMessage, ipcMainOn, ipcRendererOn } from "./ipc";
 import isEqual from "lodash/isEqual";
 import { isTestEnv } from "./vars";
 import { kebabCase } from "lodash";
-import { getLegacyGlobalDiForExtensionApi } from "../extensions/as-legacy-globals-for-extension-api/legacy-global-di-for-extension-api";
-import directoryForUserDataInjectable
-  from "./app-paths/directory-for-user-data/directory-for-user-data.injectable";
+
+export interface StoreSyncOptions<T> {
+  fireImmediately?: boolean;
+  equals?: IEqualsComparer<T>;
+}
 
 export interface BaseStoreParams<T> extends ConfOptions<T> {
-  syncOptions?: {
-    fireImmediately?: boolean;
-    equals?: IEqualsComparer<T>;
-  };
+  syncOptions?: StoreSyncOptions<T>;
+}
+
+export interface BaseStoreDependencies {
+  readonly userDataPath: string;
 }
 
 /**
- * Note: T should only contain base JSON serializable types.
+ * Note: T MUST only contain base JSON serializable types.
  */
-export abstract class BaseStore<T> extends Singleton {
+export abstract class BaseStore<T> {
+  abstract readonly displayName: string;
+
   protected storeConfig?: Config<T>;
   protected syncDisposers: Disposer[] = [];
+  protected readonly syncOptions: StoreSyncOptions<T>;
+  protected readonly params: ConfOptions<T>;
 
-  readonly displayName: string = this.constructor.name;
-
-  protected constructor(protected params: BaseStoreParams<T>) {
-    super();
+  constructor(protected readonly dependencies: BaseStoreDependencies, baseStoreParams: BaseStoreParams<T>) {
     makeObservable(this);
 
-    if (ipcRenderer) {
-      params.migrations = undefined; // don't run migrations on renderer
-    }
+    const {
+      syncOptions,
+      cwd = dependencies.userDataPath,
+      ...params
+    } = baseStoreParams;
+
+    this.syncOptions = syncOptions;
+    this.params = {
+      ...params,
+      projectName: "lens",
+      projectVersion: getAppVersion(),
+      cwd,
+    };
   }
 
   /**
@@ -51,13 +65,11 @@ export abstract class BaseStore<T> extends Singleton {
       logger.info(`[${kebabCase(this.displayName).toUpperCase()}]: LOADING from ${this.path} ...`);
     }
 
-    this.storeConfig = new Config({
-      ...this.params,
-      projectName: "lens",
-      projectVersion: getAppVersion(),
-      cwd: this.cwd(),
-    });
+    if (this.storeConfig) {
+      throw new Error(`Cannot load store for ${this.path} more than once`);
+    }
 
+    this.storeConfig = new Config(this.params);
     const res: any = this.fromStore(this.storeConfig.store);
 
     if (res instanceof Promise || (typeof res === "object" && res && typeof res.then === "function")) {
@@ -87,12 +99,6 @@ export abstract class BaseStore<T> extends Singleton {
     return this.storeConfig?.path || "";
   }
 
-  protected cwd() {
-    const di = getLegacyGlobalDiForExtensionApi();
-
-    return di.inject(directoryForUserDataInjectable);
-  }
-
   protected saveToFile(model: T) {
     logger.info(`[STORE]: SAVING ${this.path}`);
 
@@ -109,7 +115,7 @@ export abstract class BaseStore<T> extends Singleton {
       reaction(
         () => toJS(this.toJSON()), // unwrap possible observables and react to everything
         model => this.onModelChange(model),
-        this.params.syncOptions,
+        this.syncOptions,
       ),
     );
 
@@ -135,7 +141,7 @@ export abstract class BaseStore<T> extends Singleton {
   }
 
   unregisterIpcListener() {
-    ipcRenderer?.removeAllListeners(this.syncMainChannel);
+    ipcMain?.removeAllListeners(this.syncMainChannel);
     ipcRenderer?.removeAllListeners(this.syncRendererChannel);
   }
 

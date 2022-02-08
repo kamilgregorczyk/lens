@@ -5,7 +5,7 @@
 
 // Cluster store migrations
 
-import { joinMigrations } from "../helpers";
+import { joinMigrations } from "../../main/utils/join-migrations";
 
 import version360Beta1 from "./3.6.0-beta.1";
 import version500Beta10 from "./5.0.0-beta.10";

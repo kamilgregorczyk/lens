@@ -12,7 +12,7 @@ import { getDiForUnitTesting } from "../../../../getDiForUnitTesting";
 import type { DiRender } from "../../../test-utils/renderFor";
 import { renderFor } from "../../../test-utils/renderFor";
 import directoryForUserDataInjectable
-  from "../../../../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
+  from "../../../../../common/app-paths/directory-for-user-data.injectable";
 
 jest.mock("../../+cluster-roles/store");
 

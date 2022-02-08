@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { joinMigrations } from "../helpers";
+import { joinMigrations } from "../../main/utils/join-migrations";
 
 import version514 from "./5.1.4";
 

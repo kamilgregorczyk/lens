@@ -9,15 +9,15 @@
 import path from "path";
 import fse from "fs-extra";
 import { loadConfigFromFileSync } from "../../common/kube-helpers";
-import { MigrationDeclaration, migrationLog } from "../helpers";
+import { MigrationDeclaration, migrationLog } from "../../main/utils/join-migrations";
 import type { ClusterModel } from "../../common/cluster-types";
 import { getLegacyGlobalDiForExtensionApi } from "../../extensions/as-legacy-globals-for-extension-api/legacy-global-di-for-extension-api";
 import directoryForUserDataInjectable
-  from "../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
+  from "../../common/app-paths/directory-for-user-data.injectable";
 import directoryForKubeConfigsInjectable
-  from "../../common/app-paths/directory-for-kube-configs/directory-for-kube-configs.injectable";
+  from "../../common/app-paths/directory-for-kube-configs.injectable";
 import getCustomKubeConfigDirectoryInjectable
-  from "../../common/app-paths/get-custom-kube-config-directory/get-custom-kube-config-directory.injectable";
+  from "../../common/app-paths/get-custom-kube-config-directory.injectable";
 
 interface Pre360ClusterModel extends ClusterModel {
   kubeConfig: string;

@@ -4,11 +4,11 @@
  */
 
 // Add / reset "lastSeenAppVersion"
-import type { MigrationDeclaration } from "../helpers";
+import type { MigrationDeclaration } from "../../utils/join-migrations";
 
 export default {
   version: "2.1.0-beta.4",
-  run(store) {
+  run(log, store) {
     store.set("lastSeenAppVersion", "0.0.0");
   },
 } as MigrationDeclaration;

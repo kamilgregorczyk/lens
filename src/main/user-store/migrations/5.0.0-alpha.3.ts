@@ -4,11 +4,11 @@
  */
 
 // Switch representation of hiddenTableColumns in store
-import type { MigrationDeclaration } from "../helpers";
+import type { MigrationDeclaration } from "../../utils/join-migrations";
 
 export default {
   version: "5.0.0-alpha.3",
-  run(store) {
+  run(log, store) {
     const preferences = store.get("preferences");
     const oldHiddenTableColumns: Record<string, string[]> = preferences?.hiddenTableColumns;
 

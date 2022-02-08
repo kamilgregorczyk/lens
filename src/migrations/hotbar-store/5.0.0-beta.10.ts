@@ -10,11 +10,11 @@ import * as uuid from "uuid";
 import type { ClusterStoreModel } from "../../common/cluster-store/cluster-store";
 import { defaultHotbarCells, getEmptyHotbar, Hotbar, HotbarItem } from "../../common/hotbar-types";
 import { catalogEntity } from "../../main/catalog-sources/general";
-import { MigrationDeclaration, migrationLog } from "../helpers";
+import { MigrationDeclaration, migrationLog } from "../../main/utils/join-migrations";
 import { generateNewIdFor } from "../utils";
 import { getLegacyGlobalDiForExtensionApi } from "../../extensions/as-legacy-globals-for-extension-api/legacy-global-di-for-extension-api";
 import directoryForUserDataInjectable
-  from "../../common/app-paths/directory-for-user-data/directory-for-user-data.injectable";
+  from "../../common/app-paths/directory-for-user-data.injectable";
 
 interface Pre500WorkspaceStoreModel {
   workspaces: {

@@ -3,11 +3,11 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { appPathsInjectionToken } from "../app-path-injection-token";
+import fsInjectable from "./fs.injectable";
 
-const directoryForTempInjectable = getInjectable({
-  instantiate: (di) => di.inject(appPathsInjectionToken).temp,
+const moveInjectable = getInjectable({
+  instantiate: (di) => di.inject(fsInjectable).move,
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default directoryForTempInjectable;
+export default moveInjectable;

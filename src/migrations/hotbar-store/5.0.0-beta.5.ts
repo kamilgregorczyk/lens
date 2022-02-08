@@ -5,7 +5,7 @@
 
 import type { Hotbar } from "../../common/hotbar-types";
 import { catalogEntityRegistry } from "../../main/catalog";
-import type { MigrationDeclaration } from "../helpers";
+import type { MigrationDeclaration } from "../../main/utils/join-migrations";
 
 export default {
   version: "5.0.0-beta.5",

@@ -39,7 +39,7 @@ import { Console } from "console";
 import * as path from "path";
 import createKubeconfigManagerInjectable from "../kubeconfig-manager/create-kubeconfig-manager.injectable";
 import { createClusterInjectionToken } from "../../common/cluster/create-cluster-injection-token";
-import directoryForTempInjectable from "../../common/app-paths/directory-for-temp/directory-for-temp.injectable";
+import directoryForTempInjectable from "../../common/app-paths/directory-for-temp.injectable";
 
 console = new Console(process.stdout, process.stderr); // fix mockFS
 
