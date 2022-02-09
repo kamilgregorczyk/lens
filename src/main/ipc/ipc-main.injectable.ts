@@ -7,8 +7,8 @@ import { ipcMain } from "electron";
 
 const ipcMainInjectable = getInjectable({
   instantiate: () => ipcMain,
-  lifecycle: lifecycleEnum.singleton,
   causesSideEffects: true,
+  lifecycle: lifecycleEnum.singleton,
 });
 
 export default ipcMainInjectable;

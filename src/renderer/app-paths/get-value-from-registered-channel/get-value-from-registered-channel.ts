@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import type { IpcRenderer } from "electron";
-import type { Channel } from "../../../common/ipc-channel/channel";
+import type { Channel } from "../../../common/ipc-channels/channel";
 
 interface Dependencies {
   ipcRenderer: IpcRenderer;

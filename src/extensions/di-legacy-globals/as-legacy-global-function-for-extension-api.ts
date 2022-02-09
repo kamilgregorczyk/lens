@@ -2,31 +2,29 @@
  * Copyright (c) OpenLens Authors. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import type { Injectable } from "@ogre-tools/injectable";
-
+import type { InferFromInjectable, Injectable, InjectionToken, TentativeTuple } from "@ogre-tools/injectable";
 import { getLegacyGlobalDiForExtensionApi } from "./legacy-global-di-for-extension-api";
 
-type TentativeTuple<T> = T extends object ? [T] : [undefined?];
+export function asLegacyGlobalFunctionForExtensionApi<
+  TInjectionToken extends InjectionToken<unknown, unknown>,
+>(
+  injectionToken: TInjectionToken,
+  ...instantiationParameter: TentativeTuple<TInjectionToken["instantiationParameter"]>
+): TInjectionToken["template"];
 
-type FactoryType = <
-  TInjectable extends Injectable<unknown, TInstance, TInstantiationParameter>,
-  TInstantiationParameter,
-  TInstance extends (...args: unknown[]) => any,
-  TFunction extends (...args: unknown[]) => any = Awaited<
-    ReturnType<TInjectable["instantiate"]>
-  >,
+export function asLegacyGlobalFunctionForExtensionApi<
+  TInjectable extends Injectable<unknown, (...args: any[]) => any, unknown>,
 >(
   injectableKey: TInjectable,
-  ...instantiationParameter: TentativeTuple<TInstantiationParameter>
-) => (...args: Parameters<TFunction>) => ReturnType<TFunction>;
-
-export const asLegacyGlobalFunctionForExtensionApi: FactoryType =
-  (injectableKey, ...instantiationParameter) =>
-    (...args) => {
-      const injected = getLegacyGlobalDiForExtensionApi().inject(
+  ...instantiationParameter: TentativeTuple<InferFromInjectable<TInjectable>[1]>
+): InferFromInjectable<TInjectable>[1] {
+  return (...args: Parameters<InferFromInjectable<TInjectable>[0]>) => {
+    const injected = getLegacyGlobalDiForExtensionApi()
+      .inject(
         injectableKey,
         ...instantiationParameter,
       );
 
-      return injected(...args);
-    };
+    return injected(...args);
+  };
+}

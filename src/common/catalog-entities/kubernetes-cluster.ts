@@ -5,12 +5,13 @@
 
 import { catalogCategoryRegistry } from "../catalog/catalog-category-registry";
 import { CatalogEntity, CatalogEntityActionContext, CatalogEntityContextMenuContext, CatalogEntityMetadata, CatalogEntityStatus, CatalogCategory, CatalogCategorySpec } from "../catalog";
-import { ClusterStore } from "../cluster-store/cluster-store";
 import { broadcastMessage } from "../ipc";
-import { app } from "electron";
 import type { CatalogEntitySpec } from "../catalog/catalog-entity";
 import { IpcRendererNavigationEvents } from "../../renderer/navigation/events";
-import { requestClusterActivation, requestClusterDisconnection } from "../../renderer/ipc";
+import { requestClusterDisconnection } from "../../renderer/ipc";
+import { asLegacyGlobalFunctionForExtensionApi } from "../../extensions/di-legacy-globals/as-legacy-global-function-for-extension-api";
+import { activateClusterInjectionToken } from "../ipc/activate-cluster-injection-token";
+import { disconnectClusterInjectionToken } from "../ipc/disconnect-cluster-injection-token";
 
 export interface KubernetesClusterPrometheusMetrics {
   address?: {
@@ -58,6 +59,9 @@ export type KubernetesClusterStatusPhase = "connected" | "connecting" | "disconn
 export interface KubernetesClusterStatus extends CatalogEntityStatus {
 }
 
+const activateCluster = asLegacyGlobalFunctionForExtensionApi(activateClusterInjectionToken);
+const disconnectCluster = asLegacyGlobalFunctionForExtensionApi(disconnectClusterInjectionToken);
+
 export class KubernetesCluster<
   Metadata extends KubernetesClusterMetadata = KubernetesClusterMetadata,
   Status extends KubernetesClusterStatus = KubernetesClusterStatus,
@@ -70,19 +74,11 @@ export class KubernetesCluster<
   public readonly kind = KubernetesCluster.kind;
 
   async connect(): Promise<void> {
-    if (app) {
-      await ClusterStore.getInstance().getById(this.getId())?.activate();
-    } else {
-      await requestClusterActivation(this.getId(), false);
-    }
+    await activateCluster(this.getId());
   }
 
   async disconnect(): Promise<void> {
-    if (app) {
-      ClusterStore.getInstance().getById(this.getId())?.disconnect();
-    } else {
-      await requestClusterDisconnection(this.getId(), false);
-    }
+    await disconnectCluster(this.getId());
   }
 
   async onRun(context: CatalogEntityActionContext) {

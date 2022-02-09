@@ -4,7 +4,7 @@
  */
 import { getInjectionToken } from "@ogre-tools/injectable";
 import type { PathName } from "./app-path-names";
-import { createChannel } from "../ipc-channel/create-channel/create-channel";
+import { createChannel } from "../ipc-channels/create-channel";
 
 export type AppPaths = Record<PathName, string>;
 
