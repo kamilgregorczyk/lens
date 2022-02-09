@@ -14,8 +14,8 @@ import { Jobs } from "../+workloads-jobs";
 import { CronJobs } from "../+workloads-cronjobs";
 import { ReplicaSets } from "../+workloads-replicasets";
 import * as routes from "../../../common/routes";
-import type { IsAllowedResource } from "../../../common/utils/is-allowed-resource.injectable";
-import isAllowedResourceInjectable from "../../../common/utils/is-allowed-resource.injectable";
+import type { IsAllowedResource } from "../../cluster-store/is-allowed-resource.injectable";
+import isAllowedResourceInjectable from "../../cluster-store/is-allowed-resource.injectable";
 
 interface Dependencies {
   isAllowedResource: IsAllowedResource;

@@ -8,8 +8,8 @@ import type { TabLayoutRoute } from "../layout/tab-layout";
 import { PersistentVolumes } from "../+storage-volumes";
 import { StorageClasses } from "../+storage-classes";
 import { PersistentVolumeClaims } from "../+storage-volume-claims";
-import type { IsAllowedResource } from "../../../common/utils/is-allowed-resource.injectable";
-import isAllowedResourceInjectable from "../../../common/utils/is-allowed-resource.injectable";
+import type { IsAllowedResource } from "../../cluster-store/is-allowed-resource.injectable";
+import isAllowedResourceInjectable from "../../cluster-store/is-allowed-resource.injectable";
 import * as routes from "../../../common/routes";
 
 interface Dependencies {

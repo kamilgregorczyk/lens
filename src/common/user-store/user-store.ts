@@ -19,9 +19,10 @@ export interface UserStoreModel {
   preferences: UserPreferencesModel;
 }
 
+export interface UserStoreDependencies extends BaseStoreDependencies {}
+
 export class UserStore extends BaseStore<UserStoreModel> /* implements UserStoreFlatModel (when strict null is enabled) */ {
-  readonly displayName = "UserStore";
-  constructor(dependencies: BaseStoreDependencies, baseStoreParams: BaseStoreParams<UserStoreModel> = {}) {
+  constructor(dependencies: UserStoreDependencies, baseStoreParams: BaseStoreParams<UserStoreModel> = {}) {
     super(dependencies, {
       ...baseStoreParams,
       configName: "lens-user-store",

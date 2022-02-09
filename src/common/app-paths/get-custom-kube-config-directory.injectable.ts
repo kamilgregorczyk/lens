@@ -6,16 +6,20 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import path from "path";
 import directoryForKubeConfigsInjectable from "./directory-for-kube-configs.injectable";
 
+export type GetCustomKubeConfigDirectory = (dirName: string) => string;
+
+interface Dependencies {
+  directoryForKubeConfigs: string;
+}
+
+const getCustomKubeConfigDirectory = ({ directoryForKubeConfigs }: Dependencies): GetCustomKubeConfigDirectory => (
+  (dirName) => path.resolve(directoryForKubeConfigs, dirName)
+);
+
 const getCustomKubeConfigDirectoryInjectable = getInjectable({
-  instantiate: (di) => (directoryName: string) => {
-    const directoryForKubeConfigs = di.inject(directoryForKubeConfigsInjectable);
-
-    return path.resolve(
-      directoryForKubeConfigs,
-      directoryName,
-    );
-  },
-
+  instantiate: (di) => getCustomKubeConfigDirectory({
+    directoryForKubeConfigs: di.inject(directoryForKubeConfigsInjectable),
+  }),
   lifecycle: lifecycleEnum.singleton,
 });
 

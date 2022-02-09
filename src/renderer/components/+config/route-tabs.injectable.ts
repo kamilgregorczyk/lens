@@ -10,7 +10,7 @@ import { ConfigMaps } from "../+config-maps";
 import { PodDisruptionBudgets } from "../+config-pod-disruption-budgets";
 import { ResourceQuotas } from "../+config-resource-quotas";
 import { Secrets } from "../+config-secrets";
-import isAllowedResourceInjectable, { IsAllowedResource } from "../../../common/utils/is-allowed-resource.injectable";
+import isAllowedResourceInjectable, { IsAllowedResource } from "../../cluster-store/is-allowed-resource.injectable";
 import type { TabLayoutRoute } from "../layout/tab-layout";
 import * as routes from "../../../common/routes";
 

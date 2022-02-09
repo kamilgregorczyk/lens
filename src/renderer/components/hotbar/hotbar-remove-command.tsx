@@ -10,7 +10,7 @@ import hotbarManagerInjectable from "../../../common/hotbar-store.injectable";
 import { ConfirmDialog } from "../confirm-dialog";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import commandOverlayInjectable from "../command-palette/command-overlay.injectable";
-import type { Hotbar } from "../../../common/hotbar-types";
+import type { Hotbar } from "../../../common/hotbar-store/hotbar-types";
 
 interface Dependencies {
   closeCommandOverlay: () => void;

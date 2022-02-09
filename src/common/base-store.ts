@@ -7,13 +7,12 @@ import path from "path";
 import Config from "conf";
 import type { Options as ConfOptions } from "conf/dist/source/types";
 import { ipcMain, ipcRenderer } from "electron";
-import { IEqualsComparer, makeObservable, reaction, runInAction } from "mobx";
+import { comparer, IEqualsComparer, makeObservable, reaction, runInAction } from "mobx";
 import { toJS, Disposer, getAppVersion } from "./utils";
-import logger from "../main/logger";
 import { broadcastMessage, ipcMainOn, ipcRendererOn } from "./ipc";
 import isEqual from "lodash/isEqual";
 import { isTestEnv } from "./vars";
-import { kebabCase } from "lodash";
+import type { LensLogger } from "./logger";
 
 export interface StoreSyncOptions<T> {
   fireImmediately?: boolean;
@@ -26,25 +25,27 @@ export interface BaseStoreParams<T> extends ConfOptions<T> {
 
 export interface BaseStoreDependencies {
   readonly userDataPath: string;
+  readonly logger: LensLogger;
 }
 
 /**
- * Note: T MUST only contain base JSON serializable types.
+ * `T` MUST be JSON serializable
  */
 export abstract class BaseStore<T> {
-  abstract readonly displayName: string;
-
   protected storeConfig?: Config<T>;
   protected syncDisposers: Disposer[] = [];
   protected readonly syncOptions: StoreSyncOptions<T>;
   protected readonly params: ConfOptions<T>;
+  protected readonly logger: LensLogger;
 
-  constructor(protected readonly dependencies: BaseStoreDependencies, baseStoreParams: BaseStoreParams<T>) {
+  constructor({ logger, userDataPath }: BaseStoreDependencies, baseStoreParams: BaseStoreParams<T>) {
     makeObservable(this);
 
     const {
-      syncOptions,
-      cwd = dependencies.userDataPath,
+      syncOptions = {
+        equals: comparer.structural,
+      },
+      cwd = userDataPath,
       ...params
     } = baseStoreParams;
 
@@ -54,7 +55,9 @@ export abstract class BaseStore<T> {
       projectName: "lens",
       projectVersion: getAppVersion(),
       cwd,
+      accessPropertiesByDotNotation: false,
     };
+    this.logger = logger;
   }
 
   /**
@@ -62,7 +65,7 @@ export abstract class BaseStore<T> {
    */
   load() {
     if (!isTestEnv) {
-      logger.info(`[${kebabCase(this.displayName).toUpperCase()}]: LOADING from ${this.path} ...`);
+      this.logger.info(`LOADING from ${this.path} ...`);
     }
 
     if (this.storeConfig) {
@@ -73,13 +76,13 @@ export abstract class BaseStore<T> {
     const res: any = this.fromStore(this.storeConfig.store);
 
     if (res instanceof Promise || (typeof res === "object" && res && typeof res.then === "function")) {
-      console.error(`${this.displayName} extends BaseStore<T>'s fromStore method returns a Promise or promise-like object. This is an error and must be fixed.`);
+      this.logger.error(`This class's fromStore implementation returns a Promise or promise-like object. This is an error and MUST be fixed.`);
     }
 
     this.enableSync();
 
     if (!isTestEnv) {
-      logger.info(`[${kebabCase(this.displayName).toUpperCase()}]: LOADED from ${this.path}`);
+      this.logger.info(`LOADED from ${this.path}`);
     }
   }
 
@@ -100,7 +103,7 @@ export abstract class BaseStore<T> {
   }
 
   protected saveToFile(model: T) {
-    logger.info(`[STORE]: SAVING ${this.path}`);
+    this.logger.info(`[STORE]: SAVING ${this.path}`);
 
     // todo: update when fixed https://github.com/sindresorhus/conf/issues/114
     if (this.storeConfig) {
@@ -121,14 +124,14 @@ export abstract class BaseStore<T> {
 
     if (ipcMain) {
       this.syncDisposers.push(ipcMainOn(this.syncMainChannel, (event, model: T) => {
-        logger.silly(`[STORE]: SYNC ${this.name} from renderer`, { model });
+        this.logger.debug(`[STORE]: SYNC ${this.name} from renderer`, { model });
         this.onSync(model);
       }));
     }
 
     if (ipcRenderer) {
       this.syncDisposers.push(ipcRendererOn(this.syncRendererChannel, (event, model: T) => {
-        logger.silly(`[STORE]: SYNC ${this.name} from main`, { model });
+        this.logger.debug(`[STORE]: SYNC ${this.name} from main`, { model });
         this.onSyncFromMain(model);
       }));
     }

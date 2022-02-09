@@ -4,9 +4,8 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { ExtensionLoader } from "./extension-loader";
-import updateExtensionsStateInjectable from "./update-extensions-state/update-extensions-state.injectable";
-import createExtensionInstanceInjectable
-  from "./create-extension-instance/create-extension-instance.injectable";
+import updateExtensionsStateInjectable from "../../common/extensions/update-extensions-state.injectable";
+import createExtensionInstanceInjectable from "./create-extension-instance.injectable";
 
 const extensionLoaderInjectable = getInjectable({
   instantiate: (di) =>

@@ -7,18 +7,20 @@ import { BaseStore, BaseStoreParams } from "../common/base-store";
 import * as path from "path";
 import type { LensExtension } from "./lens-extension";
 import type { StaticThis } from "../common/utils";
-import { asLegacyGlobalObjectForExtensionApi } from "./as-legacy-globals-for-extension-api/as-legacy-global-object-for-extension-api";
+import { asLegacyGlobalObjectForExtensionApi } from "./di-legacy-globals/as-legacy-global-object-for-extension-api";
 import directoryForUserDataInjectable from "../common/app-paths/directory-for-user-data.injectable";
+import { asLegacyGlobalFunctionForExtensionApi } from "./di-legacy-globals/as-legacy-global-function-for-extension-api";
+import createChildLoggerInjectable from "../common/logger/create-child-logger.injectable";
 
 const instances = new WeakMap<object, ExtensionStore<any>>();
+const createChildLogger = asLegacyGlobalFunctionForExtensionApi(createChildLoggerInjectable);
 
 export abstract class ExtensionStore<T> extends BaseStore<T> {
-  readonly displayName = "ExtensionStore<T>";
-
   constructor(baseStoreParams: BaseStoreParams<T>) {
     super(
       {
         userDataPath: asLegacyGlobalObjectForExtensionApi(directoryForUserDataInjectable),
+        logger: createChildLogger(baseStoreParams.configName),
       },
       baseStoreParams,
     );

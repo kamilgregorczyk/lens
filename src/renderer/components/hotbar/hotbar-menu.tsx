@@ -10,13 +10,13 @@ import { observer } from "mobx-react";
 import { HotbarEntityIcon } from "./hotbar-entity-icon";
 import { cssNames, IClassName } from "../../utils";
 import { catalogEntityRegistry } from "../../api/catalog-entity-registry";
-import { HotbarStore } from "../../../common/hotbar-store";
+import { HotbarStore } from "../../../common/hotbar-store/hotbar-store";
 import type { CatalogEntity } from "../../api/catalog-entity";
 import { DragDropContext, Draggable, Droppable, DropResult } from "react-beautiful-dnd";
 import { HotbarSelector } from "./hotbar-selector";
 import { HotbarCell } from "./hotbar-cell";
 import { HotbarIcon } from "./hotbar-icon";
-import { defaultHotbarCells, HotbarItem } from "../../../common/hotbar-types";
+import { defaultHotbarCells, HotbarItem } from "../../../common/hotbar-store/hotbar-types";
 import { action, makeObservable, observable } from "mobx";
 
 interface Props {

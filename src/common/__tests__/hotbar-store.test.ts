@@ -7,7 +7,7 @@ import { anyObject } from "jest-mock-extended";
 import mockFs from "mock-fs";
 import logger from "../../main/logger";
 import type { CatalogEntity, CatalogEntityData, CatalogEntityKindData } from "../catalog";
-import { HotbarStore } from "../hotbar-store";
+import { HotbarStore } from "../hotbar-store/hotbar-store";
 import { getDiForUnitTesting } from "../../main/getDiForUnitTesting";
 import directoryForUserDataInjectable from "../app-paths/directory-for-user-data.injectable";
 

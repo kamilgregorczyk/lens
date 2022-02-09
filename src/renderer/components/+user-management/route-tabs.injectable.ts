@@ -5,8 +5,8 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { computed } from "mobx";
 import type { TabLayoutRoute } from "../layout/tab-layout";
-import type { IsAllowedResource } from "../../../common/utils/is-allowed-resource.injectable";
-import isAllowedResourceInjectable from "../../../common/utils/is-allowed-resource.injectable";
+import type { IsAllowedResource } from "../../cluster-store/is-allowed-resource.injectable";
+import isAllowedResourceInjectable from "../../cluster-store/is-allowed-resource.injectable";
 import * as routes from "../../../common/routes";
 import { PodSecurityPolicies } from "../+pod-security-policies";
 import { ClusterRoleBindings } from "./+cluster-role-bindings";

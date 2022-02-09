@@ -76,7 +76,7 @@ export class LensExtension {
    * folder name.
    */
   async getExtensionFileFolder(): Promise<string> {
-    return this.dependencies.fileSystemProvisionerStore.requestDirectory(this.id);
+    return this.dependencies.requestDirectory(this.id);
   }
 
   @action

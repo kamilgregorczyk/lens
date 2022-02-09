@@ -12,7 +12,7 @@ import { isMac } from "../../common/vars";
 import { ClusterStore } from "../../common/cluster-store/cluster-store";
 import { navigate } from "../navigation";
 import { entitySettingsURL } from "../../common/routes";
-import { defaultHotbarCells } from "../../common/hotbar-types";
+import { defaultHotbarCells } from "../../common/hotbar-store/hotbar-types";
 import { type ListNamespaceForbiddenArgs, clusterListNamespaceForbiddenChannel, isListNamespaceForbiddenArgs } from "../../common/ipc/cluster";
 import { hotbarTooManyItemsChannel } from "../../common/ipc/hotbar";
 

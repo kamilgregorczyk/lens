@@ -16,7 +16,7 @@ import type { InstalledExtension } from "../extension-discovery/extension-discov
 import type { LensExtension, LensExtensionConstructor, LensExtensionId } from "../lens-extension";
 import type { LensRendererExtension } from "../lens-renderer-extension";
 import * as registries from "../registries";
-import type { LensExtensionState } from "../extensions-store/extensions-store";
+import type { LensExtensionState } from "../../common/extensions/store";
 import { extensionLoaderFromMainChannel, extensionLoaderFromRendererChannel } from "../../common/ipc/extension-handling";
 import { requestExtensionLoaderInitialState } from "../../renderer/ipc";
 

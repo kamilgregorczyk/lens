@@ -10,7 +10,7 @@ import { pathToRegexp } from "path-to-regexp";
 import logger from "../../main/logger";
 import type Url from "url-parse";
 import { RoutingError, RoutingErrorType } from "./error";
-import type { ExtensionsStore } from "../../extensions/extensions-store/extensions-store";
+import type { ExtensionsStore } from "../extensions/store";
 import type { ExtensionLoader } from "../../extensions/extension-loader";
 import type { LensExtension } from "../../extensions/lens-extension";
 import type { RouteHandler, RouteParams } from "../../extensions/registries/protocol-handler";

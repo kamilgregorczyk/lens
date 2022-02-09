@@ -11,8 +11,8 @@ import { Ingresses } from "../+network-ingresses";
 import { NetworkPolicies } from "../+network-policies";
 import { PortForwards } from "../+network-port-forwards";
 import * as routes from "../../../common/routes";
-import type { IsAllowedResource } from "../../../common/utils/is-allowed-resource.injectable";
-import isAllowedResourceInjectable from "../../../common/utils/is-allowed-resource.injectable";
+import type { IsAllowedResource } from "../../cluster-store/is-allowed-resource.injectable";
+import isAllowedResourceInjectable from "../../cluster-store/is-allowed-resource.injectable";
 
 interface Dependencies {
   isAllowedResource: IsAllowedResource;

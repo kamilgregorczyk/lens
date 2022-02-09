@@ -3,8 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import directoryForUserDataInjectable from "../../common/app-paths/directory-for-user-data.injectable";
-import { UserStore } from "../../common/user-store/user-store";
+import createUserStoreInjectable from "../../common/user-store/create-user-store.injectable";
 import { userStoreInjectionToken } from "../../common/user-store/user-store-injection-token";
 import fileNameMigrationInjectable from "./migrations/file-name-migration.injectable";
 import versionedMigrationsInjectable from "./migrations/versioned.injectable";
@@ -15,14 +14,13 @@ const userStoreInjectableInjectable = getInjectable({
 
     await fileNameMigration();
   },
-  instantiate: (di) => new UserStore(
-    {
-      userDataPath: di.inject(directoryForUserDataInjectable),
-    },
-    {
+  instantiate: (di) => {
+    const createUserStore = di.inject(createUserStoreInjectable);
+
+    return createUserStore({
       migrations: di.inject(versionedMigrationsInjectable),
-    },
-  ),
+    });
+  },
   injectionToken: userStoreInjectionToken,
   lifecycle: lifecycleEnum.singleton,
 });

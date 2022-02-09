@@ -13,7 +13,7 @@ import { statefulSetStore } from "../+workloads-statefulsets/statefulset.store";
 import { replicaSetStore } from "../+workloads-replicasets/replicasets.store";
 import { jobStore } from "../+workloads-jobs/job.store";
 import { cronJobStore } from "../+workloads-cronjobs/cronjob.store";
-import isAllowedResourceInjectable from "../../../common/utils/is-allowed-resource.injectable";
+import isAllowedResourceInjectable from "../../cluster-store/is-allowed-resource.injectable";
 import namespaceStoreInjectable from "../+namespaces/namespace-store/namespace-store.injectable";
 import { workloads } from "./workloads";
 

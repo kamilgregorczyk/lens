@@ -3,16 +3,14 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import type { KubeResource } from "../../common/rbac";
-import isAllowedResourceInjectable from "../../common/utils/is-allowed-resource.injectable";
-import { asLegacyGlobalFunctionForExtensionApi } from "../as-legacy-globals-for-extension-api/as-legacy-global-function-for-extension-api";
+import isAllowedResourceInjectable from "../../renderer/cluster-store/is-allowed-resource.injectable";
+import { asLegacyGlobalFunctionForExtensionApi } from "../di-legacy-globals/as-legacy-global-function-for-extension-api";
 import { castArray } from "lodash/fp";
 
+const _isAllowedResource = asLegacyGlobalFunctionForExtensionApi(isAllowedResourceInjectable);
+
 export function isAllowedResource(resource: KubeResource | KubeResource[]) {
-  const _isAllowedResource = asLegacyGlobalFunctionForExtensionApi(isAllowedResourceInjectable);
-
-  const resources = castArray(resource);
-
-  return resources.every(x => _isAllowedResource(x));
+  return castArray(resource).every(_isAllowedResource);
 }
 
 export { ResourceStack } from "../../common/k8s/resource-stack";

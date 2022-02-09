@@ -8,7 +8,7 @@ import { Console } from "console";
 import { stdout, stderr } from "process";
 import extensionLoaderInjectable from "../extension-loader/extension-loader.injectable";
 import { runInAction } from "mobx";
-import updateExtensionsStateInjectable from "../extension-loader/update-extensions-state/update-extensions-state.injectable";
+import updateExtensionsStateInjectable from "../../common/extensions/update-extensions-state.injectable";
 import { getDisForUnitTesting } from "../../test-utils/get-dis-for-unit-testing";
 import mockFs from "mock-fs";
 

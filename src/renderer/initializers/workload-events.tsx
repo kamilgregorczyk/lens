@@ -6,8 +6,8 @@
 import { withInjectables } from "@ogre-tools/injectable-react";
 import { observer } from "mobx-react";
 import React from "react";
-import type { IsAllowedResource } from "../../common/utils/is-allowed-resource.injectable";
-import isAllowedResourceInjectable from "../../common/utils/is-allowed-resource.injectable";
+import type { IsAllowedResource } from "../cluster-store/is-allowed-resource.injectable";
+import isAllowedResourceInjectable from "../cluster-store/is-allowed-resource.injectable";
 import { Events } from "../components/+events/events";
 
 export interface WorkloadEventsProps {}

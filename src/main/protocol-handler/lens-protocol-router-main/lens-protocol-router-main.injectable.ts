@@ -4,8 +4,8 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import extensionLoaderInjectable from "../../../extensions/extension-loader/extension-loader.injectable";
+import extensionsStoreInjectable from "../../extensions/store.injectable";
 import { LensProtocolRouterMain } from "./lens-protocol-router-main";
-import extensionsStoreInjectable from "../../../extensions/extensions-store/extensions-store.injectable";
 
 const lensProtocolRouterMainInjectable = getInjectable({
   instantiate: (di) =>

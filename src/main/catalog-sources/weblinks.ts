@@ -4,7 +4,7 @@
  */
 
 import { computed, observable, reaction } from "mobx";
-import { WeblinkStore } from "../../common/weblink-store";
+import { WeblinkStore } from "../../common/weblink-store/weblink-store";
 import { WebLink } from "../../common/catalog-entities";
 import { catalogEntityRegistry } from "../catalog";
 import got from "got";

@@ -6,9 +6,8 @@
 
 import { ipcMain, ipcRenderer, webFrame } from "electron";
 import { action, comparer, computed, makeObservable, observable, reaction } from "mobx";
-import { BaseStore } from "../base-store";
+import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../base-store";
 import { Cluster } from "../cluster/cluster";
-import migrations from "../../migrations/cluster-store";
 import logger from "../../main/logger";
 import { appEventBus } from "../app-event-bus/event-bus";
 import { ipcMainHandle } from "../ipc";
@@ -21,24 +20,23 @@ export interface ClusterStoreModel {
   clusters?: ClusterModel[];
 }
 
-interface Dependencies {
-  createCluster: (model: ClusterModel) => Cluster
+export interface ClusterStoreDependencies extends BaseStoreDependencies {
+  createCluster: (model: ClusterModel) => Cluster;
 }
 
 export class ClusterStore extends BaseStore<ClusterStoreModel> {
-  readonly displayName = "ClusterStore";
   clusters = observable.map<ClusterId, Cluster>();
 
   protected disposer = disposer();
 
-  constructor(private dependencies: Dependencies) {
-    super({
+  constructor(protected readonly dependencies: ClusterStoreDependencies, baseStoreParams: BaseStoreParams<ClusterStoreModel>) {
+    super(dependencies, {
+      ...baseStoreParams,
       configName: "lens-cluster-store",
       accessPropertiesByDotNotation: false, // To make dots safe in cluster context names
       syncOptions: {
         equals: comparer.structural,
       },
-      migrations,
     });
 
     makeObservable(this);

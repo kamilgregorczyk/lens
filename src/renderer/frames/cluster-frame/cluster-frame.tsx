@@ -40,15 +40,15 @@ import type { NamespaceStore } from "../../components/+namespaces/namespace-stor
 import { withInjectables } from "@ogre-tools/injectable-react";
 import namespaceStoreInjectable  from "../../components/+namespaces/namespace-store/namespace-store.injectable";
 import type { ClusterId } from "../../../common/cluster-types";
-import hostedClusterInjectable from "../../../common/cluster-store/hosted-cluster.injectable";
+import hostedClusterInjectable from "../../cluster-store/hosted-cluster.injectable";
 import type { KubeObjectStore } from "../../../common/k8s-api/kube-object.store";
 import type { KubeObject } from "../../../common/k8s-api/kube-object";
 import type { Disposer } from "../../../common/utils";
 import kubeWatchApiInjectable from "../../kube-watch-api/kube-watch-api.injectable";
 import historyInjectable from "../../navigation/history.injectable";
 import type { History } from "history";
-import type { IsAllowedResource } from "../../../common/utils/is-allowed-resource.injectable";
-import isAllowedResourceInjectable from "../../../common/utils/is-allowed-resource.injectable";
+import type { IsAllowedResource } from "../../cluster-store/is-allowed-resource.injectable";
+import isAllowedResourceInjectable from "../../cluster-store/is-allowed-resource.injectable";
 import { HelmRoute } from "../../components/+helm/route";
 import type { KubeResource } from "../../../common/rbac";
 

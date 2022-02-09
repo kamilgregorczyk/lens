@@ -13,7 +13,7 @@ import { ProtocolHandlerInvalid, RouteAttempt } from "../../../common/protocol-h
 import { disposer, noop } from "../../../common/utils";
 import { WindowManager } from "../../window-manager";
 import type { ExtensionLoader } from "../../../extensions/extension-loader";
-import type { ExtensionsStore } from "../../../extensions/extensions-store/extensions-store";
+import type { ExtensionsStore } from "../../../common/extensions/store";
 
 export interface FallbackHandler {
   (name: string): Promise<boolean>;

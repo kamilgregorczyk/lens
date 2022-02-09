@@ -13,7 +13,7 @@ import path from "path";
 import { broadcastMessage, ipcMainHandle, ipcRendererOn } from "../../common/ipc";
 import { toJS } from "../../common/utils";
 import logger from "../../main/logger";
-import type { ExtensionsStore } from "../extensions-store/extensions-store";
+import type { ExtensionsStore } from "../../common/extensions/store";
 import type { ExtensionLoader } from "../extension-loader";
 import type { LensExtensionId, LensExtensionManifest } from "../lens-extension";
 import { isProduction } from "../../common/vars";
@@ -25,12 +25,9 @@ import { requestInitialExtensionDiscovery } from "../../renderer/ipc";
 interface Dependencies {
   extensionLoader: ExtensionLoader;
   extensionsStore: ExtensionsStore;
-
   extensionInstallationStateStore: ExtensionInstallationStateStore;
-
   isCompatibleBundledExtension: (manifest: LensExtensionManifest) => boolean;
   isCompatibleExtension: (manifest: LensExtensionManifest) => boolean;
-
   installExtension: (name: string) => Promise<void>;
   installExtensions: (packageJsonPath: string, packagesJson: PackageJson) => Promise<void>
   extensionPackageRootDirectory: string;

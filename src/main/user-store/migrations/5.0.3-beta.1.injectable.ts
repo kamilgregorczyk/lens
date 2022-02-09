@@ -73,7 +73,7 @@ const version503Beta1 = ({ userDataPath, kubeConfigsPath }: Dependencies): Migra
   },
 });
 
-const version503Beta1Injectable = getInjectable({
+const v503Beta1MigrationInjectable = getInjectable({
   instantiate: (di) => version503Beta1({
     kubeConfigsPath: di.inject(directoryForKubeConfigsInjectable),
     userDataPath: di.inject(directoryForUserDataInjectable),
@@ -81,5 +81,5 @@ const version503Beta1Injectable = getInjectable({
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default version503Beta1Injectable;
+export default v503Beta1MigrationInjectable;
 
