@@ -4,17 +4,16 @@
  */
 import appEventBusInjectable from "../../common/app-event-bus/app-event-bus.injectable";
 import getClusterByIdInjectable from "../../common/cluster-store/get-cluster-by-id.injectable";
-import { DisconnectCluster, disconnectClusterInjectionToken } from "../../common/ipc/disconnect-cluster-injection-token";
+import { disconnectClusterInjectionToken } from "../../common/ipc/cluster-disconnect.token";
 import clusterFramesInjectable from "../clusters/frames.injectable";
-import handleInjectable from "./handle.injectable";
+import { implWithHandle } from "./impl-with-handle";
 
-const disconnectClusterInjectable = disconnectClusterInjectionToken.getInjectable((di, channel) => {
+const disconnectClusterInjectable = implWithHandle(disconnectClusterInjectionToken, (di) => {
   const getClusterById = di.inject(getClusterByIdInjectable);
   const clusterFrames = di.inject(clusterFramesInjectable);
-  const handle = di.inject(handleInjectable);
   const appEventBus = di.inject(appEventBusInjectable);
 
-  const res: DisconnectCluster = async (id) => {
+  return async (id) => {
     appEventBus.emit({ name: "cluster", action: "stop" });
     const cluster = getClusterById(id);
 
@@ -23,10 +22,6 @@ const disconnectClusterInjectable = disconnectClusterInjectionToken.getInjectabl
       clusterFrames.delete(id);
     }
   };
-
-  handle(channel, res);
-
-  return res;
 });
 
 export default disconnectClusterInjectable;

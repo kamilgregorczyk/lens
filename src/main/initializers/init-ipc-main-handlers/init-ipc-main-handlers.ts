@@ -3,9 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { BrowserWindow, IpcMainInvokeEvent, Menu } from "electron";
+import { BrowserWindow, Menu } from "electron";
 import { clusterFrameMap } from "../../../common/cluster-frames";
-import { clusterSetFrameIdHandler, clusterVisibilityHandler, clusterRefreshHandler, clusterDisconnectHandler, clusterKubectlApplyAllHandler, clusterKubectlDeleteAllHandler, clusterDeleteHandler, clusterSetDeletingHandler, clusterClearDeletingHandler } from "../../../common/ipc/cluster";
+import { clusterVisibilityHandler, clusterRefreshHandler, clusterDisconnectHandler, clusterKubectlApplyAllHandler, clusterKubectlDeleteAllHandler, clusterDeleteHandler, clusterSetDeletingHandler, clusterClearDeletingHandler } from "../../../common/ipc/cluster";
 import type { ClusterId } from "../../../common/cluster-types";
 import { ClusterStore } from "../../../common/cluster-store/cluster-store";
 import { appEventBus } from "../../../common/app-event-bus/event-bus";
@@ -29,15 +29,6 @@ interface Dependencies {
 }
 
 export const initIpcMainHandlers = ({ electronMenuItems, directoryForLensLocalStorage }: Dependencies) => () => {
-  ipcMainHandle(clusterSetFrameIdHandler, (event: IpcMainInvokeEvent, clusterId: ClusterId) => {
-    const cluster = ClusterStore.getInstance().getById(clusterId);
-
-    if (cluster) {
-      clusterFrameMap.set(cluster.id, { frameId: event.frameId, processId: event.processId });
-      cluster.pushState();
-    }
-  });
-
   ipcMainOn(clusterVisibilityHandler, (event, clusterId?: ClusterId) => {
     ClusterManager.getInstance().visibleCluster = clusterId;
   });

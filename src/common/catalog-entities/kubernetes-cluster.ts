@@ -9,9 +9,9 @@ import { broadcastMessage } from "../ipc";
 import type { CatalogEntitySpec } from "../catalog/catalog-entity";
 import { IpcRendererNavigationEvents } from "../../renderer/navigation/events";
 import { requestClusterDisconnection } from "../../renderer/ipc";
-import { asLegacyGlobalFunctionForExtensionApi } from "../../extensions/di-legacy-globals/as-legacy-global-function-for-extension-api";
-import { activateClusterInjectionToken } from "../ipc/activate-cluster-injection-token";
-import { disconnectClusterInjectionToken } from "../ipc/disconnect-cluster-injection-token";
+import { activateClusterInjectionToken } from "../ipc/cluster-activate.token";
+import { disconnectClusterInjectionToken } from "../ipc/cluster-disconnect.token";
+import { asLegacyGlobalChannelForExtensionApi } from "../../extensions/di-legacy-globals/as-legacy-global-channel-for-extension-api";
 
 export interface KubernetesClusterPrometheusMetrics {
   address?: {
@@ -59,8 +59,8 @@ export type KubernetesClusterStatusPhase = "connected" | "connecting" | "disconn
 export interface KubernetesClusterStatus extends CatalogEntityStatus {
 }
 
-const activateCluster = asLegacyGlobalFunctionForExtensionApi(activateClusterInjectionToken);
-const disconnectCluster = asLegacyGlobalFunctionForExtensionApi(disconnectClusterInjectionToken);
+const activateCluster = asLegacyGlobalChannelForExtensionApi(activateClusterInjectionToken);
+const disconnectCluster = asLegacyGlobalChannelForExtensionApi(disconnectClusterInjectionToken);
 
 export class KubernetesCluster<
   Metadata extends KubernetesClusterMetadata = KubernetesClusterMetadata,

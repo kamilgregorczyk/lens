@@ -4,7 +4,7 @@
  */
 
 import type { ClusterId } from "../cluster-types";
-import { getChannelInjectionToken } from "./types";
+import { getChannelInjectionToken } from "./channel";
 
 export type DisconnectCluster = (id: ClusterId) => Promise<void>;
 

@@ -8,7 +8,7 @@ import { DependencyInjectionContainer, getInjectable, getInjectionToken, Injecti
 export type ChannelCallable<T> = T extends Channel<infer Args, infer R> ? (...args: Args) => Promise<R> : never;
 
 export class Channel<Args extends any[], R> {
-  private readonly token: InjectionToken<(...args: Args) => Promise<R>, void>;
+  readonly token: InjectionToken<(...args: Args) => Promise<R>, void>;
 
   constructor(private readonly channel: string) {
     this.token = getInjectionToken<(...args: Args) => Promise<R>>();
@@ -27,9 +27,6 @@ export class Channel<Args extends any[], R> {
     });
   }
 }
-
-export type Emitter<Fn extends (...args: any[]) => void> = Fn;
-export type EmitterArgs<C> = C extends Emitter<infer Args> ? Args : never;
 
 type PromiseValue<T> = T extends Promise<infer Value> ? Value : never;
 

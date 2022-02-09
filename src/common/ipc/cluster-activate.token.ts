@@ -4,7 +4,7 @@
  */
 
 import type { ClusterId } from "../cluster-types";
-import { getChannelInjectionToken } from "./types";
+import { getChannelInjectionToken } from "./channel";
 
 export type ActivateCluster = (id: ClusterId, force?: boolean) => Promise<void>;
 

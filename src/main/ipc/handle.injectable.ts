@@ -3,22 +3,22 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import type { IpcMain } from "electron";
-import ipcMainInjectable from "./ipc-main.injectable";
+import type { RawHandle } from "./raw-handle.injectable";
+import rawHandleInjectable from "./raw-handle.injectable";
 
 export type Handle = (channel: string, listener: (...args: any[]) => any) => void;
 
 interface Dependencies {
-  ipcMain: IpcMain;
+  rawHandle: RawHandle;
 }
 
-export const handle = ({ ipcMain }: Dependencies): Handle => (
-  (channel, listener) => ipcMain.handle(channel, (event, ...args) => listener(...args))
+const handle = ({ rawHandle }: Dependencies): Handle => (
+  (channel, listener) => rawHandle(channel, (event, ...args) => listener(...args))
 );
 
 const handleInjectable = getInjectable({
   instantiate: (di) => handle({
-    ipcMain: di.inject(ipcMainInjectable),
+    rawHandle: di.inject(rawHandleInjectable),
   }),
   lifecycle: lifecycleEnum.singleton,
 });
