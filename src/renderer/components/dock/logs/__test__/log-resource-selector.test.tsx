@@ -15,7 +15,7 @@ import mockFs from "mock-fs";
 import { getDiForUnitTesting } from "../../../../getDiForUnitTesting";
 import type { DiRender } from "../../../test-utils/renderFor";
 import { renderFor } from "../../../test-utils/renderFor";
-import directoryForUserDataInjectable from "../../../../../common/app-paths/directory-for-user-data.injectable";
+import directoryForUserDataInjectable from "../../../../../common/directory-path/user-data.injectable";
 import callForLogsInjectable from "../call-for-logs.injectable";
 import { LogTabViewModel, LogTabViewModelDependencies } from "../logs-view-model";
 import type { TabId } from "../../dock/store";

@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import directoryForUserDataInjectable from "../app-paths/directory-for-user-data.injectable";
+import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
 import type { BaseStoreParams } from "../base-store";
 import weblinkStoreLoggerInjectable from "./logger.injectable";
 import { WeblinkStore, WeblinkStoreDependencies, WeblinkStoreModel } from "./weblink-store";

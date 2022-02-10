@@ -5,15 +5,11 @@
 
 import React from "react";
 import { ipcRenderer, IpcRendererEvent } from "electron";
-import { areArgsUpdateAvailableFromMain, UpdateAvailableChannel, onCorrect, UpdateAvailableFromMain, BackchannelArg, ipcRendererOn, AutoUpdateChecking, AutoUpdateNoUpdateAvailable } from "../../common/ipc";
+import { areArgsUpdateAvailableFromMain, UpdateAvailableChannel, onCorrect, UpdateAvailableFromMain, BackchannelArg, AutoUpdateChecking, AutoUpdateNoUpdateAvailable } from "../../common/ipc";
 import { Notifications, notificationsStore } from "../components/notifications";
 import { Button } from "../components/button";
 import { isMac } from "../../common/vars";
-import { ClusterStore } from "../../common/cluster-store/cluster-store";
-import { navigate } from "../navigation";
-import { entitySettingsURL } from "../../common/routes";
 import { defaultHotbarCells } from "../../common/hotbar-store/hotbar-types";
-import { type ListNamespaceForbiddenArgs, clusterListNamespaceForbiddenChannel, isListNamespaceForbiddenArgs } from "../../common/ipc/cluster";
 import { hotbarTooManyItemsChannel } from "../../common/ipc/hotbar";
 
 function sendToBackchannel(backchannel: string, notificationId: string, data: BackchannelArg): void {
@@ -63,59 +59,6 @@ function UpdateAvailableHandler(event: IpcRendererEvent, ...[backchannel, update
   );
 }
 
-const notificationLastDisplayedAt = new Map<string, number>();
-const intervalBetweenNotifications = 1000 * 60; // 60s
-
-function ListNamespacesForbiddenHandler(event: IpcRendererEvent, ...[clusterId]: ListNamespaceForbiddenArgs): void {
-  const lastDisplayedAt = notificationLastDisplayedAt.get(clusterId);
-  const now = Date.now();
-
-  if (!notificationLastDisplayedAt.has(clusterId) || (now - lastDisplayedAt) > intervalBetweenNotifications) {
-    notificationLastDisplayedAt.set(clusterId, now);
-  } else {
-    // don't bother the user too often
-    return;
-  }
-
-  const notificationId = `list-namespaces-forbidden:${clusterId}`;
-
-  if (notificationsStore.getById(notificationId)) {
-    // notification is still visible
-    return;
-  }
-
-  Notifications.info(
-    (
-      <div className="flex column gaps">
-        <b>Add Accessible Namespaces</b>
-        <p>
-          Cluster <b>{ClusterStore.getInstance().getById(clusterId).name}</b> does not have permissions to list namespaces.{" "}
-          Please add the namespaces you have access to.
-        </p>
-        <div className="flex gaps row align-left box grow">
-          <Button
-            active
-            outlined
-            label="Go to Accessible Namespaces Settings"
-            onClick={() => {
-              navigate(entitySettingsURL({ params: { entityId: clusterId }, fragment: "namespaces" }));
-              notificationsStore.remove(notificationId);
-            }}
-          />
-        </div>
-      </div>
-    ),
-    {
-      id: notificationId,
-      /**
-       * Set the time when the notification is closed as well so that there is at
-       * least a minute between closing the notification as seeing it again
-       */
-      onClose: () => notificationLastDisplayedAt.set(clusterId, Date.now()),
-    },
-  );
-}
-
 function HotbarTooManyItemsHandler(): void {
   Notifications.error(`Cannot have more than ${defaultHotbarCells} items pinned to a hotbar`);
 }
@@ -126,12 +69,6 @@ export function registerIpcListeners() {
     channel: UpdateAvailableChannel,
     listener: UpdateAvailableHandler,
     verifier: areArgsUpdateAvailableFromMain,
-  });
-  onCorrect({
-    source: ipcRenderer,
-    channel: clusterListNamespaceForbiddenChannel,
-    listener: ListNamespacesForbiddenHandler,
-    verifier: isListNamespaceForbiddenArgs,
   });
   onCorrect({
     source: ipcRenderer,

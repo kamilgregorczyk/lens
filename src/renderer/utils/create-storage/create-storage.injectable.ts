@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import directoryForLensLocalStorageInjectable from "../../../common/app-paths/directory-for-lens-local-storage.injectable";
+import directoryForLensLocalStorageInjectable from "../../../common/directory-path/local-storage.injectable";
 import { createStorage } from "./create-storage";
 import readJsonFileInjectable from "../../../common/fs/read-json-file.injectable";
 import writeJsonFileInjectable from "../../../common/fs/write-json-file.injectable";

@@ -4,8 +4,8 @@
  */
 
 import { triggerWindowActionInjectionToken } from "../../../common/ipc/window/trigger-action.token";
-import { implWithEmit } from "../impl-with-emit";
+import { implWithSend } from "../impl-with-send";
 
-const triggerWindowActionInjectable = implWithEmit(triggerWindowActionInjectionToken);
+const triggerWindowActionInjectable = implWithSend(triggerWindowActionInjectionToken);
 
 export default triggerWindowActionInjectable;

@@ -6,6 +6,7 @@
 import type { DependencyInjectionContainer, Injectable, InjectionToken } from "@ogre-tools/injectable";
 import type { IpcMainInvokeEvent } from "electron/main";
 import type { Channel, ChannelCallable } from "../../common/ipc/channel";
+import { toJS } from "../../common/utils";
 import handleInjectable from "./handle.injectable";
 import rawHandleInjectable from "./raw-handle.injectable";
 
@@ -16,7 +17,7 @@ export function implWithHandle<Args extends any[], R extends Promise<any>>(chann
     const handle = di.inject(handleInjectable);
     const listener = init(di);
 
-    handle(channel, listener);
+    handle(channel, (...args) => listener(...args.map(toJS) as Args));
 
     return listener;
   }) as Injectable<InjectionToken<ChannelCallable<Channel<Args, R>>, void>, ChannelCallable<Channel<Args, R>>, void>;
@@ -27,7 +28,7 @@ export function implWithRawHandle<Args extends any[], R extends Promise<any>>(ch
     const rawHandle = di.inject(rawHandleInjectable);
     const listener = init(di);
 
-    rawHandle(channel, listener);
+    rawHandle(channel, (event, ...args) => listener(event, ...args.map(toJS) as Args));
 
     return () => {
       throw new Error(`Directly calling IPC channel ${channel} on main is invalid`);

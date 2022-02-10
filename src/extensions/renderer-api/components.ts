@@ -15,6 +15,11 @@ import createWorkloadLogsTabInjectable from "../../renderer/components/dock/logs
 import sendCommandInjectable from "../../renderer/components/dock/terminal/send-command.injectable";
 import { podsStore } from "../../renderer/components/+workloads-pods/pods.store";
 import renameTabInjectable from "../../renderer/components/dock/dock/rename-tab.injectable";
+import { Notifications as _Notifications } from "../../renderer/components/notifications";
+import okNotificationInjectable from "../../renderer/components/notifications/ok.injectable";
+import errorNotificationInjectable from "../../renderer/components/notifications/error.injectable";
+import infoNotificationInjectable from "../../renderer/components/notifications/info.injectable";
+import shortInfoNotificationInjectable from "../../renderer/components/notifications/short-info.injectable";
 
 // layouts
 export * from "../../renderer/components/layout/main-layout";
@@ -51,7 +56,6 @@ export * from "../../renderer/components/dialog";
 export * from "../../renderer/components/confirm-dialog";
 export * from "../../renderer/components/line-progress";
 export * from "../../renderer/components/menu";
-export * from "../../renderer/components/notifications";
 export * from "../../renderer/components/spinner";
 export * from "../../renderer/components/stepper";
 export * from "../../renderer/components/wizard";
@@ -62,6 +66,13 @@ export * from "../../renderer/components/layout/sub-title";
 export * from "../../renderer/components/input/search-input";
 export * from "../../renderer/components/chart/bar-chart";
 export * from "../../renderer/components/chart/pie-chart";
+
+export const Notifications = Object.assign(_Notifications, {
+  ok: asLegacyGlobalFunctionForExtensionApi(okNotificationInjectable),
+  error: asLegacyGlobalFunctionForExtensionApi(errorNotificationInjectable),
+  info: asLegacyGlobalFunctionForExtensionApi(infoNotificationInjectable),
+  shortInfo: asLegacyGlobalFunctionForExtensionApi(shortInfoNotificationInjectable),
+});
 
 // kube helpers
 export * from "../../renderer/components/kube-detail-params";

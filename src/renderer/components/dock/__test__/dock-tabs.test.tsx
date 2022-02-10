@@ -17,7 +17,7 @@ import dockStoreInjectable from "../dock/store.injectable";
 import type { DiRender } from "../../test-utils/renderFor";
 import { renderFor } from "../../test-utils/renderFor";
 import directoryForUserDataInjectable
-  from "../../../../common/app-paths/directory-for-user-data.injectable";
+  from "../../../../common/directory-path/user-data.injectable";
 
 jest.mock("electron", () => ({
   app: {

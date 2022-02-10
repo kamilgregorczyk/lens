@@ -14,7 +14,7 @@ import { ClusterManager } from "../../clusters/manager";
 import clusterStoreInjectable from "../../../common/cluster-store/cluster-store.injectable";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import { createClusterInjectionToken } from "../../../common/cluster/create-cluster-injection-token";
-import directoryForKubeConfigsInjectable from "../../../common/app-paths/directory-for-kube-configs.injectable";
+import directoryForKubeConfigsInjectable from "../../../common/directory-path/local-kube-configs.injectable";
 
 
 jest.mock("electron", () => ({

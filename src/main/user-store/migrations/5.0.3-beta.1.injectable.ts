@@ -11,8 +11,8 @@ import type { KubeconfigSyncEntry, UserPreferencesModel } from "../../../common/
 import type { MigrationDeclaration } from "../../utils/join-migrations";
 import { isLogicalChildPath } from "../../../common/utils";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import directoryForKubeConfigsInjectable from "../../../common/app-paths/directory-for-kube-configs.injectable";
-import directoryForUserDataInjectable from "../../../common/app-paths/directory-for-user-data.injectable";
+import directoryForKubeConfigsInjectable from "../../../common/directory-path/local-kube-configs.injectable";
+import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
 
 interface Dependencies {
   userDataPath: string;

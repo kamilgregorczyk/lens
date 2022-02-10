@@ -6,6 +6,13 @@ import type { InferFromInjectable, Injectable, InjectionToken, TentativeTuple } 
 import { getLegacyGlobalDiForExtensionApi } from "./legacy-global-di-for-extension-api";
 
 export function asLegacyGlobalFunctionForExtensionApi<
+  TInjectable extends Injectable<unknown, (...args: any[]) => any, unknown>,
+>(
+  injectableKey: TInjectable,
+  ...instantiationParameter: TentativeTuple<InferFromInjectable<TInjectable>[1]>
+): InferFromInjectable<TInjectable>[0];
+
+export function asLegacyGlobalFunctionForExtensionApi<
   TInjectionToken extends InjectionToken<unknown, unknown>,
 >(
   injectionToken: TInjectionToken,
@@ -17,7 +24,7 @@ export function asLegacyGlobalFunctionForExtensionApi<
 >(
   injectableKey: TInjectable,
   ...instantiationParameter: TentativeTuple<InferFromInjectable<TInjectable>[1]>
-): InferFromInjectable<TInjectable>[1] {
+): InferFromInjectable<TInjectable>[0] {
   return (...args: Parameters<InferFromInjectable<TInjectable>[0]>) => {
     const injected = getLegacyGlobalDiForExtensionApi()
       .inject(

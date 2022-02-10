@@ -16,7 +16,7 @@ import { ConfirmDialog } from "../../confirm-dialog";
 import type { HotbarStore } from "../../../../common/hotbar-store/hotbar-store";
 import { UserStore } from "../../../../common/user-store";
 import mockFs from "mock-fs";
-import directoryForUserDataInjectable from "../../../../common/app-paths/directory-for-user-data.injectable";
+import directoryForUserDataInjectable from "../../../../common/directory-path/user-data.injectable";
 
 const mockHotbars: { [id: string]: any } = {
   "1": {

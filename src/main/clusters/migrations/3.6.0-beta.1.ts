@@ -11,9 +11,9 @@ import fse from "fs-extra";
 import { loadConfigFromFileSync } from "../../../common/kube-helpers";
 import type { MigrationDeclaration } from "../../utils/join-migrations";
 import type { ClusterModel } from "../../../common/cluster-types";
-import directoryForUserDataInjectable from "../../../common/app-paths/directory-for-user-data.injectable";
-import directoryForKubeConfigsInjectable from "../../../common/app-paths/directory-for-kube-configs.injectable";
-import getCustomKubeConfigDirectoryInjectable, { GetCustomKubeConfigDirectory } from "../../../common/app-paths/get-custom-kube-config-directory.injectable";
+import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
+import directoryForKubeConfigsInjectable from "../../../common/directory-path/local-kube-configs.injectable";
+import getCustomKubeConfigDirectoryInjectable, { GetCustomKubeConfigDirectory } from "../../../common/directory-path/get-custom-kube-config-directory.injectable";
 
 interface Pre360ClusterModel extends ClusterModel {
   kubeConfig: string;

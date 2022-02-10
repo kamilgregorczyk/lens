@@ -8,7 +8,7 @@ import * as path from "path";
 import type { LensExtension } from "./lens-extension";
 import type { StaticThis } from "../common/utils";
 import { asLegacyGlobalObjectForExtensionApi } from "./di-legacy-globals/as-legacy-global-object-for-extension-api";
-import directoryForUserDataInjectable from "../common/app-paths/directory-for-user-data.injectable";
+import directoryForUserDataInjectable from "../common/directory-path/user-data.injectable";
 import { asLegacyGlobalFunctionForExtensionApi } from "./di-legacy-globals/as-legacy-global-function-for-extension-api";
 import createChildLoggerInjectable from "../common/logger/create-child-logger.injectable";
 

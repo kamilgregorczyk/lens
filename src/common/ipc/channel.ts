@@ -7,6 +7,10 @@ import { DependencyInjectionContainer, getInjectable, getInjectionToken, Injecti
 
 export type ChannelCallable<T> = T extends Channel<infer Args, infer R> ? (...args: Args) => R : never;
 
+export interface Listenable {
+  on: (channel: string, listener: (...args: any[]) => void) => void;
+}
+
 export class Channel<Args extends any[], R> {
   readonly token: InjectionToken<(...args: Args) => R, void>;
 
@@ -25,6 +29,10 @@ export class Channel<Args extends any[], R> {
       injectionToken: this.token,
       lifecycle: lifecycleEnum.singleton,
     });
+  }
+
+  setupListener(emitter: Listenable, listener: (...args: Args) => void) {
+    emitter.on(this.channel, listener);
   }
 }
 

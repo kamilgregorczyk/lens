@@ -11,7 +11,7 @@ import type { ClusterStoreModel } from "../../../common/cluster-store/cluster-st
 import { defaultHotbarCells, getEmptyHotbar, Hotbar, HotbarItem } from "../../../common/hotbar-store/hotbar-types";
 import { catalogEntity } from "../../catalog-sources/general";
 import type { MigrationDeclaration } from "../../utils/join-migrations";
-import directoryForUserDataInjectable from "../../../common/app-paths/directory-for-user-data.injectable";
+import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
 import { generateNewIdFor } from "../../../common/utils/generate-new-id-for";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 

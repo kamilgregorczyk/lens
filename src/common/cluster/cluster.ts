@@ -5,7 +5,6 @@
 
 import { ipcMain } from "electron";
 import { action, comparer, computed, makeObservable, observable, reaction, when } from "mobx";
-import { broadcastMessage } from "../ipc";
 import type { ContextHandler } from "../../main/context-handler/context-handler";
 import { HttpError, KubeConfig } from "@kubernetes/client-node";
 import type { Kubectl } from "../../main/kubectl/kubectl";
@@ -20,7 +19,6 @@ import type { ClusterState, ClusterRefreshOptions, ClusterMetricsResourceType, C
 import { ClusterMetadataKey, initialNodeShellImage, ClusterStatus } from "../cluster-types";
 import { disposer, toJS } from "../utils";
 import type { Response } from "request";
-import { clusterListNamespaceForbiddenChannel } from "../ipc/cluster";
 import type { CanI } from "./authorization-review.injectable";
 import type { ListNamespaces } from "./list-namespaces.injectable";
 
@@ -31,6 +29,8 @@ export interface ClusterDependencies {
   createKubectl: (clusterVersion: string) => Kubectl;
   createAuthorizationReview: (config: KubeConfig) => CanI;
   createListNamespaces: (config: KubeConfig) => ListNamespaces;
+  emitListNamespacesForbidden: (clusterId: ClusterId) => void;
+  emitClusterState: (clusterId: ClusterId, state: ClusterState) => void;
 }
 
 /**
@@ -566,7 +566,7 @@ export class Cluster implements ClusterModel, ClusterState {
    */
   pushState(state = this.getState()) {
     logger.silly(`[CLUSTER]: push-state`, state);
-    broadcastMessage("cluster:state", this.id, state);
+    this.dependencies.emitClusterState(this.id, state);
   }
 
   // get cluster system meta, e.g. use in "logger"
@@ -609,7 +609,7 @@ export class Cluster implements ClusterModel, ClusterState {
         const { response } = error as HttpError & { response: Response };
 
         logger.info("[CLUSTER]: listing namespaces is forbidden, broadcasting", { clusterId: this.id, error: response.body });
-        broadcastMessage(clusterListNamespaceForbiddenChannel, this.id);
+        this.dependencies.emitListNamespacesForbidden(this.id);
       }
 
       return namespaceList;
