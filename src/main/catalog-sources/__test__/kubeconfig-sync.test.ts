@@ -10,7 +10,7 @@ import type { Cluster } from "../../../common/cluster/cluster";
 import { computeDiff as computeDiffFor, configToModels } from "../kubeconfig-sync-manager/kubeconfig-sync-manager";
 import mockFs from "mock-fs";
 import fs from "fs";
-import { ClusterManager } from "../../cluster-manager";
+import { ClusterManager } from "../../clusters/manager";
 import clusterStoreInjectable from "../../../common/cluster-store/cluster-store.injectable";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import { createClusterInjectionToken } from "../../../common/cluster/create-cluster-injection-token";

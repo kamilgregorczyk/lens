@@ -6,7 +6,7 @@ import type { Channel, ChannelCallable } from "../../common/ipc/channel";
 import invokeInjectable from "./invoke-main.injectable";
 import type { Injectable, InjectionToken } from "@ogre-tools/injectable";
 
-export function implChannelWithInvoke<Token extends Channel<any[], any>>(channelToken: Token) {
+export function implWithInvoke<Token extends Channel<any[], any>>(channelToken: Token) {
   return channelToken.getInjectable((di, channel) => {
     const invoke = di.inject(invokeInjectable);
 

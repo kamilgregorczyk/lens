@@ -7,14 +7,12 @@ import { computed } from "mobx";
 import mainExtensionsInjectable from "../../extensions/main-extensions.injectable";
 
 const electronMenuItemsInjectable = getInjectable({
-  lifecycle: lifecycleEnum.singleton,
-
   instantiate: (di) => {
     const extensions = di.inject(mainExtensionsInjectable);
 
-    return computed(() =>
-      extensions.get().flatMap((extension) => extension.appMenus));
+    return computed(() => extensions.get().flatMap((extension) => extension.appMenus));
   },
+  lifecycle: lifecycleEnum.singleton,
 });
 
 export default electronMenuItemsInjectable;

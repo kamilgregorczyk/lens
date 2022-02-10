@@ -2,17 +2,16 @@
  * Copyright (c) OpenLens Authors. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import { app, BrowserWindow, dialog, Menu, MenuItem, MenuItemConstructorOptions, webContents, shell } from "electron";
-import { autorun, IComputedValue } from "mobx";
-import type { WindowManager } from "../window-manager";
-import { appName, isMac, isWindows, docsUrl, supportUrl, productName } from "../../common/vars";
+import { app, BrowserWindow, MenuItem, MenuItemConstructorOptions, webContents, shell } from "electron";
+import type { WindowManager } from "../window/manager";
+import { isMac, docsUrl, supportUrl, productName } from "../../common/vars";
 import logger from "../logger";
 import { exitApp } from "../exit-app";
 import { broadcastMessage } from "../../common/ipc";
-import * as packageJson from "../../../package.json";
 import { preferencesURL, extensionsURL, addClusterURL, catalogURL, welcomeURL } from "../../common/routes";
 import { checkForUpdates, isAutoUpdateEnabled } from "../app-updater";
 import type { MenuRegistration } from "./menu-registration";
+import { showAbout } from "./show-about";
 
 export type MenuTopId = "mac" | "file" | "edit" | "view" | "help";
 
@@ -20,34 +19,7 @@ interface MenuItemsOpts extends MenuItemConstructorOptions {
   submenu?: MenuItemConstructorOptions[];
 }
 
-export function initMenu(
-  windowManager: WindowManager,
-  electronMenuItems: IComputedValue<MenuRegistration[]>,
-) {
-  return autorun(() => buildMenu(windowManager, electronMenuItems.get()), {
-    delay: 100,
-  });
-}
-
-export function showAbout(browserWindow: BrowserWindow) {
-  const appInfo = [
-    `${appName}: ${app.getVersion()}`,
-    `Electron: ${process.versions.electron}`,
-    `Chrome: ${process.versions.chrome}`,
-    `Node: ${process.versions.node}`,
-    packageJson.copyright,
-  ];
-
-  dialog.showMessageBoxSync(browserWindow, {
-    title: `${isWindows ? " ".repeat(2) : ""}${appName}`,
-    type: "info",
-    buttons: ["Close"],
-    message: productName,
-    detail: appInfo.join("\r\n"),
-  });
-}
-
-export function getAppMenu(
+export function buildMenu(
   windowManager: WindowManager,
   electronMenuItems: MenuRegistration[],
 ) {
@@ -317,14 +289,4 @@ export function getAppMenu(
   }
 
   return [...appMenu.values()];
-
-}
-
-export function buildMenu(
-  windowManager: WindowManager,
-  electronMenuItems: MenuRegistration[],
-) {
-  Menu.setApplicationMenu(
-    Menu.buildFromTemplate(getAppMenu(windowManager, electronMenuItems)),
-  );
 }

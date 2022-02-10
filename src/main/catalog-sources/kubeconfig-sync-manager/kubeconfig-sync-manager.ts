@@ -14,7 +14,7 @@ import { bytesToUnits, Disposer, ExtendedObservableMap, iter, noop } from "../..
 import logger from "../../logger";
 import type { KubeConfig } from "@kubernetes/client-node";
 import { loadConfigFromString, splitConfig } from "../../../common/kube-helpers";
-import { catalogEntityFromCluster, ClusterManager } from "../../cluster-manager";
+import { catalogEntityFromCluster, ClusterManager } from "../../clusters/manager";
 import { UserStore } from "../../../common/user-store";
 import { ClusterStore } from "../../../common/cluster-store/cluster-store";
 import { createHash } from "crypto";

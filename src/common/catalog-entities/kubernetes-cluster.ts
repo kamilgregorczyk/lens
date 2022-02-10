@@ -9,8 +9,8 @@ import { broadcastMessage } from "../ipc";
 import type { CatalogEntitySpec } from "../catalog/catalog-entity";
 import { IpcRendererNavigationEvents } from "../../renderer/navigation/events";
 import { requestClusterDisconnection } from "../../renderer/ipc";
-import { activateClusterInjectionToken } from "../ipc/cluster-activate.token";
-import { disconnectClusterInjectionToken } from "../ipc/cluster-disconnect.token";
+import { activateClusterInjectionToken } from "../ipc/cluster/activate.token";
+import { disconnectClusterInjectionToken } from "../ipc/cluster/disconnect.token";
 import { asLegacyGlobalChannelForExtensionApi } from "../../extensions/di-legacy-globals/as-legacy-global-channel-for-extension-api";
 
 export interface KubernetesClusterPrometheusMetrics {

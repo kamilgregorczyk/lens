@@ -25,7 +25,7 @@ export interface ClusterStoreDependencies extends BaseStoreDependencies {
 }
 
 export class ClusterStore extends BaseStore<ClusterStoreModel> {
-  clusters = observable.map<ClusterId, Cluster>();
+  protected clusters = observable.map<ClusterId, Cluster>();
 
   protected disposer = disposer();
 
@@ -103,6 +103,10 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
 
   getById(id: ClusterId): Cluster | null {
     return this.clusters.get(id) ?? null;
+  }
+
+  deleteById(id: ClusterId): void {
+    this.clusters.delete(id);
   }
 
   addCluster(clusterOrModel: ClusterModel | Cluster): Cluster {

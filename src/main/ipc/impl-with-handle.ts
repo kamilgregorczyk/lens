@@ -9,9 +9,9 @@ import type { Channel, ChannelCallable } from "../../common/ipc/channel";
 import handleInjectable from "./handle.injectable";
 import rawHandleInjectable from "./raw-handle.injectable";
 
-type ChannelInit<Args extends any[], R> = (di: DependencyInjectionContainer) => (...args: Args) => Promise<R>;
+type ChannelInit<Args extends any[], R extends Promise<any>> = (di: DependencyInjectionContainer) => (...args: Args) => R;
 
-export function implWithHandle<Args extends any[], R>(channelToken: Channel<Args, R>, init: ChannelInit<Args, R>) {
+export function implWithHandle<Args extends any[], R extends Promise<any>>(channelToken: Channel<Args, R>, init: ChannelInit<Args, R>) {
   return channelToken.getInjectable((di, channel) => {
     const handle = di.inject(handleInjectable);
     const listener = init(di);
@@ -22,7 +22,7 @@ export function implWithHandle<Args extends any[], R>(channelToken: Channel<Args
   }) as Injectable<InjectionToken<ChannelCallable<Channel<Args, R>>, void>, ChannelCallable<Channel<Args, R>>, void>;
 }
 
-export function implWithRawHandle<Args extends any[], R>(channelToken: Channel<Args, R>, init: ChannelInit<[IpcMainInvokeEvent, ...Args], R>) {
+export function implWithRawHandle<Args extends any[], R extends Promise<any>>(channelToken: Channel<Args, R>, init: ChannelInit<[IpcMainInvokeEvent, ...Args], R>) {
   return channelToken.getInjectable((di, channel) => {
     const rawHandle = di.inject(rawHandleInjectable);
     const listener = init(di);

@@ -4,9 +4,9 @@
  */
 
 import { app } from "electron";
-import { WindowManager } from "./window-manager";
+import { WindowManager } from "./window/manager";
 import { appEventBus } from "../common/app-event-bus/event-bus";
-import { ClusterManager } from "./cluster-manager";
+import { ClusterManager } from "./clusters/manager";
 import logger from "./logger";
 
 export function exitApp() {

@@ -3,19 +3,19 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { ClusterId } from "../common/cluster-types";
-import { makeObservable, observable } from "mobx";
+import type { ClusterId } from "../../common/cluster-types";
+import { makeObservable, observable, ObservableMap } from "mobx";
 import { app, BrowserWindow, dialog, ipcMain, shell, webContents } from "electron";
 import windowStateKeeper from "electron-window-state";
-import { appEventBus } from "../common/app-event-bus/event-bus";
-import { ipcMainOn } from "../common/ipc";
-import { delay, iter, Singleton } from "../common/utils";
-import { ClusterFrameInfo, clusterFrameMap } from "../common/cluster-frames";
-import { IpcRendererNavigationEvents } from "../renderer/navigation/events";
-import logger from "./logger";
-import { isMac, productName } from "../common/vars";
-import { LensProxy } from "./lens-proxy";
-import { bundledExtensionsLoaded } from "../common/ipc/extension-handling";
+import { appEventBus } from "../../common/app-event-bus/event-bus";
+import { ipcMainOn } from "../../common/ipc";
+import { delay, iter } from "../../common/utils";
+import { IpcRendererNavigationEvents } from "../../renderer/navigation/events";
+import logger from "../logger";
+import { isMac, productName } from "../../common/vars";
+import { LensProxy } from "../lens-proxy";
+import { bundledExtensionsLoaded } from "../../common/ipc/extension-handling";
+import type { ClusterFrameInfo } from "../clusters/frames.injectable";
 
 function isHideable(window: BrowserWindow | null): boolean {
   return Boolean(window && !window.isDestroyed());
@@ -27,7 +27,11 @@ export interface SendToViewArgs {
   data?: any[];
 }
 
-export class WindowManager extends Singleton {
+export interface WindowManagerDependencies {
+  readonly clusterFrames: ObservableMap<string, ClusterFrameInfo>;
+}
+
+export class WindowManager {
   protected mainWindow: BrowserWindow;
   protected splashWindow: BrowserWindow;
   protected windowState: windowStateKeeper.State;
@@ -35,8 +39,7 @@ export class WindowManager extends Singleton {
 
   @observable activeClusterId: ClusterId;
 
-  constructor() {
-    super();
+  constructor(protected readonly dependencies: WindowManagerDependencies) {
     makeObservable(this);
     this.bindEvents();
   }
@@ -198,7 +201,7 @@ export class WindowManager extends Singleton {
   async navigateExtension(extId: string, pageId?: string, params?: Record<string, any>, frameId?: number) {
     await this.ensureMainWindow();
 
-    const frameInfo = iter.find(clusterFrameMap.values(), frameInfo => frameInfo.frameId === frameId);
+    const frameInfo = iter.find(this.dependencies.clusterFrames.values(), frameInfo => frameInfo.frameId === frameId);
 
     this.sendToView({
       channel: "extension:navigate",
@@ -210,7 +213,7 @@ export class WindowManager extends Singleton {
   async navigate(url: string, frameId?: number) {
     await this.ensureMainWindow();
 
-    const frameInfo = iter.find(clusterFrameMap.values(), frameInfo => frameInfo.frameId === frameId);
+    const frameInfo = iter.find(this.dependencies.clusterFrames.values(), frameInfo => frameInfo.frameId === frameId);
     const channel = frameInfo
       ? IpcRendererNavigationEvents.NAVIGATE_IN_CLUSTER
       : IpcRendererNavigationEvents.NAVIGATE_IN_APP;
@@ -223,7 +226,7 @@ export class WindowManager extends Singleton {
   }
 
   reload() {
-    const frameInfo = clusterFrameMap.get(this.activeClusterId);
+    const frameInfo = this.dependencies.clusterFrames.get(this.activeClusterId);
 
     if (frameInfo) {
       this.sendToView({ channel: IpcRendererNavigationEvents.RELOAD_PAGE, frameInfo });

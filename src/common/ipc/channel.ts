@@ -5,17 +5,17 @@
 
 import { DependencyInjectionContainer, getInjectable, getInjectionToken, InjectionToken, lifecycleEnum } from "@ogre-tools/injectable";
 
-export type ChannelCallable<T> = T extends Channel<infer Args, infer R> ? (...args: Args) => Promise<R> : never;
+export type ChannelCallable<T> = T extends Channel<infer Args, infer R> ? (...args: Args) => R : never;
 
 export class Channel<Args extends any[], R> {
-  readonly token: InjectionToken<(...args: Args) => Promise<R>, void>;
+  readonly token: InjectionToken<(...args: Args) => R, void>;
 
   constructor(private readonly channel: string) {
-    this.token = getInjectionToken<(...args: Args) => Promise<R>>();
+    this.token = getInjectionToken<(...args: Args) => R>();
   }
 
-  getInjectable(init: (di: DependencyInjectionContainer, channel: string) => (...args: Args) => Promise<R>) {
-    let handler: (...args: Args) => Promise<R>;
+  getInjectable(init: (di: DependencyInjectionContainer, channel: string) => (...args: Args) => R) {
+    let handler: (...args: Args) => R;
 
     return getInjectable({
       setup: (di) => {
@@ -28,8 +28,24 @@ export class Channel<Args extends any[], R> {
   }
 }
 
-type PromiseValue<T> = T extends Promise<infer Value> ? Value : never;
+const channelNames = new Set<string>();
 
-export function getChannelInjectionToken<Fn extends (...args: any[]) => Promise<any>>(channel: string): Channel<Parameters<Fn>, PromiseValue<ReturnType<Fn>>> {
+export function getChannelInjectionToken<Fn extends (...args: any[]) => Promise<any>>(channel: string): Channel<Parameters<Fn>, ReturnType<Fn>> {
+  if (channelNames.has(channel)) {
+    throw new Error(`Cannot use IPC channel name "${channel}" multiple times`);
+  } else {
+    channelNames.add(channel);
+  }
+
+  return new Channel(channel);
+}
+
+export function getChannelEmitterInjectionToken<Fn extends (...args: any[]) => void>(channel: string): Channel<Parameters<Fn>, ReturnType<Fn>> {
+  if (channelNames.has(channel)) {
+    throw new Error(`Cannot use IPC channel name "${channel}" multiple times`);
+  } else {
+    channelNames.add(channel);
+  }
+
   return new Channel(channel);
 }

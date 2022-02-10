@@ -11,7 +11,7 @@ import { broadcastMessage } from "../../../common/ipc";
 import { observable, when, makeObservable } from "mobx";
 import { ProtocolHandlerInvalid, RouteAttempt } from "../../../common/protocol-handler";
 import { disposer, noop } from "../../../common/utils";
-import { WindowManager } from "../../window-manager";
+import { WindowManager } from "../../window/manager";
 import type { ExtensionLoader } from "../../../extensions/extension-loader";
 import type { ExtensionsStore } from "../../../common/extensions/store";
 
