@@ -9,23 +9,23 @@ import { toJS } from "../utils";
 import { CatalogEntity } from "../catalog";
 import { catalogEntity } from "../../main/catalog-sources/general";
 import logger from "../../main/logger";
-import { broadcastMessage } from "../ipc";
 import { defaultHotbarCells, getEmptyHotbar, Hotbar, CreateHotbarData, CreateHotbarOptions } from "./hotbar-types";
-import { hotbarTooManyItemsChannel } from "../ipc/hotbar";
 
 export interface HotbarStoreModel {
   hotbars: Hotbar[];
   activeHotbarId: string;
 }
 
-export interface HotbarStoreDependencies extends BaseStoreDependencies {}
+export interface HotbarStoreDependencies extends BaseStoreDependencies {
+  onTooManyHotbarItems: () => void;
+}
 
 export class HotbarStore extends BaseStore<HotbarStoreModel> {
   @observable hotbars: Hotbar[] = [];
   @observable private _activeHotbarId: string;
 
-  constructor(deps: HotbarStoreDependencies, params: BaseStoreParams<HotbarStoreModel>) {
-    super(deps, {
+  constructor(protected readonly dependencies: HotbarStoreDependencies, params: BaseStoreParams<HotbarStoreModel>) {
+    super(dependencies, {
       ...params,
       name: "lens-hotbar-store",
     });
@@ -179,7 +179,7 @@ export class HotbarStore extends BaseStore<HotbarStoreModel> {
       if (emptyCellIndex != -1) {
         hotbar.items[emptyCellIndex] = newItem;
       } else {
-        broadcastMessage(hotbarTooManyItemsChannel);
+        this.dependencies.onTooManyHotbarItems();
       }
     } else if (0 <= cellIndex && cellIndex < hotbar.items.length) {
       hotbar.items[cellIndex] = newItem;

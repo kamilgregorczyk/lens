@@ -9,8 +9,6 @@ import { areArgsUpdateAvailableFromMain, UpdateAvailableChannel, onCorrect, Upda
 import { Notifications, notificationsStore } from "../components/notifications";
 import { Button } from "../components/button";
 import { isMac } from "../../common/vars";
-import { defaultHotbarCells } from "../../common/hotbars/hotbar-types";
-import { hotbarTooManyItemsChannel } from "../../common/ipc/hotbar";
 
 function sendToBackchannel(backchannel: string, notificationId: string, data: BackchannelArg): void {
   notificationsStore.remove(notificationId);
@@ -59,22 +57,12 @@ function UpdateAvailableHandler(event: IpcRendererEvent, ...[backchannel, update
   );
 }
 
-function HotbarTooManyItemsHandler(): void {
-  Notifications.error(`Cannot have more than ${defaultHotbarCells} items pinned to a hotbar`);
-}
-
 export function registerIpcListeners() {
   onCorrect({
     source: ipcRenderer,
     channel: UpdateAvailableChannel,
     listener: UpdateAvailableHandler,
     verifier: areArgsUpdateAvailableFromMain,
-  });
-  onCorrect({
-    source: ipcRenderer,
-    channel: hotbarTooManyItemsChannel,
-    listener: HotbarTooManyItemsHandler,
-    verifier: (args: unknown[]): args is [] => args.length === 0,
   });
   ipcRendererOn(AutoUpdateChecking, () => {
     Notifications.shortInfo("Checking for updates");
