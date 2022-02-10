@@ -7,11 +7,11 @@ import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { Input, InputValidators } from "../input";
 import { SubTitle } from "../layout/sub-title";
-import { UserStore } from "../../../common/user-store";
+import { UserStore } from "../../../common/user-preferences";
 import { bundledKubectlPath } from "../../../main/kubectl/kubectl";
 import { SelectOption, Select } from "../select";
 import { Switch } from "../switch";
-import { packageMirrors } from "../../../common/user-store/preferences-helpers";
+import { packageMirrors } from "../../../common/user-preferences/preferences-helpers";
 import directoryForBinariesInjectable
   from "../../../common/directory-path/binaries.injectable";
 import { withInjectables } from "@ogre-tools/injectable-react";

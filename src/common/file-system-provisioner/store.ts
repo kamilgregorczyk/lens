@@ -27,7 +27,7 @@ export class FileSystemProvisionerStore extends BaseStore<FileSystemProvisionerM
   constructor(protected readonly dependencies: FileSystemProvisionerStoreDependencies, params: BaseStoreParams<FileSystemProvisionerModel>) {
     super(dependencies, {
       ...params,
-      configName: "lens-filesystem-provisioner-store",
+      name: "lens-filesystem-provisioner-store",
     });
 
     makeObservable(this);

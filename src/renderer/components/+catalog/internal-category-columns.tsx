@@ -6,7 +6,7 @@
 import styles from "./catalog.module.scss";
 
 import React from "react";
-import { HotbarStore } from "../../../common/hotbar-store/hotbar-store";
+import { HotbarStore } from "../../../common/hotbars/store";
 import type { CatalogEntity } from "../../api/catalog-entity";
 import { Avatar } from "../avatar";
 import type { RegisteredAdditionalCategoryColumn } from "./custom-category-columns";

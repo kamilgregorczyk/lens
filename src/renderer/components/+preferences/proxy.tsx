@@ -5,7 +5,7 @@
 import { observer } from "mobx-react";
 import React from "react";
 
-import { UserStore } from "../../../common/user-store";
+import { UserStore } from "../../../common/user-preferences";
 import { Input } from "../input";
 import { SubTitle } from "../layout/sub-title";
 import { Switch } from "../switch";

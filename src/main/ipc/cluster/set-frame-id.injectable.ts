@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import getClusterByIdInjectable from "../../../common/cluster-store/get-cluster-by-id.injectable";
+import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injectable";
 import { setClusterFrameIdInjectionToken } from "../../../common/ipc/cluster/set-frame-id.token";
 import clusterFramesInjectable from "../../clusters/frames.injectable";
 import { implWithRawHandle } from "../impl-with-handle";

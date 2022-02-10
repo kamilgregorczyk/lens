@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type Conf from "conf";
+import type ElectronStore from "electron-store";
 import type { Migrations } from "conf/dist/source/types";
 import logger from "../../common/logger";
 import { ExtendedMap, iter } from "../../common/utils";
@@ -15,7 +15,7 @@ function migrationLog(message: string, meta?: any) {
   }
 }
 
-export type Migration = (log: (message: string, meta?: any) => void, store: Conf<any>) => void;
+export type Migration = (log: (message: string, meta?: any) => void, store: ElectronStore<any>) => void;
 
 export interface MigrationDeclaration {
   version: string,
@@ -32,7 +32,7 @@ export function joinMigrations(...declarations: MigrationDeclaration[]): Migrati
   return Object.fromEntries(
     iter.map(
       migrations,
-      ([v, fns]) => [v, (store: Conf<any>) => {
+      ([v, fns]) => [v, (store: ElectronStore<any>) => {
         migrationLog(`Running ${v} migration for ${store.path}`);
 
         for (const fn of fns) {

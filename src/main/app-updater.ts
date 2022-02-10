@@ -11,7 +11,7 @@ import { areArgsUpdateAvailableToBackchannel, AutoUpdateChecking, AutoUpdateLogP
 import { once } from "lodash";
 import { ipcMain, autoUpdater as electronAutoUpdater } from "electron";
 import { nextUpdateChannel } from "./utils/update-channel";
-import { UserStore } from "../common/user-store";
+import { UserStore } from "../common/user-preferences";
 
 let installVersion: null | string = null;
 

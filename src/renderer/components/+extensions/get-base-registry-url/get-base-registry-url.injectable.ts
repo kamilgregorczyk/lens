@@ -7,7 +7,7 @@ import {
   getInjectable,
   lifecycleEnum,
 } from "@ogre-tools/injectable";
-import { UserStore } from "../../../../common/user-store";
+import { UserStore } from "../../../../common/user-preferences";
 import { getBaseRegistryUrl } from "./get-base-registry-url";
 
 const getBaseRegistryUrlInjectable = getInjectable({

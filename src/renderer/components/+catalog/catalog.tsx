@@ -13,7 +13,7 @@ import type { CatalogEntityStore } from "./catalog-entity-store/catalog-entity.s
 import { navigate } from "../../navigation";
 import { MenuItem, MenuActions } from "../menu";
 import type { CatalogEntityContextMenu, CatalogEntityContextMenuContext } from "../../api/catalog-entity";
-import { HotbarStore } from "../../../common/hotbar-store/hotbar-store";
+import { HotbarStore } from "../../../common/hotbars/store";
 import { ConfirmDialog } from "../confirm-dialog";
 import { catalogCategoryRegistry, CatalogEntity } from "../../../common/catalog";
 import { CatalogAddButton } from "./catalog-add-button";

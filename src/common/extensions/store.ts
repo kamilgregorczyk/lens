@@ -23,7 +23,7 @@ export class ExtensionsStore extends BaseStore<ExtensionsStoreModel> {
   constructor(deps: ExtensionsStoreDependencies, params: BaseStoreParams<ExtensionsStoreModel>) {
     super(deps, {
       ...params,
-      configName: "lens-extensions",
+      name: "lens-extensions",
     });
     makeObservable(this);
     this.load();

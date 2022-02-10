@@ -5,7 +5,7 @@
 
 import { comparer, computed, makeObservable, observable, reaction } from "mobx";
 import { autoBind, Singleton } from "./utils";
-import { UserStore } from "../common/user-store";
+import { UserStore } from "../common/user-preferences";
 import logger from "../main/logger";
 import lensDarkThemeJson from "./themes/lens-dark.json";
 import lensLightThemeJson from "./themes/lens-light.json";

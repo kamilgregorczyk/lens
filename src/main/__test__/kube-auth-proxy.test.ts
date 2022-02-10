@@ -42,7 +42,7 @@ import { bundledKubectlPath, Kubectl } from "../kubectl/kubectl";
 import { mock, MockProxy } from "jest-mock-extended";
 import { waitUntilUsed } from "tcp-port-used";
 import { EventEmitter, Readable } from "stream";
-import { UserStore } from "../../common/user-store";
+import { UserStore } from "../../common/user-preferences";
 import { Console } from "console";
 import { stdout, stderr } from "process";
 import mockFs from "mock-fs";

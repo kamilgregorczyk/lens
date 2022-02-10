@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import appEventBusInjectable from "../../../common/app-event-bus/app-event-bus.injectable";
-import getClusterByIdInjectable from "../../../common/cluster-store/get-cluster-by-id.injectable";
+import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injectable";
 import { disconnectClusterInjectionToken } from "../../../common/ipc/cluster/disconnect.token";
 import clusterFramesInjectable from "../../clusters/frames.injectable";
 import { implWithHandle } from "../impl-with-handle";

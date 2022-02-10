@@ -7,7 +7,7 @@ import React from "react";
 import { kubernetesClusterCategory } from "../../common/catalog-entities";
 import { addClusterURL, kubernetesURL } from "../../common/routes";
 import { multiSet } from "../utils";
-import { UserStore } from "../../common/user-store";
+import { UserStore } from "../../common/user-preferences";
 import { getAllEntries } from "../components/+preferences/kubeconfig-syncs";
 import { runInAction } from "mobx";
 import { isLinux, isWindows } from "../../common/vars";

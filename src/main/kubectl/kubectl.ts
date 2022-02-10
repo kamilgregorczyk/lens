@@ -13,7 +13,7 @@ import { helmCli } from "../helm/helm-cli";
 import { getBundledKubectlVersion } from "../../common/utils/app-version";
 import { isDevelopment, isWindows, isTestEnv } from "../../common/vars";
 import { SemVer } from "semver";
-import { defaultPackageMirror, packageMirrors } from "../../common/user-store/preferences-helpers";
+import { defaultPackageMirror, packageMirrors } from "../../common/user-preferences/preferences-helpers";
 import got from "got/dist/source";
 import { promisify } from "util";
 import stream from "stream";

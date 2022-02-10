@@ -5,7 +5,7 @@
 
 import React from "react";
 import { observer } from "mobx-react";
-import { UserStore } from "../../../common/user-store";
+import { UserStore } from "../../../common/user-preferences";
 import { SubTitle } from "../layout/sub-title";
 import { Input, InputValidators } from "../input";
 import { isWindows } from "../../../common/vars";

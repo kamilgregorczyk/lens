@@ -12,13 +12,15 @@ import { clearKubeconfigEnvVars } from "../utils/clear-kube-env-vars";
 import path from "path";
 import os from "os";
 import { isMac, isWindows } from "../../common/vars";
-import { UserStore } from "../../common/user-store";
 import * as pty from "node-pty";
-import { appEventBus } from "../../common/app-event-bus/event-bus";
 import logger from "../logger";
 import { TerminalChannels, TerminalMessage } from "../../renderer/api/terminal-api";
 import { deserialize, serialize } from "v8";
 import { stat } from "fs/promises";
+import type { AppEventBus } from "../../common/app-event-bus/event-bus";
+import type { IComputedValue } from "mobx";
+import { getOrInsertWith } from "../../common/utils";
+import type { LensLogger } from "../../common/logger";
 
 export class ShellOpenError extends Error {
   constructor(message: string, public cause: Error) {
@@ -104,11 +106,27 @@ export enum WebSocketCloseEvent {
   TlsHandshake = 1015,
 }
 
-export abstract class ShellSession {
-  abstract ShellType: string;
+export interface ShellSessionArgs {
+  kubectl: Kubectl;
+  websocket: WebSocket;
+  cluster: Cluster;
+  terminalId: string;
+}
 
-  private static shellEnvs = new Map<string, Record<string, string>>();
-  private static processes = new Map<string, pty.IPty>();
+export interface ShellSessionDependencies {
+  readonly appEventBus: AppEventBus;
+  readonly resolvedShell: IComputedValue<string>;
+  readonly logger: LensLogger;
+}
+
+export abstract class ShellSession {
+  abstract readonly ShellType: string;
+
+  private static readonly shellEnvs = new Map<string, Record<string, string>>();
+  private static readonly processes = new Map<string, pty.IPty>();
+  protected readonly kubectl: Kubectl;
+  protected readonly websocket: WebSocket;
+  protected readonly cluster: Cluster;
 
   /**
    * Kill all remaining shell backing processes. Should be called when about to
@@ -127,17 +145,16 @@ export abstract class ShellSession {
   }
 
   protected running = false;
-  protected kubectlBinDirP: Promise<string>;
-  protected kubeconfigPathP: Promise<string>;
+  protected readonly kubectlBinDirP: Promise<string>;
+  protected readonly kubeconfigPathP: Promise<string>;
   protected readonly terminalId: string;
 
   protected abstract get cwd(): string | undefined;
 
   protected ensureShellProcess(shell: string, args: string[], env: Record<string, string>, cwd: string): { shellProcess: pty.IPty, resume: boolean } {
     const resume = ShellSession.processes.has(this.terminalId);
-
-    if (!resume) {
-      ShellSession.processes.set(this.terminalId, pty.spawn(shell, args, {
+    const shellProcess = getOrInsertWith(ShellSession.processes, this.terminalId, () => (
+      pty.spawn(shell, args, {
         rows: 30,
         cols: 80,
         cwd,
@@ -145,17 +162,18 @@ export abstract class ShellSession {
         name: "xterm-256color",
         // TODO: Something else is broken here so we need to force the use of winPty on windows
         useConpty: false,
-      }));
-    }
-
-    const shellProcess = ShellSession.processes.get(this.terminalId);
+      })
+    ));
 
     logger.info(`[SHELL-SESSION]: PTY for ${this.terminalId} is ${resume ? "resumed" : "started"} with PID=${shellProcess.pid}`);
 
     return { shellProcess, resume };
   }
 
-  constructor(protected kubectl: Kubectl, protected websocket: WebSocket, protected cluster: Cluster, terminalId: string) {
+  constructor(protected readonly dependencies: ShellSessionDependencies, { kubectl, websocket, cluster, terminalId }: ShellSessionArgs) {
+    this.kubectl = kubectl;
+    this.websocket = websocket;
+    this.cluster = cluster;
     this.kubeconfigPathP = this.cluster.getProxyKubeconfigPath();
     this.kubectlBinDirP = this.kubectl.binDir();
     this.terminalId = `${cluster.id}:${terminalId}`;
@@ -285,7 +303,7 @@ export abstract class ShellSession {
         }
       });
 
-    appEventBus.emit({ name: this.ShellType, action: "open" });
+    this.dependencies.appEventBus.emit({ name: this.ShellType, action: "open" });
   }
 
   protected getPathEntries(): string[] {
@@ -313,7 +331,7 @@ export abstract class ShellSession {
   protected async getShellEnv() {
     const env = clearKubeconfigEnvVars(JSON.parse(JSON.stringify(await shellEnv())));
     const pathStr = [...this.getPathEntries(), await this.kubectlBinDirP, process.env.PATH].join(path.delimiter);
-    const shell = UserStore.getInstance().resolvedShell;
+    const shell = this.dependencies.resolvedShell.get();
 
     delete env.DEBUG; // don't pass DEBUG into shells
 

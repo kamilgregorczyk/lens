@@ -4,7 +4,7 @@
  */
 import { observer } from "mobx-react";
 import React from "react";
-import { UserStore } from "../../../common/user-store";
+import { UserStore } from "../../../common/user-preferences";
 import { sentryDsn } from "../../../common/vars";
 import { Checkbox } from "../checkbox";
 import { SubTitle } from "../layout/sub-title";

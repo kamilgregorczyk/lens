@@ -3,9 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { clusterStoreInjectionToken } from "../../common/cluster-store/cluster-store-injection-token";
+import { clusterStoreInjectionToken } from "../../common/clusters/store-injection-token";
 import versionedMigrationsInjectable from "./migrations/versioned.injectable";
-import createClusterStoreInjectable from "../../common/cluster-store/create-cluster-store.injectable";
+import createClusterStoreInjectable from "../../common/clusters/create-store.injectable";
 import { reaction } from "mobx";
 
 const clusterStoreInjectable = getInjectable({

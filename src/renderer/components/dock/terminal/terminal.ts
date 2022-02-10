@@ -13,10 +13,10 @@ import { ThemeStore } from "../../../theme.store";
 import { disposer } from "../../../utils";
 import { isMac, defaultTerminalFontFamily } from "../../../../common/vars";
 import { once } from "lodash";
-import { UserStore } from "../../../../common/user-store";
+import { UserStore } from "../../../../common/user-preferences";
 import { clipboard } from "electron";
 import logger from "../../../../common/logger";
-import type { TerminalConfig } from "../../../../common/user-store/preferences-helpers";
+import type { TerminalConfig } from "../../../../common/user-preferences/preferences-helpers";
 
 export class Terminal {
   private terminalConfig: TerminalConfig = UserStore.getInstance().terminalConfig;

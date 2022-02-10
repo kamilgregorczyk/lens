@@ -5,7 +5,7 @@
 
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import React from "react";
-import getClusterByIdInjectable, { GetClusterById } from "../../../../common/cluster-store/get-cluster-by-id.injectable";
+import getClusterByIdInjectable, { GetClusterById } from "../../../../common/clusters/get-by-id.injectable";
 import { emitListNamespacesForbiddenInjectionToken, ListNamespacesForbidden } from "../../../../common/ipc/cluster/list-namespaces/emit.token";
 import { entitySettingsURL } from "../../../../common/routes";
 import { Button } from "../../../components/button";

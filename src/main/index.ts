@@ -31,8 +31,8 @@ import { syncGeneralEntities, syncWeblinks } from "./catalog-sources";
 import configurePackages from "../common/configure-packages";
 import { PrometheusProviderRegistry } from "./prometheus";
 import * as initializers from "./initializers";
-import { HotbarStore } from "../common/hotbar-store/hotbar-store";
-import { WeblinkStore } from "../common/weblink-store/weblink-store";
+import { HotbarStore } from "../common/hotbars/store";
+import { WeblinkStore } from "../common/weblinks/store";
 import { SentryInit } from "../common/sentry";
 import { ensureDir } from "fs-extra";
 import { initMenu } from "./menu/build-menu";
@@ -48,10 +48,10 @@ import initIpcMainHandlersInjectable from "./initializers/init-ipc-main-handlers
 import electronMenuItemsInjectable from "./menu/electron-menu-items.injectable";
 import directoryForKubeConfigsInjectable from "../common/directory-path/local-kube-configs.injectable";
 import kubeconfigSyncManagerInjectable from "./catalog-sources/kubeconfig-sync-manager/kubeconfig-sync-manager.injectable";
-import clusterStoreInjectable from "../common/cluster-store/cluster-store.injectable";
+import clusterStoreInjectable from "../common/clusters/cluster-store.injectable";
 import routerInjectable from "./router/router.injectable";
 import shellApiRequestInjectable from "./proxy-functions/shell-api-request/shell-api-request.injectable";
-import userStoreInjectable from "../common/user-store/user-store.injectable";
+import userStoreInjectable from "../common/user-preferences/user-store.injectable";
 import trayMenuItemsInjectable from "./tray/tray-menu-items.injectable";
 import catalogApiRequestHandlerInjectable from "./proxy-functions/catalog-api-request/handler.injectable";
 

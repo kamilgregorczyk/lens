@@ -10,7 +10,7 @@ import { Pod } from "../../../../../common/k8s-api/endpoints";
 import { LogResourceSelector } from "../resource-selector";
 import { dockerPod, deploymentPod1, deploymentPod2 } from "./pod.mock";
 import { ThemeStore } from "../../../../theme.store";
-import { UserStore } from "../../../../../common/user-store";
+import { UserStore } from "../../../../../common/user-preferences";
 import mockFs from "mock-fs";
 import { getDiForUnitTesting } from "../../../../getDiForUnitTesting";
 import type { DiRender } from "../../../test-utils/renderFor";

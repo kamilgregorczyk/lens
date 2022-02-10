@@ -11,7 +11,7 @@ import type { CommandOverlay } from "../command-palette";
 import { HotbarAddCommand } from "./hotbar-add-command";
 import { HotbarRemoveCommand } from "./hotbar-remove-command";
 import { HotbarRenameCommand } from "./hotbar-rename-command";
-import type { Hotbar } from "../../../common/hotbar-store/hotbar-types";
+import type { Hotbar } from "../../../common/hotbars/hotbar-types";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import commandOverlayInjectable from "../command-palette/command-overlay.injectable";
 

@@ -12,7 +12,7 @@ import type { MonacoTheme } from "./monaco-themes";
 import { MonacoValidator, monacoValidators } from "./monaco-validators";
 import { debounce, merge } from "lodash";
 import { cssNames, disposer } from "../../utils";
-import { UserStore } from "../../../common/user-store";
+import { UserStore } from "../../../common/user-preferences";
 import { ThemeStore } from "../../theme.store";
 
 export type MonacoEditorId = string;

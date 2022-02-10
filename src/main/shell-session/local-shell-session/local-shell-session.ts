@@ -6,7 +6,6 @@
 import type WebSocket from "ws";
 import path from "path";
 import { helmCli } from "../../helm/helm-cli";
-import { UserStore } from "../../../common/user-store";
 import type { Cluster } from "../../../common/cluster/cluster";
 import type { ClusterId } from "../../../common/cluster-types";
 import { ShellSession } from "../shell-session";
@@ -16,9 +15,9 @@ export class LocalShellSession extends ShellSession {
   ShellType = "shell";
 
   constructor(protected shellEnvModify: (clusterId: ClusterId, env: Record<string, string>) => Record<string, string>, kubectl: Kubectl, websocket: WebSocket, cluster: Cluster, terminalId: string) {
-    super(kubectl, websocket, cluster, terminalId);
+    super({ kubectl, websocket, cluster, terminalId });
   }
-  
+
   protected getPathEntries(): string[] {
     return [helmCli.getBinaryDir()];
   }

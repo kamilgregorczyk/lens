@@ -6,7 +6,7 @@
 import { Dedupe, Offline } from "@sentry/integrations";
 import * as Sentry from "@sentry/electron";
 import { sentryDsn, isProduction } from "./vars";
-import { UserStore } from "./user-store";
+import { UserStore } from "./user-preferences";
 import { inspect } from "util";
 
 /**

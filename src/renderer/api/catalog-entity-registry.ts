@@ -8,7 +8,7 @@ import { ipcRendererOn } from "../../common/ipc";
 import { CatalogCategory, CatalogEntity, CatalogEntityData, catalogCategoryRegistry, CatalogCategoryRegistry, CatalogEntityKindData } from "../../common/catalog";
 import "../../common/catalog-entities";
 import type { Cluster } from "../../common/cluster/cluster";
-import { ClusterStore } from "../../common/cluster-store/cluster-store";
+import { ClusterStore } from "../../common/clusters/store";
 import { Disposer, iter } from "../utils";
 import { once } from "lodash";
 import logger from "../../common/logger";

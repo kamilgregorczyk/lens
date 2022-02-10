@@ -5,8 +5,8 @@
 
 import path from "path";
 import directoryForLensLocalStorageInjectable from "../../../common/directory-path/local-storage.injectable";
-import deleteClusterByIdInjectable from "../../../common/cluster-store/delete-cluster-by-id.injectable";
-import getClusterByIdInjectable from "../../../common/cluster-store/get-cluster-by-id.injectable";
+import deleteClusterByIdInjectable from "../../../common/clusters/delete-by-id.injectable";
+import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injectable";
 import removeInjectable from "../../../common/fs/remove.injectable";
 import { deleteClusterInjectionToken } from "../../../common/ipc/cluster/delete.token";
 import clusterFramesInjectable from "../../clusters/frames.injectable";

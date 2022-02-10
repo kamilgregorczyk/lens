@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { UserStore } from "../../common/user-store";
+import { UserStore } from "../../common/user-preferences";
 import type { ContextHandler } from "../context-handler/context-handler";
 import { PrometheusProvider, PrometheusProviderRegistry, PrometheusService } from "../prometheus";
 import mockFs from "mock-fs";

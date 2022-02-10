@@ -9,7 +9,7 @@ import { areArgsUpdateAvailableFromMain, UpdateAvailableChannel, onCorrect, Upda
 import { Notifications, notificationsStore } from "../components/notifications";
 import { Button } from "../components/button";
 import { isMac } from "../../common/vars";
-import { defaultHotbarCells } from "../../common/hotbar-store/hotbar-types";
+import { defaultHotbarCells } from "../../common/hotbars/hotbar-types";
 import { hotbarTooManyItemsChannel } from "../../common/ipc/hotbar";
 
 function sendToBackchannel(backchannel: string, notificationId: string, data: BackchannelArg): void {

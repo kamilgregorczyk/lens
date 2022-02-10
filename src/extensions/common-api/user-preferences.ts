@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { UserStore } from "../../common/user-store";
+import { UserStore } from "../../common/user-preferences";
 
 /**
  * Get the configured kubectl binaries path.

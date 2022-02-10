@@ -7,7 +7,7 @@ import React from "react";
 import { observer } from "mobx-react";
 import { Input } from "../input";
 import { isUrl } from "../input/input_validators";
-import { WeblinkStore } from "../../../common/weblink-store/weblink-store";
+import { WeblinkStore } from "../../../common/weblinks/store";
 import { computed, makeObservable, observable } from "mobx";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import commandOverlayInjectable from "../command-palette/command-overlay.injectable";

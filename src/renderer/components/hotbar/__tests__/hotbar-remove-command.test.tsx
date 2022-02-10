@@ -13,8 +13,8 @@ import { DiRender, renderFor } from "../../test-utils/renderFor";
 import hotbarManagerInjectable from "../../../../common/hotbar-store.injectable";
 import { ThemeStore } from "../../../theme.store";
 import { ConfirmDialog } from "../../confirm-dialog";
-import type { HotbarStore } from "../../../../common/hotbar-store/hotbar-store";
-import { UserStore } from "../../../../common/user-store";
+import type { HotbarStore } from "../../../../common/hotbars/store";
+import { UserStore } from "../../../../common/user-preferences";
 import mockFs from "mock-fs";
 import directoryForUserDataInjectable from "../../../../common/directory-path/user-data.injectable";
 

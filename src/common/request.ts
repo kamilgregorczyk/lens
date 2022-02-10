@@ -5,7 +5,7 @@
 
 import request from "request";
 import requestPromise from "request-promise-native";
-import { UserStore } from "./user-store";
+import { UserStore } from "./user-preferences";
 
 // todo: get rid of "request" (deprecated)
 // https://github.com/lensapp/lens/issues/459

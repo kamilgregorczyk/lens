@@ -7,7 +7,7 @@ import React from "react";
 import type { LensProtocolRouterRenderer } from "../lens-protocol-router-renderer/lens-protocol-router-renderer";
 import { navigate } from "../../navigation/helpers";
 import { catalogEntityRegistry } from "../../api/catalog-entity-registry";
-import { ClusterStore } from "../../../common/cluster-store/cluster-store";
+import { ClusterStore } from "../../../common/clusters/store";
 import {
   EXTENSION_NAME_MATCH,
   EXTENSION_PUBLISHER_MATCH,

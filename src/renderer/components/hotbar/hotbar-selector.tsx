@@ -11,7 +11,7 @@ import hotbarManagerInjectable from "../../../common/hotbar-store.injectable";
 import { HotbarSwitchCommand } from "./hotbar-switch-command";
 import { Tooltip, TooltipPosition } from "../tooltip";
 import { observer } from "mobx-react";
-import type { Hotbar } from "../../../common/hotbar-store/hotbar-types";
+import type { Hotbar } from "../../../common/hotbars/hotbar-types";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import commandOverlayInjectable from "../command-palette/command-overlay.injectable";
 import { cssNames } from "../../utils";

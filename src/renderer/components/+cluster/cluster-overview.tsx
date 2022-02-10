@@ -19,7 +19,7 @@ import type { ClusterOverviewStore } from "./cluster-overview-store/cluster-over
 import { ClusterPieCharts } from "./cluster-pie-charts";
 import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
-import { ClusterStore } from "../../../common/cluster-store/cluster-store";
+import { ClusterStore } from "../../../common/clusters/store";
 import { eventStore } from "../+events/event.store";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import kubeWatchApiInjectable from "../../kube-watch-api/kube-watch-api.injectable";

@@ -13,7 +13,7 @@ import type { KubeConfig } from "@kubernetes/client-node";
 import type { Cluster } from "../../../common/cluster/cluster";
 import { saveKubeconfig } from "./save-config";
 import { Notifications } from "../notifications";
-import { HotbarStore } from "../../../common/hotbar-store/hotbar-store";
+import { HotbarStore } from "../../../common/hotbars/store";
 import { boundMethod } from "autobind-decorator";
 import { Dialog } from "../dialog";
 import { Icon } from "../icon";

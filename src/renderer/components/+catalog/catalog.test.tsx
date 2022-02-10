@@ -20,7 +20,7 @@ import catalogEntityRegistryInjectable from "../../api/catalog-entity-registry/c
 import type { DiRender } from "../test-utils/renderFor";
 import { renderFor } from "../test-utils/renderFor";
 import { ThemeStore } from "../../theme.store";
-import { UserStore } from "../../../common/user-store";
+import { UserStore } from "../../../common/user-preferences";
 import mockFs from "mock-fs";
 import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
 import { noop } from "../../utils";

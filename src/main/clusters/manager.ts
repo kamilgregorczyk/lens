@@ -14,7 +14,7 @@ import { catalogEntityRegistry } from "../catalog";
 import { KubernetesCluster, KubernetesClusterPrometheusMetrics, LensKubernetesClusterStatus } from "../../common/catalog-entities/kubernetes-cluster";
 import { ipcMainOn } from "../../common/ipc";
 import { once } from "lodash";
-import type { ClusterStore } from "../../common/cluster-store/cluster-store";
+import type { ClusterStore } from "../../common/clusters/store";
 import type { ClusterId } from "../../common/cluster-types";
 
 const logPrefix = "[CLUSTER-MANAGER]:";

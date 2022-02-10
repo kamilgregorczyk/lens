@@ -3,8 +3,8 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import createUserStoreInjectable from "../../common/user-store/create-user-store.injectable";
-import { userStoreInjectionToken } from "../../common/user-store/user-store-injection-token";
+import createUserStoreInjectable from "../../common/user-preferences/create-store.injectable";
+import { userStoreInjectionToken } from "../../common/user-preferences/store-injection-token";
 
 const userStoreInjectableInjectable = getInjectable({
   instantiate: (di) => {

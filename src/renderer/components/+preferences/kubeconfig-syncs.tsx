@@ -8,7 +8,7 @@ import { disposeOnUnmount, observer } from "mobx-react";
 import React from "react";
 import { Notice } from "../+extensions/notice";
 
-import { KubeconfigSyncEntry, KubeconfigSyncValue, UserStore } from "../../../common/user-store";
+import { KubeconfigSyncEntry, KubeconfigSyncValue, UserStore } from "../../../common/user-preferences";
 import { isWindows } from "../../../common/vars";
 import logger from "../../../main/logger";
 import { iter, multiSet } from "../../utils";

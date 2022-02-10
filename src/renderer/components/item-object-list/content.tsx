@@ -20,7 +20,7 @@ import { ThemeStore } from "../../theme.store";
 import { MenuActions } from "../menu/menu-actions";
 import { MenuItem } from "../menu";
 import { Checkbox } from "../checkbox";
-import { UserStore } from "../../../common/user-store";
+import { UserStore } from "../../../common/user-preferences";
 
 interface ItemListLayoutContentProps<I extends ItemObject> {
   getFilters: () => Filter[]

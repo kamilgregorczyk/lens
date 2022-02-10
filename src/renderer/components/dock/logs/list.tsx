@@ -14,7 +14,7 @@ import { disposeOnUnmount, observer } from "mobx-react";
 import moment from "moment-timezone";
 import type { Align, ListOnScrollProps } from "react-window";
 import { SearchStore } from "../../../search-store/search-store";
-import { UserStore } from "../../../../common/user-store";
+import { UserStore } from "../../../../common/user-preferences";
 import { array, boundMethod, cssNames } from "../../../utils";
 import { VirtualList } from "../../virtual-list";
 import { ToBottom } from "./to-bottom";

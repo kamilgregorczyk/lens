@@ -7,7 +7,7 @@ import "@testing-library/jest-dom/extend-expect";
 import { fireEvent, waitFor } from "@testing-library/react";
 import fse from "fs-extra";
 import React from "react";
-import { UserStore } from "../../../../common/user-store";
+import { UserStore } from "../../../../common/user-preferences";
 import type { ExtensionDiscovery } from "../../../../extensions/extension-discovery/extension-discovery";
 import type { ExtensionLoader } from "../../../../extensions/extension-loader";
 import { ConfirmDialog } from "../../confirm-dialog";

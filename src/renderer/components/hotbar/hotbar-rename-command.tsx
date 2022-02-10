@@ -8,7 +8,7 @@ import { observer } from "mobx-react";
 import { Select } from "../select";
 import hotbarManagerInjectable from "../../../common/hotbar-store.injectable";
 import { Input, InputValidator } from "../input";
-import type { Hotbar } from "../../../common/hotbar-store/hotbar-types";
+import type { Hotbar } from "../../../common/hotbars/hotbar-types";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import commandOverlayInjectable from "../command-palette/command-overlay.injectable";
 import uniqueHotbarNameInjectable from "../input/validators/unique-hotbar-name.injectable";

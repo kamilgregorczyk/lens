@@ -21,16 +21,16 @@ jest.mock("electron", () => ({
   },
 }));
 
-import { UserStore } from "../user-store";
+import { UserStore } from "../user-preferences";
 import { Console } from "console";
 import { SemVer } from "semver";
 import electron from "electron";
 import { stdout, stderr } from "process";
 import { getDisForUnitTesting } from "../../test-utils/get-dis-for-unit-testing";
-import userStoreInjectable from "../user-store/user-store.injectable";
+import userStoreInjectable from "../user-preferences/user-store.injectable";
 import type { DependencyInjectionContainer } from "@ogre-tools/injectable";
 import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
-import type { ClusterStoreModel } from "../cluster-store/cluster-store";
+import type { ClusterStoreModel } from "../clusters/store";
 import { defaultTheme } from "../vars";
 
 console = new Console(stdout, stderr);

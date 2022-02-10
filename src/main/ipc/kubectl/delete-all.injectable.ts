@@ -4,7 +4,7 @@
  */
 
 import appEventBusInjectable from "../../../common/app-event-bus/app-event-bus.injectable";
-import getClusterByIdInjectable from "../../../common/cluster-store/get-cluster-by-id.injectable";
+import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injectable";
 import { kubectlDeleteAllInjectionToken } from "../../../common/ipc/kubectl/delete-all.token";
 import { ResourceApplier } from "../../resource-applier";
 import { implWithHandle } from "../impl-with-handle";
