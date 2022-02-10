@@ -6,14 +6,26 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { clusterStoreInjectionToken } from "../../common/cluster-store/cluster-store-injection-token";
 import versionedMigrationsInjectable from "./migrations/versioned.injectable";
 import createClusterStoreInjectable from "../../common/cluster-store/create-cluster-store.injectable";
+import { reaction } from "mobx";
 
 const clusterStoreInjectable = getInjectable({
   instantiate: (di) => {
     const createClusterStore = di.inject(createClusterStoreInjectable);
-
-    return createClusterStore({
+    const store = createClusterStore({
       migrations: di.inject(versionedMigrationsInjectable),
     });
+
+    // TODO: remove state sync that isn't part of the catalog
+    reaction(
+      () => store.connectedClustersList,
+      (clusters) => {
+        for (const cluster of clusters) {
+          cluster.pushState();
+        }
+      },
+    );
+
+    return store;
   },
   injectionToken: clusterStoreInjectionToken,
   lifecycle: lifecycleEnum.singleton,

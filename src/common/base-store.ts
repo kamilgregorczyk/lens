@@ -9,7 +9,6 @@ import type { Options as ConfOptions } from "conf/dist/source/types";
 import { ipcMain, ipcRenderer } from "electron";
 import { comparer, IEqualsComparer, makeObservable, reaction, runInAction } from "mobx";
 import { toJS, Disposer, getAppVersion } from "./utils";
-import { broadcastMessage, ipcMainOn, ipcRendererOn } from "./ipc";
 import isEqual from "lodash/isEqual";
 import { isTestEnv } from "./vars";
 import type { LensLogger } from "./logger";
@@ -141,11 +140,6 @@ export abstract class BaseStore<T> {
     this.applyWithoutSync(() => {
       this.onSync(model);
     });
-  }
-
-  unregisterIpcListener() {
-    ipcMain?.removeAllListeners(this.syncMainChannel);
-    ipcRenderer?.removeAllListeners(this.syncRendererChannel);
   }
 
   disableSync() {

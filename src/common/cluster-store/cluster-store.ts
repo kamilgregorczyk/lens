@@ -5,16 +5,14 @@
 
 
 import { ipcMain, ipcRenderer, webFrame } from "electron";
-import { action, comparer, computed, makeObservable, observable, reaction } from "mobx";
+import { action, comparer, computed, makeObservable, observable } from "mobx";
 import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../base-store";
 import { Cluster } from "../cluster/cluster";
 import logger from "../../main/logger";
-import { appEventBus } from "../app-event-bus/event-bus";
-import { ipcMainHandle } from "../ipc";
-import { disposer, toJS } from "../utils";
+import type { AppEventBus } from "../app-event-bus/event-bus";
+import { toJS } from "../utils";
 import type { ClusterModel, ClusterId, ClusterState } from "../cluster-types";
-import { requestInitialClusterStates } from "../../renderer/ipc";
-import { clusterStates } from "../ipc/cluster";
+import type { ClusterStates } from "../ipc/cluster/states.token";
 
 export interface ClusterStoreModel {
   clusters?: ClusterModel[];
@@ -22,12 +20,12 @@ export interface ClusterStoreModel {
 
 export interface ClusterStoreDependencies extends BaseStoreDependencies {
   createCluster: (model: ClusterModel) => Cluster;
+  emitClusterStates: ClusterStates;
+  readonly appEventBus: AppEventBus;
 }
 
 export class ClusterStore extends BaseStore<ClusterStoreModel> {
   protected clusters = observable.map<ClusterId, Cluster>();
-
-  protected disposer = disposer();
 
   constructor(protected readonly dependencies: ClusterStoreDependencies, baseStoreParams: BaseStoreParams<ClusterStoreModel>) {
     super(dependencies, {
@@ -41,32 +39,6 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
 
     makeObservable(this);
     this.load();
-    this.pushStateToViewsAutomatically();
-  }
-
-  async loadInitialOnRenderer() {
-    logger.info("[CLUSTER-STORE] requesting initial state sync");
-
-    for (const { id, state } of await requestInitialClusterStates()) {
-      this.getById(id)?.setState(state);
-    }
-  }
-
-  provideInitialFromMain() {
-    ipcMainHandle(clusterStates, () => (
-      this.clustersList.map(cluster => ({
-        id: cluster.id,
-        state: cluster.getState(),
-      }))
-    ));
-  }
-
-  protected pushStateToViewsAutomatically() {
-    if (ipcMain) {
-      this.disposer.push(
-        reaction(() => this.connectedClustersList, () => this.pushState()),
-      );
-    }
   }
 
   registerIpcListener() {
@@ -75,17 +47,6 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
 
     ipc?.on("cluster:state", (event, clusterId: ClusterId, state: ClusterState) => {
       this.getById(clusterId)?.setState(state);
-    });
-  }
-
-  unregisterIpcListener() {
-    super.unregisterIpcListener();
-    this.disposer();
-  }
-
-  pushState() {
-    this.clusters.forEach((c) => {
-      c.pushState();
     });
   }
 
@@ -110,7 +71,7 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
   }
 
   addCluster(clusterOrModel: ClusterModel | Cluster): Cluster {
-    appEventBus.emit({ name: "cluster", action: "add" });
+    this.dependencies.appEventBus.emit({ name: "cluster", action: "add" });
 
     const cluster = clusterOrModel instanceof Cluster
       ? clusterOrModel

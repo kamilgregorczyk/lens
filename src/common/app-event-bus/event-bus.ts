@@ -11,7 +11,9 @@ export type AppEvent = {
   params?: object;
 };
 
+export type AppEventBus = EventEmitter<[AppEvent]>;
+
 /**
  * @deprecated use appEventBusInjectable instead
  */
-export const appEventBus = new EventEmitter<[AppEvent]>();
+export const appEventBus: AppEventBus = new EventEmitter();
