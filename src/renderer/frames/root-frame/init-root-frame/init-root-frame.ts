@@ -4,7 +4,6 @@
  */
 import { delay } from "../../../../common/utils";
 import { broadcastMessage } from "../../../../common/ipc";
-import { registerIpcListeners } from "../../../ipc/register-listeners";
 import logger from "../../../../common/logger";
 import { unmountComponentAtNode } from "react-dom";
 import type { ExtensionLoading } from "../../../../extensions/extension-loader";
@@ -22,6 +21,9 @@ interface Dependencies {
   lensProtocolRouterRenderer: { init: () => void };
   catalogEntityRegistry: CatalogEntityRegistry;
   initCatalogEnityRunListener: () => void;
+  initUpdateAvailableListener: () => void;
+  initUpdateCheckingListener: () => void;
+  initUpdateNotAvailableListener: () => void;
 }
 
 const logPrefix = "[ROOT-FRAME]:";
@@ -33,11 +35,17 @@ export const initRootFrame =
     lensProtocolRouterRenderer,
     ipcRenderer,
     initCatalogEnityRunListener,
+    initUpdateAvailableListener,
+    initUpdateCheckingListener,
+    initUpdateNotAvailableListener,
     catalogEntityRegistry,
   }: Dependencies) =>
     async (rootElem: HTMLElement) => {
       catalogEntityRegistry.init();
       initCatalogEnityRunListener();
+      initUpdateAvailableListener();
+      initUpdateCheckingListener();
+      initUpdateNotAvailableListener();
 
       try {
       // maximum time to let bundled extensions finish loading
@@ -65,8 +73,6 @@ export const initRootFrame =
       );
 
       window.addEventListener("online", () => broadcastMessage("network:online"));
-
-      registerIpcListeners();
 
       window.addEventListener("beforeunload", () => {
         logger.info(`${logPrefix} Unload app`);

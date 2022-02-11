@@ -6,4 +6,4 @@
 import { getInjectionToken } from "@ogre-tools/injectable";
 import type { UserPereferencesStore } from "./store";
 
-export const userStoreInjectionToken = getInjectionToken<UserPereferencesStore>();
+export const userPreferencesStoreInjectionToken = getInjectionToken<UserPereferencesStore>();
