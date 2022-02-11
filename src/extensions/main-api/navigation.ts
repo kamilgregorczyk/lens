@@ -3,8 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { WindowManager } from "../../main/window/manager";
+import navigateInAppInjectable from "../../main/ipc/window/navigate-in-app.injectable";
+import { asLegacyGlobalFunctionForExtensionApi } from "../di-legacy-globals/as-legacy-global-function-for-extension-api";
 
-export function navigate(url: string) {
-  return WindowManager.getInstance().navigate(url);
-}
+export const navigate = asLegacyGlobalFunctionForExtensionApi(navigateInAppInjectable);

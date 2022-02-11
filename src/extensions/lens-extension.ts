@@ -9,10 +9,7 @@ import logger from "../main/logger";
 import type { ProtocolHandlerRegistration } from "./registries";
 import type { PackageJson } from "type-fest";
 import { Disposer, disposer } from "../common/utils";
-import {
-  LensExtensionDependencies,
-  setLensExtensionDependencies,
-} from "./lens-extension-set-dependencies";
+import { LensExtensionDependencies, extensionDependencies } from "./lens-extension-set-dependencies";
 
 export type LensExtensionId = string; // path to manifest (package.json)
 export type LensExtensionConstructor = new (...args: ConstructorParameters<typeof LensExtension>) => LensExtension;
@@ -26,7 +23,7 @@ export interface LensExtensionManifest extends PackageJson {
 
 export const Disposers = Symbol();
 
-export class LensExtension {
+export class LensExtension<Dependencies extends LensExtensionDependencies = LensExtensionDependencies> {
   readonly id: LensExtensionId;
   readonly manifest: LensExtensionManifest;
   readonly manifestPath: string;
@@ -62,11 +59,10 @@ export class LensExtension {
     return this.manifest.description;
   }
 
-  private dependencies: LensExtensionDependencies;
-
-  [setLensExtensionDependencies] = (dependencies: LensExtensionDependencies) => {
-    this.dependencies = dependencies;
-  };
+  /**
+   * @internal
+   */
+  [extensionDependencies]: Dependencies;
 
   /**
    * getExtensionFileFolder returns the path to an already created folder. This
@@ -75,8 +71,8 @@ export class LensExtension {
    * Note: there is no security done on this folder, only obfuscation of the
    * folder name.
    */
-  async getExtensionFileFolder(): Promise<string> {
-    return this.dependencies.requestDirectory(this.id);
+  getExtensionFileFolder(): Promise<string> {
+    return this[extensionDependencies].requestDirectory(this.id);
   }
 
   @action

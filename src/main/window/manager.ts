@@ -3,19 +3,16 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { ClusterId } from "../../common/cluster-types";
-import { makeObservable, observable, ObservableMap } from "mobx";
-import { app, BrowserWindow, dialog, ipcMain, shell, webContents } from "electron";
+import { app, BrowserWindow, dialog, shell } from "electron";
 import windowStateKeeper from "electron-window-state";
-import { appEventBus } from "../../common/app-event-bus/event-bus";
-import { ipcMainOn } from "../../common/ipc";
-import { delay, iter } from "../../common/utils";
-import { IpcRendererNavigationEvents } from "../../renderer/navigation/events";
+import type { AppEventBus } from "../../common/app-event-bus/event-bus";
+import { delay } from "../../common/utils";
 import logger from "../logger";
 import { isMac, productName } from "../../common/vars";
 import { LensProxy } from "../lens-proxy";
-import { bundledExtensionsLoaded } from "../../common/ipc/extension-handling";
 import type { ClusterFrameInfo } from "../clusters/frames.injectable";
+import type TypedEventEmitter from "typed-emitter";
+import type { BundledExtensionsEvents } from "../extensions/bundled-loaded.injectable";
 
 function isHideable(window: BrowserWindow | null): boolean {
   return Boolean(window && !window.isDestroyed());
@@ -28,21 +25,17 @@ export interface SendToViewArgs {
 }
 
 export interface WindowManagerDependencies {
-  readonly clusterFrames: ObservableMap<string, ClusterFrameInfo>;
+  readonly bundledExtensionsEmitter: TypedEventEmitter<BundledExtensionsEvents>;
+  readonly appEventBus: AppEventBus;
 }
 
 export class WindowManager {
-  protected mainWindow: BrowserWindow;
+  protected mainWindow?: BrowserWindow;
   protected splashWindow: BrowserWindow;
   protected windowState: windowStateKeeper.State;
   protected disposers: Record<string, Function> = {};
 
-  @observable activeClusterId: ClusterId;
-
-  constructor(protected readonly dependencies: WindowManagerDependencies) {
-    makeObservable(this);
-    this.bindEvents();
-  }
+  constructor(protected readonly dependencies: WindowManagerDependencies) {}
 
   get mainUrl() {
     return `http://localhost:${LensProxy.getInstance().port}`;
@@ -85,10 +78,10 @@ export class WindowManager {
       // open external links in default browser (target=_blank, window.open)
       this.mainWindow
         .on("focus", () => {
-          appEventBus.emit({ name: "app", action: "focus" });
+          this.dependencies.appEventBus.emit({ name: "app", action: "focus" });
         })
         .on("blur", () => {
-          appEventBus.emit({ name: "app", action: "blur" });
+          this.dependencies.appEventBus.emit({ name: "app", action: "blur" });
         })
         .on("closed", () => {
           // clean up
@@ -99,7 +92,7 @@ export class WindowManager {
         })
         .webContents
         .on("dom-ready", () => {
-          appEventBus.emit({ name: "app", action: "dom-ready" });
+          this.dependencies.appEventBus.emit({ name: "app", action: "dom-ready" });
         })
         .on("did-fail-load", (_event, code, desc) => {
           logger.error(`[WINDOW-MANAGER]: Failed to load Main window`, { code, desc });
@@ -153,20 +146,13 @@ export class WindowManager {
     }
   }
 
-  protected bindEvents() {
-    // track visible cluster from ui
-    ipcMainOn(IpcRendererNavigationEvents.CLUSTER_VIEW_CURRENT_ID, (event, clusterId: ClusterId) => {
-      this.activeClusterId = clusterId;
-    });
-  }
-
   async ensureMainWindow(showSplash = true): Promise<BrowserWindow> {
     // This needs to be ready to hear the IPC message before the window is loaded
     let viewHasLoaded = Promise.resolve();
 
     if (!this.mainWindow) {
       viewHasLoaded = new Promise<void>(resolve => {
-        ipcMain.once(bundledExtensionsLoaded, () => resolve());
+        this.dependencies.bundledExtensionsEmitter.once("loaded", resolve);
       });
       await this.initMainWindow(showSplash);
     }
@@ -180,7 +166,7 @@ export class WindowManager {
       this.splashWindow?.close();
       this.splashWindow = undefined;
       setTimeout(() => {
-        appEventBus.emit({ name: "app", action: "start" });
+        this.dependencies.appEventBus.emit({ name: "app", action: "start" });
       }, 1000);
     } catch (error) {
       logger.error(`Showing main window failed: ${error.stack || error}`);
@@ -188,54 +174,6 @@ export class WindowManager {
     }
 
     return this.mainWindow;
-  }
-
-  private sendToView({ channel, frameInfo, data = [] }: SendToViewArgs) {
-    if (frameInfo) {
-      this.mainWindow.webContents.sendToFrame([frameInfo.processId, frameInfo.frameId], channel, ...data);
-    } else {
-      this.mainWindow.webContents.send(channel, ...data);
-    }
-  }
-
-  async navigateExtension(extId: string, pageId?: string, params?: Record<string, any>, frameId?: number) {
-    await this.ensureMainWindow();
-
-    const frameInfo = iter.find(this.dependencies.clusterFrames.values(), frameInfo => frameInfo.frameId === frameId);
-
-    this.sendToView({
-      channel: "extension:navigate",
-      frameInfo,
-      data: [extId, pageId, params],
-    });
-  }
-
-  async navigate(url: string, frameId?: number) {
-    await this.ensureMainWindow();
-
-    const frameInfo = iter.find(this.dependencies.clusterFrames.values(), frameInfo => frameInfo.frameId === frameId);
-    const channel = frameInfo
-      ? IpcRendererNavigationEvents.NAVIGATE_IN_CLUSTER
-      : IpcRendererNavigationEvents.NAVIGATE_IN_APP;
-
-    this.sendToView({
-      channel,
-      frameInfo,
-      data: [url],
-    });
-  }
-
-  reload() {
-    const frameInfo = this.dependencies.clusterFrames.get(this.activeClusterId);
-
-    if (frameInfo) {
-      this.sendToView({ channel: IpcRendererNavigationEvents.RELOAD_PAGE, frameInfo });
-    } else {
-      webContents.getAllWebContents().filter(wc => wc.getType() === "window").forEach(wc => {
-        wc.reload();
-        wc.clearHistory();
-      });
-    }
   }
 
   async showSplash() {

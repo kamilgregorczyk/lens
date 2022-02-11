@@ -20,8 +20,9 @@ import type { AdditionalCategoryColumnRegistration } from "../renderer/component
 import type { CustomCategoryViewRegistration } from "../renderer/components/+catalog/custom-views";
 import type { StatusBarRegistration } from "../renderer/components/status-bar/status-bar-registration";
 import type { KubeObjectMenuRegistration } from "../renderer/components/kube-object-menu/dependencies/kube-object-menu-items/kube-object-menu-registration";
+import { extensionDependencies, LensRendererExtensionDependencies } from "./lens-extension-set-dependencies";
 
-export class LensRendererExtension extends LensExtension {
+export class LensRendererExtension extends LensExtension<LensRendererExtensionDependencies> {
   globalPages: registries.PageRegistration[] = [];
   clusterPages: registries.PageRegistration[] = [];
   clusterPageMenus: registries.ClusterPageMenuRegistration[] = [];
@@ -40,15 +41,19 @@ export class LensRendererExtension extends LensExtension {
   additionalCategoryColumns: AdditionalCategoryColumnRegistration[] = [];
   customCategoryViews: CustomCategoryViewRegistration[] = [];
 
-  async navigate<P extends object>(pageId?: string, params?: P) {
-    const { navigate } = await import("../renderer/navigation");
-    const pageUrl = getExtensionPageUrl({
+  navigate(pageId?: string, params?: Record<string, any>): void;
+  /**
+   * @deprecated This function is not really async, it just returns a resolved promise
+   */
+  navigate<P>(pageId?: string, params?: Record<string, any>): Promise<P extends void ? void : void>;
+  navigate<P>(pageId?: string, params: Record<string, any> = {}): Promise<P extends void ? void : void> {
+    this[extensionDependencies].navigate(getExtensionPageUrl({
       extensionId: this.name,
       pageId,
-      params: params ?? {}, // compile to url with params
-    });
+      params,
+    }));
 
-    navigate(pageUrl);
+    return Promise.resolve();
   }
 
   /**

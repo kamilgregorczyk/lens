@@ -10,7 +10,7 @@ import type { LensLogger } from "../../../common/logger";
 import { toJS } from "../../../common/utils";
 import clusterFramesInjectable, { ClusterFrames } from "../../clusters/frames.injectable";
 import getAllWebContentsInjectable, { GetAllWebContents } from "../../window/get-all-web-contents.injectable";
-import { implWithOn } from "../impl-with-on";
+import { implWithOn } from "../impl-channel";
 import ipcMainInjectable from "../ipc-main.injectable";
 
 function safeGetViewType(view: WebContents): string {

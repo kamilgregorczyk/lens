@@ -7,7 +7,7 @@ import { BrowserWindow } from "electron";
 import { triggerWindowActionInjectionToken, WindowAction } from "../../../common/ipc/window/trigger-action.token";
 import type { LensLogger } from "../../../common/logger";
 import baseLoggerInjectable from "../../../common/logger/base-logger.injectable";
-import { implWithOn } from "../impl-with-on";
+import { implWithOn } from "../impl-channel";
 
 interface Dependencies {
   logger: LensLogger;

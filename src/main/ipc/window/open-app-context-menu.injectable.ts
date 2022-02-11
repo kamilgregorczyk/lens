@@ -6,7 +6,7 @@
 import { windowOpenAppContextMenuInjectionToken } from "../../../common/ipc/window/open-app-context-menu.token";
 import menuInjectable from "../../menu/menu.injectable";
 import getBrowserWindowByIdInjectable from "../../window/get-browser-window-by-id.injectable";
-import { implWithRawOn } from "../impl-with-on";
+import { implWithRawOn } from "../impl-channel";
 
 const windowOpenAppContextMenuInjectable = implWithRawOn(windowOpenAppContextMenuInjectionToken, (di) => {
   const getBrowserWindowById = di.inject(getBrowserWindowByIdInjectable);

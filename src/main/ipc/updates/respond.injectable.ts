@@ -7,7 +7,7 @@ import { updateAvailableRespondInjectionToken } from "../../../common/ipc/update
 import isLinuxInjectable from "../../../common/vars/is-linux.injectable";
 import isMacInjectable from "../../../common/vars/is-mac.injectable";
 import updaterLoggerInjectable from "../../updater/logger.injectable";
-import { implWithOn } from "../impl-with-on";
+import { implWithOn } from "../impl-channel";
 import { autoUpdater as electronAutoUpdater } from "electron";
 import { autoUpdater } from "electron-updater";
 

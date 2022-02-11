@@ -4,6 +4,7 @@
  */
 
 import { DependencyInjectionContainer, getInjectable, getInjectionToken, InjectionToken, lifecycleEnum } from "@ogre-tools/injectable";
+import sendToViewInjectable from "../../main/ipc/send-to-view.injectable";
 
 export type ChannelCallable<T> = T extends Channel<infer Args, infer R> ? (...args: Args) => R : never;
 
@@ -14,8 +15,8 @@ export interface Listenable {
 export class Channel<Args extends any[], R> {
   readonly token: InjectionToken<(...args: Args) => R, void>;
 
-  constructor(private readonly channel: string) {
-    this.token = getInjectionToken<(...args: Args) => R>();
+  constructor(readonly channel: string) {
+    this.token = getInjectionToken();
   }
 
   getInjectable(init: (di: DependencyInjectionContainer, channel: string) => (...args: Args) => R) {
@@ -33,6 +34,14 @@ export class Channel<Args extends any[], R> {
 
   setupListener(emitter: Listenable, listener: (...args: Args) => void) {
     emitter.on(this.channel, listener);
+  }
+
+  getSendToView(di: DependencyInjectionContainer): (args: Args, frameId?: number) => void {
+    const sendToView = di.inject(sendToViewInjectable);
+
+    return (args, frameId) => {
+      sendToView(this.channel, args, frameId);
+    };
   }
 }
 

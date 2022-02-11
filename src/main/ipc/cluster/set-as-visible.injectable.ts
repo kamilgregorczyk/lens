@@ -5,7 +5,7 @@
 
 import { setClusterAsVisibleInjectionToken } from "../../../common/ipc/cluster/set-as-visible.token";
 import clusterManagerInjectable from "../../clusters/manager.injectable";
-import { implWithOn } from "../impl-with-on";
+import { implWithOn } from "../impl-channel";
 
 const setClusterAsVisibleInjectable = implWithOn(setClusterAsVisibleInjectionToken, (di) => {
   const clusterManager = di.inject(clusterManagerInjectable);

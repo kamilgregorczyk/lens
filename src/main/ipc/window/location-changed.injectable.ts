@@ -7,7 +7,7 @@ import emitCanGoBackInjectable from "../../../common/ipc/history/can-go-back/emi
 import emitCanGoForwardInjectable from "../../../common/ipc/history/can-go-forward/emit.injectable";
 import { windowLocationChangedInjectionToken } from "../../../common/ipc/window/location-changed.token";
 import getAllWebContentsInjectable from "../../window/get-all-web-contents.injectable";
-import { implWithOn } from "../impl-with-on";
+import { implWithOn } from "../impl-channel";
 
 const windowLocationChangedInjectable = implWithOn(windowLocationChangedInjectionToken, (di) => {
   const getAllWebContents = di.inject(getAllWebContentsInjectable);
