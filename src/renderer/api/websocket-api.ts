@@ -80,10 +80,13 @@ export class WebSocketApi<Events extends WebSocketEvents> extends (EventEmitter 
     pingMessage: "PING",
   };
 
-  constructor(params: WebsocketApiParams) {
+  constructor(params: WebsocketApiParams = {}) {
     super();
     makeObservable(this);
-    this.params = Object.assign({}, WebSocketApi.defaultParams, params);
+    this.params = {
+      ...WebSocketApi.defaultParams,
+      ...params,
+    };
     const { pingInterval } = this.params;
 
     if (pingInterval) {
