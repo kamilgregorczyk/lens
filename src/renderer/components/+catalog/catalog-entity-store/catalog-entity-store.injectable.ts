@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { CatalogEntityStore } from "./catalog-entity.store";
-import catalogEntityRegistryInjectable from "../../../api/catalog-entity-registry/catalog-entity-registry.injectable";
+import catalogEntityRegistryInjectable from "../../../catalog/entity-registry.injectable";
 
 const catalogEntityStoreInjectable = getInjectable({
   instantiate: (di) => new CatalogEntityStore({

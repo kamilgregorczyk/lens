@@ -224,7 +224,7 @@ export class CatalogEntityRegistry {
    * @param entity The entity to run the hooks on
    * @returns Whether the entities `onRun` method should be executed
    */
-  async onBeforeRun(entity: CatalogEntity): Promise<boolean> {
+  private async onBeforeRun(entity: CatalogEntity): Promise<boolean> {
     logger.debug(`[CATALOG-ENTITY-REGISTRY]: run onBeforeRun on ${entity.getId()}`);
 
     const runEvent = new CatalogRunEvent({ target: entity });
@@ -261,6 +261,9 @@ export class CatalogEntityRegistry {
   }
 }
 
+/**
+ * @deprecated use catalogEntityRegistryInjectable instead
+ */
 export const catalogEntityRegistry = new CatalogEntityRegistry({
   categoryRegistry: catalogCategoryRegistry,
   initSync: startCatalogEntitySync,

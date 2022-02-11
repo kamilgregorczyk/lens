@@ -8,7 +8,8 @@ import extensionLoaderInjectable from "../../../../extensions/extension-loader/e
 import ipcRendererInjectable from "../../../ipc/ipc-renderer.injectable";
 import bindProtocolAddRouteHandlersInjectable from "../../../protocol-handler/bind-protocol-add-route-handlers/bind-protocol-add-route-handlers.injectable";
 import lensProtocolRouterRendererInjectable from "../../../protocol-handler/lens-protocol-router-renderer/lens-protocol-router-renderer.injectable";
-import catalogEntityRegistryInjectable from "../../../api/catalog-entity-registry/catalog-entity-registry.injectable";
+import catalogEntityRegistryInjectable from "../../../catalog/entity-registry.injectable";
+import initCatalogEntityRunListenerInjectable from "../../../ipc/catalog-entity/listeners/run.injectable";
 
 const initRootFrameInjectable = getInjectable({
   instantiate: (di) => {
@@ -16,18 +17,11 @@ const initRootFrameInjectable = getInjectable({
 
     return initRootFrame({
       loadExtensions: extensionLoader.loadOnClusterManagerRenderer,
-
       ipcRenderer: di.inject(ipcRendererInjectable),
-
-      bindProtocolAddRouteHandlers: di.inject(
-        bindProtocolAddRouteHandlersInjectable,
-      ),
-
-      lensProtocolRouterRenderer: di.inject(
-        lensProtocolRouterRendererInjectable,
-      ),
-
+      bindProtocolAddRouteHandlers: di.inject(bindProtocolAddRouteHandlersInjectable),
+      lensProtocolRouterRenderer: di.inject(lensProtocolRouterRendererInjectable),
       catalogEntityRegistry: di.inject(catalogEntityRegistryInjectable),
+      initCatalogEnityRunListener: di.inject(initCatalogEntityRunListenerInjectable),
     });
   },
 

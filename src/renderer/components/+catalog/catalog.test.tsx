@@ -16,7 +16,7 @@ import type { CatalogEntityStore } from "./catalog-entity-store/catalog-entity.s
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import type { DependencyInjectionContainer } from "@ogre-tools/injectable";
 import catalogEntityStoreInjectable from "./catalog-entity-store/catalog-entity-store.injectable";
-import catalogEntityRegistryInjectable from "../../api/catalog-entity-registry/catalog-entity-registry.injectable";
+import catalogEntityRegistryInjectable from "../../catalog/entity-registry.injectable";
 import type { DiRender } from "../test-utils/renderFor";
 import { renderFor } from "../test-utils/renderFor";
 import { ThemeStore } from "../../theme.store";

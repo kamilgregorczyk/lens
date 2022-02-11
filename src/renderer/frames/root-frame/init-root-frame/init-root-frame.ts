@@ -21,6 +21,7 @@ interface Dependencies {
   bindProtocolAddRouteHandlers: () => void;
   lensProtocolRouterRenderer: { init: () => void };
   catalogEntityRegistry: CatalogEntityRegistry;
+  initCatalogEnityRunListener: () => void;
 }
 
 const logPrefix = "[ROOT-FRAME]:";
@@ -31,11 +32,12 @@ export const initRootFrame =
     bindProtocolAddRouteHandlers,
     lensProtocolRouterRenderer,
     ipcRenderer,
-
+    initCatalogEnityRunListener,
     catalogEntityRegistry,
   }: Dependencies) =>
     async (rootElem: HTMLElement) => {
       catalogEntityRegistry.init();
+      initCatalogEnityRunListener();
 
       try {
       // maximum time to let bundled extensions finish loading
