@@ -6,35 +6,62 @@ import { app, BrowserWindow, MenuItem, MenuItemConstructorOptions, webContents, 
 import type { WindowManager } from "../window/manager";
 import { isMac, docsUrl, supportUrl, productName } from "../../common/vars";
 import logger from "../logger";
-import { exitApp } from "../exit-app";
-import { broadcastMessage } from "../../common/ipc";
+import type { ExitApp } from "../exit-app.injectable";
 import { preferencesURL, extensionsURL, addClusterURL, catalogURL, welcomeURL } from "../../common/routes";
-import { checkForUpdates, isAutoUpdateEnabled } from "../app-updater";
 import type { MenuRegistration } from "./menu-registration";
 import { showAbout } from "./show-about";
+import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
+import { computed, IComputedValue, IObservableValue } from "mobx";
+import type { CheckForUpdates } from "../updater/check-for-updates.injectable";
+import type { IsAutoUpdateEnabled } from "../updater/is-auto-update-enabled.injectable";
+import type { NavigateInApp } from "../../common/ipc/window/navigate-in-app.token";
+import type { ReloadPage } from "../../common/ipc/window/reload-page.token";
+import checkForUpdatesInjectable from "../updater/check-for-updates.injectable";
+import electronMenuItemsInjectable from "./electron-menu-items.injectable";
+import exitAppInjectable from "../exit-app.injectable";
+import isAutoUpdateEnabledInjectable from "../updater/is-auto-update-enabled.injectable";
+import navigateInAppInjectable from "../ipc/window/navigate-in-app.injectable";
+import reloadInjectable from "../ipc/window/reload.injectable";
+import windowManagerInjectable from "../window/manager.injectable";
+import type { ClusterId } from "../../common/cluster-types";
+import activeClusterIdInjectable from "../window/active-cluster-id.injectable";
+import type { OpenCommandPallet } from "../../common/ipc/command-pallet/open.injectable";
+import openCommandPalletInjectable from "../../common/ipc/command-pallet/open.injectable";
 
 export type MenuTopId = "mac" | "file" | "edit" | "view" | "help";
 
-interface MenuItemsOpts extends MenuItemConstructorOptions {
+export interface MenuItemsOpts extends MenuItemConstructorOptions {
   submenu?: MenuItemConstructorOptions[];
 }
 
-export function buildMenu(
-  windowManager: WindowManager,
-  electronMenuItems: MenuRegistration[],
-) {
-  function ignoreIf(check: boolean, menuItems: MenuItemConstructorOptions[]) {
-    return check ? [] : menuItems;
-  }
+function ignoreIf(check: boolean, menuItems: MenuItemConstructorOptions[]) {
+  return check ? [] : menuItems;
+}
 
-  async function navigate(url: string) {
-    logger.info(`[MENU]: navigating to ${url}`);
-    await windowManager.navigate(url);
-  }
+interface Dependencies {
+  windowManager: WindowManager;
+  electronMenuItems: IComputedValue<MenuRegistration[]>;
+  exitApp: ExitApp;
+  checkForUpdates: CheckForUpdates;
+  isAutoUpdateEnabled: IsAutoUpdateEnabled;
+  navigate: NavigateInApp;
+  reload: ReloadPage;
+  openCommandPallet: OpenCommandPallet;
+  activeClusterId: IObservableValue<ClusterId | undefined>;
+}
 
+const getMenuTemplate = ({
+  windowManager,
+  electronMenuItems,
+  exitApp,
+  checkForUpdates,
+  isAutoUpdateEnabled,
+  navigate,
+  reload,
+  openCommandPallet,
+  activeClusterId,
+}: Dependencies): IComputedValue<MenuItemsOpts[]> => computed(() => {
   const autoUpdateDisabled = !isAutoUpdateEnabled();
-
-  logger.info(`[MENU]: autoUpdateDisabled=${autoUpdateDisabled}`);
 
   const macAppMenu: MenuItemsOpts = {
     label: app.getName(),
@@ -180,7 +207,7 @@ export function buildMenu(
            * NOTE: this `?` is required because of a bug in playwright. https://github.com/microsoft/playwright/issues/10554
            */
           if (!event?.triggeredByAccelerator) {
-            broadcastMessage("command-palette:open");
+            openCommandPallet(activeClusterId.get());
           }
         },
       },
@@ -206,7 +233,7 @@ export function buildMenu(
         accelerator: "CmdOrCtrl+R",
         id: "reload",
         click() {
-          windowManager.reload();
+          reload();
         },
       },
       { role: "toggleDevTools" },
@@ -271,7 +298,7 @@ export function buildMenu(
   ]);
 
   // Modify menu from extensions-api
-  for (const menuItem of electronMenuItems) {
+  for (const menuItem of electronMenuItems.get()) {
     if (!appMenu.has(menuItem.parentId)) {
       logger.error(
         `[MENU]: cannot register menu item for parentId=${menuItem.parentId}, parent item doesn't exist`,
@@ -289,4 +316,22 @@ export function buildMenu(
   }
 
   return [...appMenu.values()];
-}
+});
+
+const menuTemplateInjectable = getInjectable({
+  instantiate: (di) => getMenuTemplate({
+    checkForUpdates: di.inject(checkForUpdatesInjectable),
+    electronMenuItems: di.inject(electronMenuItemsInjectable),
+    exitApp: di.inject(exitAppInjectable),
+    isAutoUpdateEnabled: di.inject(isAutoUpdateEnabledInjectable),
+    navigate: di.inject(navigateInAppInjectable),
+    reload: di.inject(reloadInjectable),
+    windowManager: di.inject(windowManagerInjectable),
+    activeClusterId: di.inject(activeClusterIdInjectable),
+    openCommandPallet: di.inject(openCommandPalletInjectable),
+  }),
+  lifecycle: lifecycleEnum.singleton,
+});
+
+export default menuTemplateInjectable;
+

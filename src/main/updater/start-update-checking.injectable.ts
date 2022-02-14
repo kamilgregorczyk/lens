@@ -39,7 +39,11 @@ let installVersion: null | string = null;
 
 const startUpdateChecking = ({ isAutoUpdateEnabled, isTestEnv, store, autoUpdater, logger, emitUpdateAvailable, emitUpdateNotAvailable, checkForUpdates }: Dependencies): StartUpdateChecking => (
   once((intervalMs = 1000 * 60 * 60 * 24) => {
-    if (!isAutoUpdateEnabled() || isTestEnv) {
+    const autoUpdateDisabled = !isAutoUpdateEnabled() || isTestEnv;
+
+    logger.info(`auto updating is ${autoUpdateDisabled ? "disabled" : "enabled"}`);
+
+    if (autoUpdateDisabled) {
       return;
     }
 

@@ -12,12 +12,14 @@ import { CommandDialog } from "./command-dialog";
 import type { ClusterId } from "../../../common/cluster-types";
 import commandOverlayInjectable, { CommandOverlay } from "./command-overlay.injectable";
 import { isMac } from "../../../common/vars";
-import { catalogEntityRegistry } from "../../api/catalog-entity-registry";
-import { broadcastMessage, ipcRendererOn } from "../../../common/ipc";
 import { getMatchedClusterId } from "../../navigation";
 import type { Disposer } from "../../utils";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import windowAddEventListenerInjectable from "../../window/event-listener.injectable";
+import type { OpenCommandPallet } from "../../../common/ipc/command-pallet/open.injectable";
+import openCommandPalletInjectable from "../../../common/ipc/command-pallet/open.injectable";
+import type { ListenForOpen } from "../../ipc/command-pallet/listen-for-open.injectable";
+import listenForOpenInjectable from "../../ipc/command-pallet/listen-for-open.injectable";
 
 export interface CommandContainerProps {
   clusterId?: ClusterId;
@@ -26,6 +28,8 @@ export interface CommandContainerProps {
 interface Dependencies {
   addWindowEventListener: <K extends keyof WindowEventMap>(type: K, listener: (this: Window, ev: WindowEventMap[K]) => any, options?: boolean | AddEventListenerOptions) => Disposer;
   commandOverlay: CommandOverlay,
+  openCommandPallet: OpenCommandPallet;
+  listenForOpen: ListenForOpen;
 }
 
 @observer
@@ -39,14 +43,15 @@ class NonInjectedCommandContainer extends React.Component<CommandContainerProps 
     }
   }
 
-  handleCommandPalette = () => {
-    const { commandOverlay } = this.props;
-    const clusterIsActive = getMatchedClusterId() !== undefined;
+  openDialog = () => this.props.commandOverlay.open(<CommandDialog />);
 
-    if (clusterIsActive) {
-      broadcastMessage(`command-palette:${catalogEntityRegistry.activeEntity.getId()}:open`);
+  handleCommandPalette = () => {
+    const clusterId = getMatchedClusterId();
+
+    if (clusterId) {
+      this.props.openCommandPallet(clusterId);
     } else {
-      commandOverlay.open(<CommandDialog />);
+      this.openDialog();
     }
   };
 
@@ -61,17 +66,13 @@ class NonInjectedCommandContainer extends React.Component<CommandContainerProps 
   }
 
   componentDidMount() {
-    const { clusterId, addWindowEventListener, commandOverlay } = this.props;
-
+    const { clusterId, addWindowEventListener, listenForOpen } = this.props;
     const action = clusterId
-      ? () => commandOverlay.open(<CommandDialog />)
+      ? this.openDialog
       : this.handleCommandPalette;
-    const ipcChannel = clusterId
-      ? `command-palette:${clusterId}:open`
-      : "command-palette:open";
 
     disposeOnUnmount(this, [
-      ipcRendererOn(ipcChannel, action),
+      listenForOpen(clusterId, action),
       addWindowEventListener("keydown", this.onKeyboardShortcut(action)),
       addWindowEventListener("keyup", (e) => this.escHandler(e), true),
     ]);
@@ -99,6 +100,8 @@ export const CommandContainer = withInjectables<Dependencies, CommandContainerPr
   getProps: (di, props) => ({
     addWindowEventListener: di.inject(windowAddEventListenerInjectable),
     commandOverlay: di.inject(commandOverlayInjectable),
+    openCommandPallet: di.inject(openCommandPalletInjectable),
+    listenForOpen: di.inject(listenForOpenInjectable),
     ...props,
   }),
 });

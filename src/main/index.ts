@@ -35,7 +35,7 @@ import { HotbarStore } from "../common/hotbars/store";
 import { WeblinkStore } from "../common/weblinks/store";
 import { SentryInit } from "../common/sentry";
 import { ensureDir } from "fs-extra";
-import { initMenu } from "./menu/build-menu";
+import { initMenu } from "./menu/menu-template.injectable";
 import { kubeApiRequest } from "./proxy-functions";
 import { initTray } from "./tray/tray";
 import { ShellSession } from "./shell-session/shell-session";

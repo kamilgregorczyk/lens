@@ -5,25 +5,19 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { Menu } from "electron";
 import { computed, IComputedValue } from "mobx";
-import type { WindowManager } from "../window/manager";
-import windowManagerInjectable from "../window/manager.injectable";
-import electronMenuItemsInjectable from "./electron-menu-items.injectable";
-import { buildMenu } from "./build-menu";
-import type { MenuRegistration } from "./menu-registration";
+import menuTemplateInjectable, { MenuItemsOpts } from "./menu-template.injectable";
 
 interface Dependencies {
-  windowManager: WindowManager;
-  electronMenuItems: IComputedValue<MenuRegistration[]>;
+  menuTemplate: IComputedValue<MenuItemsOpts[]>;
 }
 
-function computeMenu({ windowManager, electronMenuItems }: Dependencies) {
-  return computed(() => Menu.buildFromTemplate(buildMenu(windowManager, electronMenuItems.get())));
+function computeMenu({ menuTemplate }: Dependencies) {
+  return computed(() => Menu.buildFromTemplate(menuTemplate.get()));
 }
 
 const menuInjectable = getInjectable({
   instantiate: (di) => computeMenu({
-    electronMenuItems: di.inject(electronMenuItemsInjectable),
-    windowManager: di.inject(windowManagerInjectable),
+    menuTemplate: di.inject(menuTemplateInjectable),
   }),
   lifecycle: lifecycleEnum.singleton,
 });
