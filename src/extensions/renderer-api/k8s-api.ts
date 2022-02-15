@@ -3,9 +3,11 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import type { KubeResource } from "../../common/rbac";
-import isAllowedResourceInjectable from "../../renderer/cluster-store/is-allowed-resource.injectable";
 import { asLegacyGlobalFunctionForExtensionApi } from "../di-legacy-globals/as-legacy-global-function-for-extension-api";
 import { castArray } from "lodash/fp";
+import isAllowedResourceInjectable from "../../renderer/clusters/is-allowed-resource.injectable";
+
+export * from "../common-api/k8s-api";
 
 const _isAllowedResource = asLegacyGlobalFunctionForExtensionApi(isAllowedResourceInjectable);
 
@@ -48,7 +50,6 @@ export { ClusterRole, clusterRoleApi } from "../../common/k8s-api/endpoints";
 export { ClusterRoleBinding, clusterRoleBindingApi } from "../../common/k8s-api/endpoints";
 export { CustomResourceDefinition, crdApi } from "../../common/k8s-api/endpoints";
 export { KubeObjectStatusLevel } from "./kube-object-status";
-export { KubeJsonApi } from "../../common/k8s-api/kube-json-api";
 
 // types
 export type { ILocalKubeApiConfig, IRemoteKubeApiConfig, IKubeApiCluster } from "../../common/k8s-api/kube-api";

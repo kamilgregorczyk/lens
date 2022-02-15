@@ -9,29 +9,37 @@ import React from "react";
 import { observable, makeObservable } from "mobx";
 import type { RouteComponentProps } from "react-router";
 import { observer } from "mobx-react";
-import { navigation } from "../../navigation";
 import { Tabs, Tab } from "../tabs";
-import type { CatalogEntity } from "../../api/catalog-entity";
-import { catalogEntityRegistry } from "../../api/catalog-entity-registry";
 import { EntitySettingRegistry } from "../../../extensions/registries";
 import type { EntitySettingsRouteParams } from "../../../common/routes";
 import { groupBy } from "lodash";
 import { SettingLayout } from "../layout/setting-layout";
 import logger from "../../../common/logger";
 import { Avatar } from "../avatar";
+import type { ObservableHistory } from "mobx-observable-history";
+import { withInjectables } from "@ogre-tools/injectable-react";
+import type { CatalogEntity } from "../../../common/catalog/entity/entity";
+import type { GetEntityById } from "../../../common/catalog/entity/get-by-id.injectable";
+import getEntityByIdInjectable from "../../../common/catalog/entity/get-by-id.injectable";
+import observableHistoryInjectable from "../../navigation/observable-history.injectable";
 
-interface Props extends RouteComponentProps<EntitySettingsRouteParams> {
+export interface EntitySettingsProps extends RouteComponentProps<EntitySettingsRouteParams> {
+}
+
+interface Dependencies {
+  navigation: ObservableHistory;
+  getEntityById: GetEntityById;
 }
 
 @observer
-export class EntitySettings extends React.Component<Props> {
+class NonInjectedEntitySettings extends React.Component<EntitySettingsProps & Dependencies> {
   @observable activeTab: string;
 
-  constructor(props: Props) {
+  constructor(props: EntitySettingsProps & Dependencies) {
     super(props);
     makeObservable(this);
 
-    const { hash } = navigation.location;
+    const { hash } = props.navigation.location;
 
     if (hash) {
       const menuId = hash.slice(1);
@@ -48,7 +56,7 @@ export class EntitySettings extends React.Component<Props> {
   }
 
   get entity(): CatalogEntity {
-    return catalogEntityRegistry.getById(this.entityId);
+    return this.props.getEntityById(this.entityId);
   }
 
   get menuItems() {
@@ -140,3 +148,11 @@ export class EntitySettings extends React.Component<Props> {
     );
   }
 }
+
+export const EntitySettings = withInjectables<Dependencies, EntitySettingsProps>(NonInjectedEntitySettings, {
+  getProps: (di, props) => ({
+    ...props,
+    getEntityById: di.inject(getEntityByIdInjectable),
+    navigation: di.inject(observableHistoryInjectable),
+  }),
+});

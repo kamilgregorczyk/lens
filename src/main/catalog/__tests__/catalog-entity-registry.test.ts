@@ -5,8 +5,10 @@
 
 import { observable, reaction } from "mobx";
 import { WebLink, WebLinkSpec, WebLinkStatus } from "../../../common/catalog-entities";
-import { catalogCategoryRegistry, CatalogEntity, CatalogEntityMetadata } from "../../../common/catalog";
-import { CatalogEntityRegistry } from "../catalog-entity-registry";
+import { CatalogEntity, type CatalogEntityMetadata } from "../../../common/catalog/entity/entity";
+import { getDiForUnitTesting } from "../../getDiForUnitTesting";
+import type { CatalogEntityRegistry } from "../entity/registry";
+import catalogEntityRegistryInjectable from "../entity/registry.injectable";
 
 class InvalidEntity extends CatalogEntity<CatalogEntityMetadata, WebLinkStatus, WebLinkSpec> {
   public readonly apiVersion = "entity.k8slens.dev/v1alpha1";
@@ -61,7 +63,9 @@ describe("CatalogEntityRegistry", () => {
   });
 
   beforeEach(() => {
-    registry = new CatalogEntityRegistry(catalogCategoryRegistry);
+    const di = getDiForUnitTesting({ doGeneralOverrides: true });
+
+    registry = di.inject(catalogEntityRegistryInjectable);
   });
 
   describe("addSource", () => {

@@ -5,23 +5,29 @@
 
 import { action, observable, makeObservable, computed } from "mobx";
 import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../base-store";
-import { toJS } from "../utils";
-import { CatalogEntity } from "../catalog";
+import { iter, toJS } from "../utils";
 import { catalogEntity } from "../../main/catalog-sources/general";
-import logger from "../../main/logger";
-import { defaultHotbarCells, getEmptyHotbar, Hotbar, CreateHotbarData, CreateHotbarOptions } from "./hotbar-types";
+import { defaultHotbarCells, CreateHotbarData, CreateHotbarOptions } from "./hotbar-types";
+import type { SelectOption } from "../../renderer/components/select";
+import type { HotbarModel, Hotbar } from "./hotbar";
+import { merge } from "lodash";
+
+export enum OrderDirection {
+  NEXT = 1,
+  PREVIOUS = -1,
+}
 
 export interface HotbarStoreModel {
-  hotbars: Hotbar[];
+  hotbars: [string, HotbarModel][];
   activeHotbarId: string;
 }
 
 export interface HotbarStoreDependencies extends BaseStoreDependencies {
-  onTooManyHotbarItems: () => void;
+  createHotbar: (data: CreateHotbarData) => [string, Hotbar];
 }
 
 export class HotbarStore extends BaseStore<HotbarStoreModel> {
-  @observable hotbars: Hotbar[] = [];
+  readonly hotbars = observable.map<string, Hotbar>();
   @observable private _activeHotbarId: string;
 
   constructor(protected readonly dependencies: HotbarStoreDependencies, params: BaseStoreParams<HotbarStoreModel>) {
@@ -33,7 +39,8 @@ export class HotbarStore extends BaseStore<HotbarStoreModel> {
     this.load();
   }
 
-  @computed get activeHotbarId() {
+  @computed
+  get activeHotbarId() {
     return this._activeHotbarId;
   }
 
@@ -41,46 +48,40 @@ export class HotbarStore extends BaseStore<HotbarStoreModel> {
    * If `hotbar` points to a known hotbar, make it active. Otherwise, ignore
    * @param hotbar The hotbar instance, or the index, or its ID
    */
-  setActiveHotbar(hotbar: Hotbar | number | string) {
-    if (typeof hotbar === "number") {
-      if (hotbar >= 0 && hotbar < this.hotbars.length) {
-        this._activeHotbarId = this.hotbars[hotbar].id;
-      }
-    } else if (typeof hotbar === "string") {
-      if (this.getById(hotbar)) {
-        this._activeHotbarId = hotbar;
-      }
-    } else {
-      if (this.hotbars.indexOf(hotbar) >= 0) {
-        this._activeHotbarId = hotbar.id;
-      }
+  setActiveHotbar(id: string) {
+    if (this.hotbars.has(id)) {
+      this._activeHotbarId = id;
     }
   }
 
-  private hotbarIndexById(id: string) {
-    return this.hotbars.findIndex((hotbar) => hotbar.id === id);
-  }
-
-  private hotbarIndex(hotbar: Hotbar) {
-    return this.hotbars.indexOf(hotbar);
-  }
-
-  @computed get activeHotbarIndex() {
-    return this.hotbarIndexById(this.activeHotbarId);
+  private setFirstAsActive() {
+    this._activeHotbarId = iter.first(this.hotbars.keys());
   }
 
   @action
   protected fromStore(data: Partial<HotbarStoreModel> = {}) {
     if (!data.hotbars || !data.hotbars.length) {
-      const hotbar = getEmptyHotbar("Default");
+      const [id, hotbar] = this.dependencies.createHotbar({ name: "Default" });
       const { metadata: { uid, name, source }} = catalogEntity;
       const initialItem = { entity: { uid, name, source }};
 
       hotbar.items[0] = initialItem;
 
-      this.hotbars = [hotbar];
+      this.hotbars.replace([id, hotbar]);
     } else {
-      this.hotbars = data.hotbars;
+      this.hotbars.replace(data.hotbars.map(([id, model]) => {
+        if (this.hotbars.has(id)) {
+          // This is done so that users who hold on to instances continue to work
+          const prev = this.hotbars.get(id);
+
+          prev.name = model.name;
+          merge(prev.items, model.items);
+
+          return [id, prev];
+        }
+
+        return [id, this.dependencies.createHotbar(model)];
+      }));
     }
 
     this.hotbars.forEach(ensureExactHotbarItemLength);
@@ -90,114 +91,49 @@ export class HotbarStore extends BaseStore<HotbarStoreModel> {
     }
 
     if (!this.activeHotbarId) {
-      this.setActiveHotbar(0);
+      this.setFirstAsActive();
     }
   }
 
   toJSON(): HotbarStoreModel {
-    const model: HotbarStoreModel = {
-      hotbars: this.hotbars,
+    return toJS({
+      hotbars: [...iter.map(this.hotbars, ([id, hotbar]) => [id, hotbar.toJSON()])],
       activeHotbarId: this.activeHotbarId,
-    };
-
-    return toJS(model);
+    } as HotbarStoreModel);
   }
 
-  getActive() {
-    return this.getById(this.activeHotbarId);
-  }
+  readonly active = computed(() => this.getById(this.activeHotbarId));
 
   getByName(name: string) {
-    return this.hotbars.find((hotbar) => hotbar.name === name);
+    return iter.find(this.hotbars.values(), (hotbar) => hotbar.name === name);
   }
 
   getById(id: string) {
-    return this.hotbars.find((hotbar) => hotbar.id === id);
+    return this.hotbars.get(id);
   }
 
-  add = action((data: CreateHotbarData, { setActive = false }: CreateHotbarOptions = {}) => {
-    const hotbar = getEmptyHotbar(data.name, data.id);
+  @action
+  add(data: CreateHotbarData, { setActive = false }: CreateHotbarOptions = {}): void {
+    const [id, hotbar] = this.dependencies.createHotbar(data);
 
-    this.hotbars.push(hotbar);
+    this.hotbars.set(id, hotbar);
 
     if (setActive) {
-      this._activeHotbarId = hotbar.id;
+      this._activeHotbarId = id;
     }
-  });
+  }
 
-  setHotbarName = action((id: string, name: string) => {
-    const index = this.hotbars.findIndex((hotbar) => hotbar.id === id);
-
-    if (index < 0) {
-      return void console.warn(`[HOTBAR-STORE]: cannot setHotbarName: unknown id`, { id });
-    }
-
-    this.hotbars[index].name = name;
-  });
-
-  remove = action((hotbar: Hotbar) => {
-    if (this.hotbars.length <= 1) {
+  @action
+  remove(id: string): void {
+    if (this.hotbars.size <= 1) {
       throw new Error("Cannot remove the last hotbar");
     }
 
-    this.hotbars = this.hotbars.filter((h) => h !== hotbar);
+    this.hotbars.delete(id);
 
-    if (this.activeHotbarId === hotbar.id) {
-      this.setActiveHotbar(0);
+    if (this.activeHotbarId === id) {
+      this.setFirstAsActive();
     }
-  });
-
-  @action
-  addToHotbar(item: CatalogEntity, cellIndex?: number) {
-    const hotbar = this.getActive();
-    const uid = item.getId();
-    const name = item.getName();
-
-    if (typeof uid !== "string") {
-      throw new TypeError("CatalogEntity's ID must be a string");
-    }
-
-    if (typeof name !== "string") {
-      throw new TypeError("CatalogEntity's NAME must be a string");
-    }
-
-    if (this.isAddedToActive(item)) {
-      return;
-    }
-
-    const entity = {
-      uid,
-      name,
-      source: item.metadata.source,
-    };
-    const newItem = { entity };
-
-    if (cellIndex === undefined) {
-      // Add item to empty cell
-      const emptyCellIndex = hotbar.items.indexOf(null);
-
-      if (emptyCellIndex != -1) {
-        hotbar.items[emptyCellIndex] = newItem;
-      } else {
-        this.dependencies.onTooManyHotbarItems();
-      }
-    } else if (0 <= cellIndex && cellIndex < hotbar.items.length) {
-      hotbar.items[cellIndex] = newItem;
-    } else {
-      logger.error(`[HOTBAR-STORE]: cannot pin entity to hotbar outside of index range`, { entityId: uid, hotbarId: hotbar.id, cellIndex });
-    }
-  }
-
-  @action
-  removeFromHotbar(uid: string): void {
-    const hotbar = this.getActive();
-    const index = hotbar.items.findIndex(item => item?.entity.uid === uid);
-
-    if (index < 0) {
-      return;
-    }
-
-    hotbar.items[index] = null;
   }
 
   /**
@@ -207,93 +143,78 @@ export class HotbarStore extends BaseStore<HotbarStoreModel> {
    */
   @action
   removeAllHotbarItems(uid: string) {
-    for (const hotbar of this.hotbars) {
-      const index = hotbar.items.findIndex((i) => i?.entity.uid === uid);
+    for (const hotbar of this.hotbars.values()) {
+      hotbar.remove(uid);
+    }
+  }
 
-      if (index >= 0) {
-        hotbar.items[index] = null;
+  private getActiveHotbarIndex() {
+    let i = 0;
+
+    for (const id of this.hotbars.keys()) {
+      if (id === this._activeHotbarId) {
+        return i;
       }
+
+      i += 1;
     }
+
+    // This should NEVER happen, it means that `this._activeHotbarId` is invalid
+    return 0;
   }
 
-  findClosestEmptyIndex(from: number, direction = 1) {
-    let index = from;
+  private getNextIndex(direction: 1 | -1) {
+    const potentialNextIndex = this.getActiveHotbarIndex() + direction;
 
-    while(this.getActive().items[index] != null) {
-      index += direction;
+    if (potentialNextIndex < 0) {
+      return this.hotbars.size - 1;
     }
 
-    return index;
+    if (potentialNextIndex >= this.hotbars.size) {
+      return 0;
+    }
+
+    return potentialNextIndex;
   }
 
-  @action
-  restackItems(from: number, to: number): void {
-    const { items } = this.getActive();
-    const source = items[from];
-    const moveDown = from < to;
-
-    if (from < 0 || to < 0 || from >= items.length || to >= items.length || isNaN(from) || isNaN(to)) {
-      throw new Error("Invalid 'from' or 'to' arguments");
-    }
-
-    if (from == to) {
-      return;
-    }
-
-    items.splice(from, 1, null);
-
-    if (items[to] == null) {
-      items.splice(to, 1, source);
-    } else {
-      // Move cells up or down to closes empty cell
-      items.splice(this.findClosestEmptyIndex(to, moveDown ? -1 : 1), 1);
-      items.splice(to, 0, source);
-    }
+  private setActiveByIndex(index: number) {
+    this._activeHotbarId = iter.nth(this.hotbars.keys(), index);
   }
 
-  switchToPrevious() {
-    let index = this.activeHotbarIndex - 1;
-
-    if (index < 0) {
-      index = this.hotbars.length - 1;
-    }
-
-    this.setActiveHotbar(index);
+  switchHotbar(direction: OrderDirection): void {
+    this.setActiveByIndex(this.getNextIndex(direction));
   }
 
-  switchToNext() {
-    let index = this.activeHotbarIndex + 1;
+  readonly selectOptions = computed(() => {
+    const res: SelectOption<string>[] = [];
+    let i = 0;
 
-    if (index >= this.hotbars.length) {
-      index = 0;
+    for (const [id, hotbar] of this.hotbars) {
+      i += 1;
+      res.push({
+        value: id,
+        label: `${i}: ${hotbar.name}`,
+      });
     }
 
-    this.setActiveHotbar(index);
-  }
+    return res;
+  });
 
   /**
-   * Checks if entity already pinned to the active hotbar
+   * Get the display index (1-base) of the hotbar provided
    */
-  isAddedToActive(entity: CatalogEntity | null | undefined): boolean {
-    if (!entity) {
-      return false;
-    }
-
-    return this.getActive().items.findIndex(item => item?.entity.uid === entity.getId()) >= 0;
-  }
-
-  getDisplayLabel(hotbar: Hotbar): string {
-    return `${this.getDisplayIndex(hotbar)}: ${hotbar.name}`;
-  }
-
   getDisplayIndex(hotbar: Hotbar): string {
-    const index = this.hotbarIndex(hotbar);
+    let i = 0;
 
-    if (index < 0) {
-      return "??";
+    for (const entry of this.hotbars.values()) {
+      i += 1;
+
+      if (entry === hotbar) {
+        return `${i}`;
+      }
     }
 
-    return `${index + 1}`;
+    return "??";
   }
 }
 

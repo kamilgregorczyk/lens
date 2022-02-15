@@ -12,7 +12,6 @@ import { cssNames } from "../../utils";
 import { isActiveRoute } from "../../navigation";
 import { ClusterPageMenuRegistration, ClusterPageMenuRegistry, ClusterPageRegistry, getExtensionPageUrl } from "../../../extensions/registries";
 import { SidebarItem } from "./sidebar-item";
-import { catalogEntityRegistry } from "../../api/catalog-entity-registry";
 import { SidebarCluster } from "./sidebar-cluster";
 import { renderTabRoutesSidebarItems } from "./tab-routes-sidebar-items";
 import { ConfigSidebarItem } from "../+config/sidebar-item";
@@ -110,16 +109,12 @@ export class Sidebar extends React.Component<SidebarProps> {
     });
   }
 
-  get clusterEntity() {
-    return catalogEntityRegistry.activeEntity;
-  }
-
   render() {
     const { className } = this.props;
 
     return (
       <div className={cssNames("flex flex-col", className)} data-testid="cluster-sidebar">
-        <SidebarCluster clusterEntity={this.clusterEntity}/>
+        <SidebarCluster />
         <div className={styles.sidebarNav}>
           <ClusterSidebarItem />
           <NodesSidebarItem />

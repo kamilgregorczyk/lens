@@ -4,35 +4,47 @@
  */
 
 
-import type { CatalogCategory, CatalogEntity } from "../../common/catalog";
-import { catalogEntityRegistry as registry } from "../../renderer/api/catalog-entity-registry";
-import type { CatalogEntityOnBeforeRun } from "../../renderer/api/catalog-entity-registry";
+import type { CatalogEntity } from "../../common/catalog/entity/entity";
+import type { CatalogCategory } from "../../common/catalog/category";
 import type { Disposer } from "../../common/utils";
-export { catalogCategoryRegistry as catalogCategories } from "../../common/catalog/catalog-category-registry";
+import type { CatalogEntityOnBeforeRun } from "../../renderer/catalog/entity/registry";
+import catalogEntityRegistryInjectable from "../../renderer/catalog/entity/registry.injectable";
+import { asLegacyGlobalObjectForExtensionApi } from "../di-legacy-globals/as-legacy-global-object-for-extension-api";
 
-export class CatalogEntityRegistry {
+export interface CatalogEntityRegistry {
   /**
    * Currently active/visible entity
    */
-  get activeEntity() {
-    return registry.activeEntity;
-  }
+  readonly activeEntity: CatalogEntity | undefined;
 
-  get entities(): Map<string, CatalogEntity> {
-    return registry.entities;
-  }
+  /**
+   * A map of all entities
+   */
+  readonly entities: Map<string, CatalogEntity>;
 
-  getById(id: string) {
-    return this.entities.get(id);
-  }
+  /**
+   * Get a specific entity by its ID
+   * @param id The entity ID
+   */
+  getById(id: string): CatalogEntity | undefined;
 
-  getItemsForApiKind<T extends CatalogEntity>(apiVersion: string, kind: string): T[] {
-    return registry.getItemsForApiKind<T>(apiVersion, kind);
-  }
+  /**
+   * Get all the entities for a specific version and kind
+   */
+  getItemsForApiKind(apiVersion: string, kind: string): CatalogEntity[];
+  /**
+   * @deprecated don't use the irrelavent type parameter
+   */
+  getItemsForApiKind<T extends CatalogEntity>(apiVersion: string, kind: string): T[];
 
-  getItemsForCategory<T extends CatalogEntity>(category: CatalogCategory): T[] {
-    return registry.getItemsForCategory(category);
-  }
+  /**
+   * Get all the entities for the kind and all the versions that a category declares
+   */
+  getItemsForCategory(category: CatalogCategory): CatalogEntity[];
+  /**
+   * @deprecated don't use the irrelavent type parameter
+   */
+  getItemsForCategory<T extends CatalogEntity>(category: CatalogCategory): T[];
 
   /**
    * Add a onBeforeRun hook to a catalog entities. If `onBeforeRun` was previously
@@ -42,9 +54,28 @@ export class CatalogEntityRegistry {
    * to stop run sequence
    * @returns A function to remove that hook
    */
-  addOnBeforeRun(onBeforeRun: CatalogEntityOnBeforeRun): Disposer {
-    return registry.addOnBeforeRun(onBeforeRun);
-  }
+  addOnBeforeRun(onBeforeRun: CatalogEntityOnBeforeRun): Disposer;
 }
 
-export const catalogEntities = new CatalogEntityRegistry();
+const _catalogEntities = asLegacyGlobalObjectForExtensionApi(catalogEntityRegistryInjectable);
+
+export const catalogEntities: CatalogEntityRegistry = {
+  get activeEntity() {
+    return _catalogEntities.activeEntity.get();
+  },
+  get entities() {
+    return _catalogEntities.entityMap.get();
+  },
+  addOnBeforeRun(fn) {
+    return _catalogEntities.addOnBeforeRun(fn);
+  },
+  getById(id) {
+    return _catalogEntities.getById(id);
+  },
+  getItemsForApiKind(apiVersion: string, kind: string) {
+    return _catalogEntities.getItemsForApiKind(apiVersion, kind);
+  },
+  getItemsForCategory(category: CatalogCategory) {
+    return _catalogEntities.getItemsForCategory(category);
+  },
+};

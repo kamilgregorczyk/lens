@@ -5,8 +5,8 @@
 
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { CatalogEntityRun, emitCatalogEntityRunInjectionToken } from "../../../../common/ipc/catalog-entity/run/emit.token";
-import type { CatalogEntityRegistry } from "../../../api/catalog-entity-registry";
-import catalogEntityRegistryInjectable from "../../../catalog/entity-registry.injectable";
+import type { CatalogEntityRegistry } from "../../../catalog/entity/registry";
+import catalogEntityRegistryInjectable from "../../../catalog/entity/registry.injectable";
 import { setupListener } from "../../setup-listener";
 
 interface Dependencies {

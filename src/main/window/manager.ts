@@ -9,10 +9,10 @@ import type { AppEventBus } from "../../common/app-event-bus/event-bus";
 import { delay } from "../../common/utils";
 import logger from "../logger";
 import { isMac, productName } from "../../common/vars";
-import { LensProxy } from "../lens-proxy";
 import type { ClusterFrameInfo } from "../clusters/frames.injectable";
 import type TypedEventEmitter from "typed-emitter";
 import type { BundledExtensionsEvents } from "../extensions/bundled-loaded.injectable";
+import type { LensProxyPort } from "../lens-proxy/port.injectable";
 
 function isHideable(window: BrowserWindow | null): boolean {
   return Boolean(window && !window.isDestroyed());
@@ -27,6 +27,7 @@ export interface SendToViewArgs {
 export interface WindowManagerDependencies {
   readonly bundledExtensionsEmitter: TypedEventEmitter<BundledExtensionsEvents>;
   readonly appEventBus: AppEventBus;
+  readonly proxyPort: LensProxyPort;
 }
 
 export class WindowManager {
@@ -38,7 +39,7 @@ export class WindowManager {
   constructor(protected readonly dependencies: WindowManagerDependencies) {}
 
   get mainUrl() {
-    return `http://localhost:${LensProxy.getInstance().port}`;
+    return `http://localhost:${this.dependencies.proxyPort.get()}`;
   }
 
   private async initMainWindow(showSplash: boolean) {

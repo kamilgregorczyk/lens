@@ -3,10 +3,8 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { CatalogCategory, CatalogEntity, CatalogEntityContextMenuContext, CatalogEntityMetadata, CatalogEntityStatus } from "../catalog";
-import { catalogCategoryRegistry } from "../catalog/catalog-category-registry";
-import { productName } from "../vars";
-import { WeblinkStore } from "../weblinks/store";
+import { CatalogEntity, CatalogEntityMetadata, CatalogEntityStatus } from "../catalog/entity/entity";
+import { CatalogCategory } from "../catalog/category";
 
 export type WebLinkStatusPhase = "available" | "unavailable";
 
@@ -29,26 +27,18 @@ export class WebLink extends CatalogEntity<CatalogEntityMetadata, WebLinkStatus,
     window.open(this.spec.url, "_blank");
   }
 
-  public onSettingsOpen(): void {
-    return;
-  }
-
-  async onContextMenuOpen(context: CatalogEntityContextMenuContext) {
-    if (this.metadata.source === "local") {
-      context.menuItems.push({
-        title: "Delete",
-        icon: "delete",
-        onClick: async () => WeblinkStore.getInstance().removeById(this.getId()),
-        confirm: {
-          message: `Remove Web Link "${this.getName()}" from ${productName}?`,
-        },
-      });
-    }
-
-    catalogCategoryRegistry
-      .getCategoryForEntity<WebLinkCategory>(this)
-      ?.emit("contextMenuOpen", this, context);
-  }
+  // async onContextMenuOpen(context: CatalogEntityContextMenuContext) {
+  //   if (this.metadata.source === "local") {
+  //     context.menuItems.push({
+  //       title: "Delete",
+  //       icon: "delete",
+  //       onClick: async () => WeblinkStore.getInstance().removeById(this.getId()),
+  //       confirm: {
+  //         message: `Remove Web Link "${this.getName()}" from ${productName}?`,
+  //       },
+  //     });
+  //   }
+  // }
 }
 
 export class WebLinkCategory extends CatalogCategory {
@@ -71,5 +61,3 @@ export class WebLinkCategory extends CatalogCategory {
     },
   };
 }
-
-catalogCategoryRegistry.add(new WebLinkCategory());

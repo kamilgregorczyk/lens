@@ -10,26 +10,30 @@ import { reaction } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import { nodesStore } from "../+nodes/nodes.store";
 import { podsStore } from "../+workloads-pods/pods.store";
-import { Disposer, getHostedClusterId, interval } from "../../utils";
+import { Disposer, interval } from "../../utils";
 import { TabLayout } from "../layout/tab-layout";
 import { Spinner } from "../spinner";
 import { ClusterIssues } from "./cluster-issues";
 import { ClusterMetrics } from "./cluster-metrics";
 import type { ClusterOverviewStore } from "./cluster-overview-store/cluster-overview-store";
 import { ClusterPieCharts } from "./cluster-pie-charts";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
-import { ClusterStore } from "../../../common/clusters/store";
 import { eventStore } from "../+events/event.store";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import kubeWatchApiInjectable from "../../kube-watch-api/kube-watch-api.injectable";
 import type { KubeObjectStore } from "../../../common/k8s-api/kube-object.store";
 import type { KubeObject } from "../../../common/k8s-api/kube-object";
 import clusterOverviewStoreInjectable from "./cluster-overview-store/cluster-overview-store.injectable";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import type { Cluster } from "../../../common/cluster/cluster";
+import hostedClusterInjectable from "../../clusters/hosted-cluster.injectable";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Dependencies {
-  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer,
-  clusterOverviewStore: ClusterOverviewStore
+  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer;
+  clusterOverviewStore: ClusterOverviewStore;
+  shouldDisplayMetric: ShouldDisplayMetric;
+  cluster: Cluster | undefined;
 }
 
 @observer
@@ -37,9 +41,7 @@ class NonInjectedClusterOverview extends React.Component<Dependencies> {
   private metricPoller = interval(60, () => this.loadMetrics());
 
   loadMetrics() {
-    const cluster = ClusterStore.getInstance().getById(getHostedClusterId());
-
-    if (cluster.available) {
+    if (this.props.cluster?.available) {
       this.props.clusterOverviewStore.loadMetrics();
     }
   }
@@ -65,53 +67,41 @@ class NonInjectedClusterOverview extends React.Component<Dependencies> {
     this.metricPoller.stop();
   }
 
-  renderMetrics(isMetricsHidden: boolean) {
-    if (isMetricsHidden) {
-      return null;
-    }
-
-    return (
-      <>
-        <ClusterMetrics/>
-        <ClusterPieCharts/>
-      </>
-    );
-  }
-
-  renderClusterOverview(isLoaded: boolean, isMetricsHidden: boolean) {
+  renderClusterOverview(isLoaded: boolean) {
     if (!isLoaded) {
       return <Spinner center/>;
     }
 
     return (
       <>
-        {this.renderMetrics(isMetricsHidden)}
-        <ClusterIssues className={isMetricsHidden ? "OnlyClusterIssues" : ""}/>
+        <ClusterMetrics/>
+        <ClusterPieCharts/>
+        <ClusterIssues className={"OnlyClusterIssues"}/>
       </>
     );
   }
 
   render() {
+    const { shouldDisplayMetric } = this.props;
     const isLoaded = nodesStore.isLoaded && eventStore.isLoaded;
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.Cluster);
 
     return (
       <TabLayout>
         <div className={styles.ClusterOverview} data-testid="cluster-overview-page">
-          {this.renderClusterOverview(isLoaded, isMetricHidden)}
+          {shouldDisplayMetric(ClusterMetricsResourceType.Cluster) && (
+            this.renderClusterOverview(isLoaded)
+          )}
         </div>
       </TabLayout>
     );
   }
 }
 
-export const ClusterOverview = withInjectables<Dependencies>(
-  NonInjectedClusterOverview,
-
-  {
-    getProps: (di) => ({
-      subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
-      clusterOverviewStore: di.inject(clusterOverviewStoreInjectable),
-    }),
-  },
-);
+export const ClusterOverview = withInjectables<Dependencies>(NonInjectedClusterOverview, {
+  getProps: (di) => ({
+    subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
+    clusterOverviewStore: di.inject(clusterOverviewStoreInjectable),
+    cluster: di.inject(hostedClusterInjectable),
+    shouldDisplayMetric: di.inject(shouldDisplayMetricInjectable),
+  }),
+});

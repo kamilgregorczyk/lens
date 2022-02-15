@@ -7,14 +7,14 @@ import type { BaseStoreParams } from "../base-store";
 import { HotbarStore, HotbarStoreDependencies, HotbarStoreModel } from "./store";
 import hotbarStoreLoggerInjectable from "./logger.injectable";
 import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
-import { onTooManyHotbarItemsInjectionToken } from "./too-many-items.token";
+import createHotbarInjectable from "./create-hotbar.injectable";
 
 const createHotbarStoreInjectable = getInjectable({
   instantiate: (di) => {
     const deps: HotbarStoreDependencies = {
       logger: di.inject(hotbarStoreLoggerInjectable),
       userDataPath: di.inject(directoryForUserDataInjectable),
-      onTooManyHotbarItems: di.inject(onTooManyHotbarItemsInjectionToken),
+      createHotbar: di.inject(createHotbarInjectable),
     };
 
     return (params: BaseStoreParams<HotbarStoreModel>) => new HotbarStore(deps, params);

@@ -5,7 +5,6 @@
 
 export {
   KubernetesCluster,
-  kubernetesClusterCategory,
   GeneralEntity,
   WebLink,
 } from "../../common/catalog-entities";
@@ -21,4 +20,4 @@ export type {
   KubernetesClusterStatus,
 } from "../../common/catalog-entities";
 
-export * from "../../common/catalog/catalog-entity";
+export * from "../../common/catalog/entity/entity";

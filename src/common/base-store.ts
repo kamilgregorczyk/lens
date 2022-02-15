@@ -57,11 +57,11 @@ export abstract class BaseStore<T> {
    * This must be called after the last child's constructor is finished (or just before it finishes)
    */
   load() {
-    this.logger.info(`LOADING ...`);
-
     if (this.storeConfig) {
       throw new Error(`Cannot load store for ${this.params.name} more than once`);
     }
+
+    this.logger.info(`LOADING ...`);
 
     this.storeConfig = new ElectronStore(this.params);
     const res: any = this.fromStore(this.storeConfig.store);

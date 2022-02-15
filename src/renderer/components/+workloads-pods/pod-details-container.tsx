@@ -17,12 +17,13 @@ import { ResourceMetrics } from "../resource-metrics";
 import type { IMetrics } from "../../../common/k8s-api/endpoints/metrics.api";
 import { ContainerCharts } from "./container-charts";
 import { LocaleDate } from "../locale-date";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
 import type { PortForwardStore } from "../../port-forward";
 import { disposeOnUnmount, observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import portForwardStoreInjectable from "../../port-forward/port-forward-store/port-forward-store.injectable";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Props {
   pod: Pod;
@@ -32,6 +33,7 @@ interface Props {
 
 interface Dependencies {
   portForwardStore: PortForwardStore
+  shouldDisplayMetric: ShouldDisplayMetric;
 }
 
 @observer
@@ -70,7 +72,7 @@ class NonInjectedPodDetailsContainer extends React.Component<Props & Dependencie
   }
 
   render() {
-    const { pod, container, metrics } = this.props;
+    const { pod, container, metrics, shouldDisplayMetric } = this.props;
 
     if (!pod || !container) return null;
     const { name, image, imagePullPolicy, ports, volumeMounts, command, args } = container;
@@ -88,14 +90,13 @@ class NonInjectedPodDetailsContainer extends React.Component<Props & Dependencie
       "Memory",
       "Filesystem",
     ];
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.Container);
 
     return (
       <div className="PodDetailsContainer">
         <div className="pod-container-title">
           <StatusBrick className={cssNames(state, { ready })}/>{name}
         </div>
-        {!isMetricHidden && !isInitContainer &&
+        {shouldDisplayMetric(ClusterMetricsResourceType.Container) && !isInitContainer &&
         <ResourceMetrics tabs={metricTabs} params={{ metrics }}>
           <ContainerCharts/>
         </ResourceMetrics>
@@ -191,13 +192,10 @@ class NonInjectedPodDetailsContainer extends React.Component<Props & Dependencie
   }
 }
 
-export const PodDetailsContainer = withInjectables<Dependencies, Props>(
-  NonInjectedPodDetailsContainer,
-
-  {
-    getProps: (di, props) => ({
-      portForwardStore: di.inject(portForwardStoreInjectable),
-      ...props,
-    }),
-  },
-);
+export const PodDetailsContainer = withInjectables<Dependencies, Props>(NonInjectedPodDetailsContainer, {
+  getProps: (di, props) => ({
+    ...props,
+    portForwardStore: di.inject(portForwardStoreInjectable),
+    shouldDisplayMetric: di.inject(shouldDisplayMetricInjectable),
+  }),
+});

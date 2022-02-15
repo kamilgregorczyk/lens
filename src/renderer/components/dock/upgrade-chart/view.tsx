@@ -35,7 +35,7 @@ interface Dependencies {
 }
 
 @observer
-export class NonInjectedUpgradeChart extends React.Component<Props & Dependencies> {
+class NonInjectedUpgradeChart extends React.Component<Props & Dependencies> {
   @observable error: string;
   @observable versions = observable.array<IChartVersion>();
   @observable version: IChartVersion;

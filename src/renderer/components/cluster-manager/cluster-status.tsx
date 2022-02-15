@@ -17,7 +17,7 @@ import { Spinner } from "../spinner";
 import { navigate } from "../../navigation";
 import { entitySettingsURL } from "../../../common/routes";
 import type { KubeAuthUpdate } from "../../../common/cluster-types";
-import { catalogEntityRegistry } from "../../api/catalog-entity-registry";
+import { catalogEntityRegistry } from "../../catalog/entity/registry";
 import { requestClusterActivation } from "../../ipc";
 
 interface Props {

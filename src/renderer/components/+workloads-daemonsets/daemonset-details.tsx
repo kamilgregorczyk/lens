@@ -21,21 +21,22 @@ import { PodCharts, podMetricTabs } from "../+workloads-pods/pod-charts";
 import { makeObservable, observable, reaction } from "mobx";
 import { PodDetailsList } from "../+workloads-pods/pod-details-list";
 import { KubeObjectMeta } from "../kube-object-meta";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
 import { boundMethod, Disposer } from "../../utils";
 import logger from "../../../common/logger";
 import type { KubeObjectStore } from "../../../common/k8s-api/kube-object.store";
 import type { KubeObject } from "../../../common/k8s-api/kube-object";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import kubeWatchApiInjectable
-  from "../../kube-watch-api/kube-watch-api.injectable";
+import kubeWatchApiInjectable from "../../kube-watch-api/kube-watch-api.injectable";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Props extends KubeObjectDetailsProps<DaemonSet> {
 }
 
 interface Dependencies {
-  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer
+  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer;
+  shouldDisplayMetric: ShouldDisplayMetric;
 }
 
 @observer
@@ -66,7 +67,7 @@ class NonInjectedDaemonSetDetails extends React.Component<Props & Dependencies> 
   }
 
   render() {
-    const { object: daemonSet } = this.props;
+    const { object: daemonSet, shouldDisplayMetric } = this.props;
 
     if (!daemonSet) {
       return null;
@@ -83,11 +84,10 @@ class NonInjectedDaemonSetDetails extends React.Component<Props & Dependencies> 
     const images = daemonSet.getImages();
     const nodeSelector = daemonSet.getNodeSelectors();
     const childPods = daemonSetStore.getChildPods(daemonSet);
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.DaemonSet);
 
     return (
       <div className="DaemonSetDetails">
-        {!isMetricHidden && podsStore.isLoaded && (
+        {shouldDisplayMetric(ClusterMetricsResourceType.DaemonSet) && podsStore.isLoaded && (
           <ResourceMetrics
             loader={this.loadMetrics}
             tabs={podMetricTabs} object={daemonSet} params={{ metrics: this.metrics }}
@@ -132,13 +132,10 @@ class NonInjectedDaemonSetDetails extends React.Component<Props & Dependencies> 
   }
 }
 
-export const DaemonSetDetails = withInjectables<Dependencies, Props>(
-  NonInjectedDaemonSetDetails,
-
-  {
-    getProps: (di, props) => ({
-      subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
-      ...props,
-    }),
-  },
-);
+export const DaemonSetDetails = withInjectables<Dependencies, Props>(NonInjectedDaemonSetDetails, {
+  getProps: (di, props) => ({
+    ...props,
+    subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
+    shouldDisplayMetric: di.inject(shouldDisplayMetricInjectable),
+  }),
+});

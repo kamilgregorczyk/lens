@@ -6,15 +6,15 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { isEqual } from "lodash";
 import { autorun, IComputedValue } from "mobx";
-import type { CatalogEntity } from "../../../common/catalog";
+import type { CatalogEntity } from "../../../common/catalog/entity/entity";
 import { toJS } from "../../../renderer/utils";
-import catalogEntitiesInjectable from "../../catalog/entities.injectable";
+import catalogEntitiesInjectable from "../../catalog/entity/entities.injectable";
 import type { ProxyApiRequestArgs } from "../types";
 import WebSocket, { Server as WebSocketServer } from "ws";
 import logger from "../../logger";
 import EventEmitter from "events";
 import type TypedEventEmitter from "typed-emitter";
-import type { RawCatalogEntity, RawCatalogEntityUpdate, EntityChangeEvents, CatalogSyncAddMessage, CatalogSyncDeleteMessage, CatalogSyncUpdateMessage } from "../../../common/catalog/entity-sync";
+import type { RawCatalogEntity, RawCatalogEntityUpdate, EntityChangeEvents, CatalogSyncAddMessage, CatalogSyncDeleteMessage, CatalogSyncUpdateMessage } from "../../../common/catalog/entity/sync-types";
 
 interface Dependencies {
   entities: IComputedValue<CatalogEntity[]>;

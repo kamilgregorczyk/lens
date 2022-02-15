@@ -3,24 +3,16 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { CatalogEntityRegistry } from "../catalog-entity-registry";
-import { catalogCategoryRegistry } from "../../../common/catalog/catalog-category-registry";
-import { CatalogCategory, CatalogEntityData, CatalogEntityKindData } from "../catalog-entity";
+import type { CatalogEntityRegistry } from "../../catalog/entity/registry";
 import { KubernetesCluster, WebLink } from "../../../common/catalog-entities";
-import { observable, runInAction } from "mobx";
-import { noop } from "../../utils";
-
-class TestCatalogEntityRegistry extends CatalogEntityRegistry {
-  replaceItems(items: (CatalogEntityData & CatalogEntityKindData)[]) {
-    runInAction(() => {
-      this._entities.clear();
-
-      for (const item of items) {
-        this.addItem(item);
-      }
-    });
-  }
-}
+import { CatalogCategory } from "../../../common/catalog/category";
+import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
+import catalogEntitySyncerInjectable from "../../catalog/entity/entity-syncer.injectable";
+import { getDiForUnitTesting } from "../../getDiForUnitTesting";
+import catalogEntityRegistryInjectable from "../../catalog/entity/registry.injectable";
+import type { EntityChangeEvents } from "../../../common/catalog/entity/sync-types";
+import type { CatalogCategoryRegistry } from "../../catalog/category/registry";
+import catalogCategoryRegistryInjectable from "../../catalog/category/registry.injectable";
 
 class FooBarCategory extends CatalogCategory {
   public readonly apiVersion = "catalog.k8slens.dev/v1alpha1";
@@ -87,13 +79,25 @@ const entitykc = new KubernetesCluster({
 });
 
 describe("CatalogEntityRegistry", () => {
+  let categoryRegistry: CatalogCategoryRegistry;
+  let entityRegistry: CatalogEntityRegistry;
+  let eventHandlers: EntityChangeEvents;
+
+  beforeEach(async () => {
+    const di = getDiForUnitTesting({ doGeneralOverrides: true });
+
+    di.override(directoryForUserDataInjectable, () => "some-directory-for-user-data");
+    di.override(catalogEntitySyncerInjectable, () => (events) => eventHandlers = events);
+
+    await di.runSetups();
+
+    entityRegistry = di.inject(catalogEntityRegistryInjectable);
+    categoryRegistry = di.inject(catalogCategoryRegistryInjectable);
+  });
+
   describe("updateItems", () => {
-    it("adds new catalog item", () => {
-      const catalog = new TestCatalogEntityRegistry({
-        categoryRegistry: catalogCategoryRegistry,
-        initSync: noop,
-      });
-      const items = [{
+    beforeEach(() => {
+      eventHandlers.add({
         apiVersion: "entity.k8slens.dev/v1alpha1",
         kind: "KubernetesCluster",
         metadata: {
@@ -106,12 +110,11 @@ describe("CatalogEntityRegistry", () => {
           phase: "disconnected",
         },
         spec: {},
-      }];
+      });
+    });
 
-      catalog.replaceItems(items);
-      expect(catalog.items.length).toEqual(1);
-
-      items.push({
+    it("adds new catalog item", () => {
+      eventHandlers.add({
         apiVersion: "entity.k8slens.dev/v1alpha1",
         kind: "KubernetesCluster",
         metadata: {
@@ -126,52 +129,40 @@ describe("CatalogEntityRegistry", () => {
         spec: {},
       });
 
-      catalog.replaceItems(items);
-      expect(catalog.items.length).toEqual(2);
+      expect(entityRegistry.entities.get().length).toEqual(2);
     });
 
     it("updates existing items", () => {
-      const catalog = new TestCatalogEntityRegistry({
-        categoryRegistry: catalogCategoryRegistry,
-        initSync: noop,
-      });
-      const items = [{
-        apiVersion: "entity.k8slens.dev/v1alpha1",
-        kind: "KubernetesCluster",
-        metadata: {
-          uid: "123",
-          name: "foobar",
-          source: "test",
-          labels: {},
-        },
+      expect(entityRegistry.entities.get()[0].status.phase).toEqual("disconnected");
+
+      eventHandlers.update("123", {
         status: {
-          phase: "disconnected",
+          phase: "connected",
         },
-        spec: {},
-      }];
-
-      catalog.replaceItems(items);
-      expect(catalog.items.length).toEqual(1);
-      expect(catalog.items[0].status.phase).toEqual("disconnected");
-
-      items[0].status.phase = "connected";
-
-      catalog.replaceItems(items);
-      expect(catalog.items.length).toEqual(1);
-      expect(catalog.items[0].status.phase).toEqual("connected");
+      });
+      expect(entityRegistry.entities.get().length).toEqual(1);
+      expect(entityRegistry.entities.get()[0].status.phase).toEqual("connected");
     });
 
     it("updates activeEntity", () => {
-      const catalog = new TestCatalogEntityRegistry({
-        categoryRegistry: catalogCategoryRegistry,
-        initSync: noop,
+      entityRegistry.setActiveEntity(entityRegistry.entities.get()[0]);
+      expect(entityRegistry.activeEntity.get().status.phase).toEqual("disconnected");
+
+      eventHandlers.update("123", {
+        status: {
+          phase: "connected",
+        },
       });
-      const items = [{
+      expect(entityRegistry.activeEntity.get().status.phase).toEqual("connected");
+    });
+
+    it("removes deleted items", () => {
+      eventHandlers.add({
         apiVersion: "entity.k8slens.dev/v1alpha1",
         kind: "KubernetesCluster",
         metadata: {
-          uid: "123",
-          name: "foobar",
+          uid: "456",
+          name: "barbaz",
           source: "test",
           labels: {},
         },
@@ -179,110 +170,30 @@ describe("CatalogEntityRegistry", () => {
           phase: "disconnected",
         },
         spec: {},
-      }];
-
-      catalog.replaceItems(items);
-      catalog.activeEntity = catalog.items[0];
-      expect(catalog.activeEntity.status.phase).toEqual("disconnected");
-
-      items[0].status.phase = "connected";
-      catalog.replaceItems(items);
-      expect(catalog.activeEntity.status.phase).toEqual("connected");
-    });
-
-    it("removes deleted items", () => {
-      const catalog = new TestCatalogEntityRegistry({
-        categoryRegistry: catalogCategoryRegistry,
-        initSync: noop,
       });
-      const items = [
-        {
-          apiVersion: "entity.k8slens.dev/v1alpha1",
-          kind: "KubernetesCluster",
-          metadata: {
-            uid: "123",
-            name: "foobar",
-            source: "test",
-            labels: {},
-          },
-          status: {
-            phase: "disconnected",
-          },
-          spec: {},
-        },
-        {
-          apiVersion: "entity.k8slens.dev/v1alpha1",
-          kind: "KubernetesCluster",
-          metadata: {
-            uid: "456",
-            name: "barbaz",
-            source: "test",
-            labels: {},
-          },
-          status: {
-            phase: "disconnected",
-          },
-          spec: {},
-        },
-      ];
-
-      catalog.replaceItems(items);
-      items.splice(0, 1);
-      catalog.replaceItems(items);
-      expect(catalog.items.length).toEqual(1);
-      expect(catalog.items[0].metadata.uid).toEqual("456");
+      eventHandlers.delete("123");
+      expect(entityRegistry.entities.get().length).toEqual(1);
+      expect(entityRegistry.entities.get()[0].metadata.uid).toEqual("456");
     });
   });
 
   describe("items", () => {
     it("does not return items without matching category", () => {
-      const catalog = new TestCatalogEntityRegistry({
-        categoryRegistry: catalogCategoryRegistry,
-        initSync: noop,
+      eventHandlers.add({
+        apiVersion: "entity.k8slens.dev/v1alpha1",
+        kind: "KubernetesCluster",
+        metadata: {
+          uid: "123",
+          name: "foobar",
+          source: "test",
+          labels: {},
+        },
+        status: {
+          phase: "disconnected",
+        },
+        spec: {},
       });
-      const items = [
-        {
-          apiVersion: "entity.k8slens.dev/v1alpha1",
-          kind: "KubernetesCluster",
-          metadata: {
-            uid: "123",
-            name: "foobar",
-            source: "test",
-            labels: {},
-          },
-          status: {
-            phase: "disconnected",
-          },
-          spec: {},
-        },
-        {
-          apiVersion: "entity.k8slens.dev/v1alpha1",
-          kind: "FooBar",
-          metadata: {
-            uid: "456",
-            name: "barbaz",
-            source: "test",
-            labels: {},
-          },
-          status: {
-            phase: "disconnected",
-          },
-          spec: {},
-        },
-      ];
-
-      catalog.replaceItems(items);
-      expect(catalog.items.length).toBe(1);
-    });
-  });
-
-  it("does return items after matching category is added", () => {
-    const catalog = new TestCatalogEntityRegistry({
-      categoryRegistry: catalogCategoryRegistry,
-      initSync: noop,
-    });
-    const items = [
-      {
+      eventHandlers.add({
         apiVersion: "entity.k8slens.dev/v1alpha1",
         kind: "FooBar",
         metadata: {
@@ -295,35 +206,49 @@ describe("CatalogEntityRegistry", () => {
           phase: "disconnected",
         },
         spec: {},
-      },
-    ];
+      });
 
-    catalog.replaceItems(items);
-    catalogCategoryRegistry.add(new FooBarCategory());
-    expect(catalog.items.length).toBe(1);
+      expect(entityRegistry.entities.get().length).toBe(1);
+    });
+  });
+
+  it("does return items after matching category is added", () => {
+    eventHandlers.add({
+      apiVersion: "entity.k8slens.dev/v1alpha1",
+      kind: "FooBar",
+      metadata: {
+        uid: "456",
+        name: "barbaz",
+        source: "test",
+        labels: {},
+      },
+      status: {
+        phase: "disconnected",
+      },
+      spec: {},
+    });
+
+    categoryRegistry.add(new FooBarCategory());
+    expect(entityRegistry.entities.get().length).toBe(1);
   });
 
   it("does not return items that are filtered out", () => {
-    const source = observable.array([entity, entity2, entitykc]);
-    const catalog = new TestCatalogEntityRegistry({
-      categoryRegistry: catalogCategoryRegistry,
-      initSync: noop,
-    });
+    eventHandlers.add(entity);
+    eventHandlers.add(entity2);
+    eventHandlers.add(entitykc);
 
-    catalog.replaceItems(source);
+    expect(entityRegistry.entities.get().length).toBe(3);
+    expect(entityRegistry.filteredEntities.get().length).toBe(3);
 
-    expect(catalog.items.length).toBe(3);
-    expect(catalog.filteredItems.length).toBe(3);
+    const d = entityRegistry.addCatalogFilter(entity => entity.kind === KubernetesCluster.kind);
 
-    const d = catalog.addCatalogFilter(entity => entity.kind === KubernetesCluster.kind);
-
-    expect(catalog.items.length).toBe(3);
-    expect(catalog.filteredItems.length).toBe(1);
+    expect(entityRegistry.entities.get().length).toBe(3);
+    expect(entityRegistry.filteredEntities.get().length).toBe(1);
 
     // Remove filter
     d();
 
-    expect(catalog.items.length).toBe(3);
-    expect(catalog.filteredItems.length).toBe(3);
+    expect(entityRegistry.entities.get().length).toBe(3);
+    expect(entityRegistry.filteredEntities.get().length).toBe(3);
   });
 });

@@ -23,7 +23,6 @@ import { KubeObjectMeta } from "../kube-object-meta";
 import { makeObservable, observable, reaction } from "mobx";
 import { podMetricTabs, PodCharts } from "../+workloads-pods/pod-charts";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ResourceMetrics } from "../resource-metrics";
 import { boundMethod } from "autobind-decorator";
 import { getDetailsUrl } from "../kube-detail-params";
@@ -33,14 +32,16 @@ import type { KubeObjectStore } from "../../../common/k8s-api/kube-object.store"
 import type { KubeObject } from "../../../common/k8s-api/kube-object";
 import type { Disposer } from "../../../common/utils";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import kubeWatchApiInjectable
-  from "../../kube-watch-api/kube-watch-api.injectable";
+import kubeWatchApiInjectable from "../../kube-watch-api/kube-watch-api.injectable";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Props extends KubeObjectDetailsProps<Job> {
 }
 
 interface Dependencies {
-  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer
+  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer;
+  shouldDisplayMetric: ShouldDisplayMetric;
 }
 
 @observer
@@ -71,7 +72,7 @@ class NonInjectedJobDetails extends React.Component<Props & Dependencies> {
   }
 
   render() {
-    const { object: job } = this.props;
+    const { object: job, shouldDisplayMetric } = this.props;
 
     if (!job) {
       return null;
@@ -89,11 +90,10 @@ class NonInjectedJobDetails extends React.Component<Props & Dependencies> {
     const childPods = jobStore.getChildPods(job);
     const ownerRefs = job.getOwnerRefs();
     const condition = job.getCondition();
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.Job);
 
     return (
       <div className="JobDetails">
-        {!isMetricHidden && (
+        {shouldDisplayMetric(ClusterMetricsResourceType.Job) && (
           <ResourceMetrics
             loader={this.loadMetrics}
             tabs={podMetricTabs} object={job} params={{ metrics: this.metrics }}
@@ -165,14 +165,11 @@ class NonInjectedJobDetails extends React.Component<Props & Dependencies> {
   }
 }
 
-export const JobDetails = withInjectables<Dependencies, Props>(
-  NonInjectedJobDetails,
-
-  {
-    getProps: (di, props) => ({
-      subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
-      ...props,
-    }),
-  },
-);
+export const JobDetails = withInjectables<Dependencies, Props>(NonInjectedJobDetails, {
+  getProps: (di, props) => ({
+    ...props,
+    subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
+    shouldDisplayMetric: di.inject(shouldDisplayMetricInjectable),
+  }),
+});
 

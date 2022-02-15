@@ -6,7 +6,7 @@
 import { BrowserWindow } from "electron";
 import { triggerWindowActionInjectionToken, WindowAction } from "../../../common/ipc/window/trigger-action.token";
 import type { LensLogger } from "../../../common/logger";
-import baseLoggerInjectable from "../../../common/logger/base-logger.injectable";
+import { baseLoggerInjectionToken } from "../../../common/logger/base-logger.token";
 import { implWithOn } from "../impl-channel";
 
 interface Dependencies {
@@ -59,7 +59,7 @@ const handleWindowAction = ({ logger }: Dependencies) => (
 
 const triggerWindowActionInjectable = implWithOn(triggerWindowActionInjectionToken, (di) => (
   handleWindowAction({
-    logger: di.inject(baseLoggerInjectable),
+    logger: di.inject(baseLoggerInjectionToken),
   })
 ));
 

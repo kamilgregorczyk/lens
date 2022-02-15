@@ -19,7 +19,6 @@ import { NodeCharts } from "./node-charts";
 import { makeObservable, observable, reaction } from "mobx";
 import { PodDetailsList } from "../+workloads-pods/pod-details-list";
 import { KubeObjectMeta } from "../kube-object-meta";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
 import { NodeDetailsResources } from "./details-resources";
 import { DrawerTitle } from "../drawer/drawer-title";
@@ -28,14 +27,16 @@ import logger from "../../../common/logger";
 import type { KubeObjectStore } from "../../../common/k8s-api/kube-object.store";
 import type { KubeObject } from "../../../common/k8s-api/kube-object";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import kubeWatchApiInjectable
-  from "../../kube-watch-api/kube-watch-api.injectable";
+import kubeWatchApiInjectable from "../../kube-watch-api/kube-watch-api.injectable";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Props extends KubeObjectDetailsProps<Node> {
 }
 
 interface Dependencies {
-  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer
+  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer;
+  shouldDisplayMetic: ShouldDisplayMetric;
 }
 
 @observer
@@ -67,7 +68,7 @@ class NonInjectedNodeDetails extends React.Component<Props & Dependencies> {
   }
 
   render() {
-    const { object: node } = this.props;
+    const { object: node, shouldDisplayMetic } = this.props;
 
     if (!node) {
       return null;
@@ -91,11 +92,10 @@ class NonInjectedNodeDetails extends React.Component<Props & Dependencies> {
       "Disk",
       "Pods",
     ];
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.Node);
 
     return (
       <div className="NodeDetails">
-        {!isMetricHidden && podsStore.isLoaded && (
+        {shouldDisplayMetic(ClusterMetricsResourceType.Node) && podsStore.isLoaded && (
           <ResourceMetrics
             loader={this.loadMetrics}
             tabs={metricTabs} object={node} params={{ metrics }}
@@ -184,14 +184,11 @@ class NonInjectedNodeDetails extends React.Component<Props & Dependencies> {
   }
 }
 
-export const NodeDetails = withInjectables<Dependencies, Props>(
-  NonInjectedNodeDetails,
-
-  {
-    getProps: (di, props) => ({
-      subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
-      ...props,
-    }),
-  },
-);
+export const NodeDetails = withInjectables<Dependencies, Props>(NonInjectedNodeDetails, {
+  getProps: (di, props) => ({
+    subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
+    shouldDisplayMetic: di.inject(shouldDisplayMetricInjectable),
+    ...props,
+  }),
+});
 

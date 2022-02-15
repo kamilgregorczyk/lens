@@ -2,19 +2,33 @@
  * Copyright (c) OpenLens Authors. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import type { Injectable } from "@ogre-tools/injectable";
+import type { Injectable, InjectionToken } from "@ogre-tools/injectable";
 import { getLegacyGlobalDiForExtensionApi } from "./legacy-global-di-for-extension-api";
 
 type TentativeTuple<T> = T extends object ? [T] : [undefined?];
 
-export const asLegacyGlobalObjectForExtensionApi = <
+export function asLegacyGlobalObjectForExtensionApi<
   TInjectable extends Injectable<unknown, unknown, TInstantiationParameter>,
   TInstantiationParameter,
 >(
-    injectableKey: TInjectable,
-    ...instantiationParameter: TentativeTuple<TInstantiationParameter>
-  ) =>
-  new Proxy(
+  injectableKey: TInjectable,
+  ...instantiationParameter: TentativeTuple<TInstantiationParameter>
+): ReturnType<TInjectable["instantiate"]>;
+export function asLegacyGlobalObjectForExtensionApi<TInjectionToken extends InjectionToken<unknown, unknown>>(
+      injectionToken: TInjectionToken,
+      ...instantiationParameter: TentativeTuple<
+        TInjectionToken["instantiationParameter"]
+      >
+    ): TInjectionToken["template"];
+
+export function asLegacyGlobalObjectForExtensionApi<
+  TInjectable extends Injectable<unknown, unknown, TInstantiationParameter>,
+  TInstantiationParameter,
+>(
+  injectableKey: TInjectable,
+  ...instantiationParameter: TentativeTuple<TInstantiationParameter>
+): ReturnType<TInjectable["instantiate"]> {
+  return new Proxy(
     {},
     {
       get(target, propertyName) {
@@ -39,3 +53,4 @@ export const asLegacyGlobalObjectForExtensionApi = <
       },
     },
   ) as ReturnType<TInjectable["instantiate"]>;
+}

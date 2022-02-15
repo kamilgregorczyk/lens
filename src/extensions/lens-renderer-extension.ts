@@ -6,10 +6,9 @@
 import type * as registries from "./registries";
 import { Disposers, LensExtension } from "./lens-extension";
 import { getExtensionPageUrl } from "./registries/page-registry";
-import type { CatalogEntity } from "../common/catalog";
+import type { CatalogEntity } from "../common/catalog/entity/entity";
 import type { Disposer } from "../common/utils";
-import { catalogEntityRegistry, EntityFilter } from "../renderer/api/catalog-entity-registry";
-import { catalogCategoryRegistry, CategoryFilter } from "../renderer/api/catalog-category-registry";
+import type { EntityFilter } from "../renderer/catalog/entity/registry";
 import type { TopBarRegistration } from "../renderer/components/layout/top-bar/top-bar-registration";
 import type { KubernetesCluster } from "../common/catalog-entities";
 import type { WelcomeMenuRegistration } from "../renderer/components/+welcome/welcome-menu-items/welcome-menu-registration";
@@ -21,6 +20,7 @@ import type { CustomCategoryViewRegistration } from "../renderer/components/+cat
 import type { StatusBarRegistration } from "../renderer/components/status-bar/status-bar-registration";
 import type { KubeObjectMenuRegistration } from "../renderer/components/kube-object-menu/dependencies/kube-object-menu-items/kube-object-menu-registration";
 import { extensionDependencies, LensRendererExtensionDependencies } from "./lens-extension-set-dependencies";
+import type { CategoryFilter } from "../renderer/catalog/category/registry";
 
 export class LensRendererExtension extends LensExtension<LensRendererExtensionDependencies> {
   globalPages: registries.PageRegistration[] = [];
@@ -72,7 +72,7 @@ export class LensRendererExtension extends LensExtension<LensRendererExtensionDe
    * @returns A function to clean up the filter
    */
   addCatalogFilter(fn: EntityFilter): Disposer {
-    const dispose = catalogEntityRegistry.addCatalogFilter(fn);
+    const dispose = this[extensionDependencies].addEntityFilter(fn);
 
     this[Disposers].push(dispose);
 
@@ -85,7 +85,7 @@ export class LensRendererExtension extends LensExtension<LensRendererExtensionDe
    * @returns A function to clean up the filter
    */
   addCatalogCategoryFilter(fn: CategoryFilter): Disposer {
-    const dispose = catalogCategoryRegistry.addCatalogCategoryFilter(fn);
+    const dispose = this[extensionDependencies].addCategoryFilter(fn);
 
     this[Disposers].push(dispose);
 

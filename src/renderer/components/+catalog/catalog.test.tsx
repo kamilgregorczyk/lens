@@ -9,21 +9,21 @@ import userEvent from "@testing-library/user-event";
 import { Catalog } from "./catalog";
 import { createMemoryHistory } from "history";
 import { mockWindow } from "../../../../__mocks__/windowMock";
-import { CatalogCategoryRegistry, CatalogEntity, CatalogEntityActionContext, CatalogEntityData } from "../../../common/catalog";
-import { CatalogEntityRegistry } from "../../api/catalog-entity-registry";
+import type { CatalogEntityRegistry } from "../../catalog/entity/registry";
 import { CatalogEntityDetailRegistry } from "../../../extensions/registries";
 import type { CatalogEntityStore } from "./catalog-entity-store/catalog-entity.store";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import type { DependencyInjectionContainer } from "@ogre-tools/injectable";
 import catalogEntityStoreInjectable from "./catalog-entity-store/catalog-entity-store.injectable";
-import catalogEntityRegistryInjectable from "../../catalog/entity-registry.injectable";
+import catalogEntityRegistryInjectable from "../../catalog/entity/registry.injectable";
 import type { DiRender } from "../test-utils/renderFor";
 import { renderFor } from "../test-utils/renderFor";
 import { ThemeStore } from "../../theme.store";
-import { UserStore } from "../../../common/user-preferences";
 import mockFs from "mock-fs";
 import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
 import { noop } from "../../utils";
+import { CatalogEntity, type CatalogEntityData, type CatalogEntityActionContext } from "../../../common/catalog/entity/entity";
+import catalogEntitySyncerInjectable from "../../catalog/entity/entity-syncer.injectable";
 
 mockWindow();
 jest.mock("electron", () => ({
@@ -103,29 +103,22 @@ describe("<Catalog />", () => {
     di = getDiForUnitTesting({ doGeneralOverrides: true });
 
     di.override(directoryForUserDataInjectable, () => "some-directory-for-user-data");
+    di.override(catalogEntitySyncerInjectable, () => noop);
 
     await di.runSetups();
 
     mockFs();
 
-    UserStore.createInstance();
     ThemeStore.createInstance();
     CatalogEntityDetailRegistry.createInstance();
 
     render = renderFor(di);
 
-    catalogEntityRegistry = new CatalogEntityRegistry({
-      categoryRegistry: new CatalogCategoryRegistry(),
-      initSync: noop,
-    });
-
-    di.override(catalogEntityRegistryInjectable, () => catalogEntityRegistry);
-
+    catalogEntityRegistry = di.inject(catalogEntityRegistryInjectable);
     catalogEntityStore = di.inject(catalogEntityStoreInjectable);
   });
 
   afterEach(() => {
-    UserStore.resetInstance();
     ThemeStore.resetInstance();
     CatalogEntityDetailRegistry.resetInstance();
 

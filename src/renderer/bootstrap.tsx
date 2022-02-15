@@ -31,11 +31,11 @@ import type { DependencyInjectionContainer } from "@ogre-tools/injectable";
 import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
 import extensionDiscoveryInjectable from "../extensions/extension-discovery/extension-discovery.injectable";
 import extensionInstallationStateStoreInjectable from "../extensions/extension-installation-state-store/extension-installation-state-store.injectable";
-import clusterStoreInjectable from "../common/clusters/cluster-store.injectable";
-import userStoreInjectable from "../common/user-preferences/user-store.injectable";
-import initRootFrameInjectable from "./frames/root-frame/init-root-frame/init-root-frame.injectable";
-import initClusterFrameInjectable from "./frames/cluster-frame/init-cluster-frame/init-cluster-frame.injectable";
+import initRootFrameInjectable from "./frames/root-frame/init.injectable";
+import initClusterFrameInjectable from "./frames/cluster-frame/init.injectable";
 import commandOverlayInjectable from "./components/command-palette/command-overlay.injectable";
+import userStoreInjectable from "./user-preferences/store.injectable";
+import clusterStoreInjectable from "./clusters/store.injectable";
 
 if (process.isMainFrame) {
   SentryInit();
@@ -91,9 +91,6 @@ export async function bootstrap(di: DependencyInjectionContainer) {
   });
 
   const extensionLoader = di.inject(extensionLoaderInjectable);
-
-  logger.info(`${logPrefix} initializing IpcRendererListeners`);
-  initializers.initIpcRendererListeners(extensionLoader);
 
   extensionLoader.init();
 

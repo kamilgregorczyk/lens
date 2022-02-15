@@ -3,8 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import * as uuid from "uuid";
-import { tuple, Tuple } from "../utils";
+import type { Tuple } from "../utils";
+
+export type HotbarItems = Tuple<HotbarItem | null, typeof defaultHotbarCells>;
 
 export interface HotbarItem {
   entity: {
@@ -17,12 +18,10 @@ export interface HotbarItem {
   }
 }
 
-export type Hotbar = Required<CreateHotbarData>;
-
 export interface CreateHotbarData {
   id?: string;
   name: string;
-  items?: Tuple<HotbarItem | null, typeof defaultHotbarCells>;
+  items?: HotbarItems;
 }
 
 export interface CreateHotbarOptions {
@@ -30,11 +29,3 @@ export interface CreateHotbarOptions {
 }
 
 export const defaultHotbarCells = 12; // Number is chosen to easy hit any item with keyboard
-
-export function getEmptyHotbar(name: string, id: string = uuid.v4()): Hotbar {
-  return {
-    id,
-    items: tuple.filled(defaultHotbarCells, null),
-    name,
-  };
-}

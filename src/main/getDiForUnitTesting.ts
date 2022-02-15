@@ -8,12 +8,13 @@ import { memoize, kebabCase } from "lodash/fp";
 import { createContainer } from "@ogre-tools/injectable";
 
 import { setLegacyGlobalDiForExtensionApi } from "../extensions/di-legacy-globals/legacy-global-di-for-extension-api";
-import getElectronAppPathInjectable from "./app-paths/get-electron-app-path/get-electron-app-path.injectable";
-import setElectronAppPathInjectable from "./app-paths/set-electron-app-path/set-electron-app-path.injectable";
 import appNameInjectable from "./electron/app-name.injectable";
-import registerChannelInjectable from "./app-paths/register-channel/register-channel.injectable";
 import writeJsonFileInjectable from "../common/fs/write-json-file.injectable";
 import readJsonFileInjectable from "../common/fs/read-json-file.injectable";
+import type { LensLogger } from "../common/logger";
+import baseLoggerInjectable from "./logger/base-logger.injectable";
+import getAppPathInjectable from "./electron/get-app-path.injectable";
+import setAppPathInjectable from "./electron/set-app-path.injectable";
 
 export const getDiForUnitTesting = (
   { doGeneralOverrides } = { doGeneralOverrides: false },
@@ -36,14 +37,14 @@ export const getDiForUnitTesting = (
   di.preventSideEffects();
 
   if (doGeneralOverrides) {
+    di.override(baseLoggerInjectable, () => console as LensLogger);
     di.override(
-      getElectronAppPathInjectable,
+      getAppPathInjectable,
       () => (name: string) => `some-electron-app-path-for-${kebabCase(name)}`,
     );
 
-    di.override(setElectronAppPathInjectable, () => () => undefined);
+    di.override(setAppPathInjectable, () => () => undefined);
     di.override(appNameInjectable, () => "some-electron-app-name");
-    di.override(registerChannelInjectable, () => () => undefined);
 
     di.override(writeJsonFileInjectable, () => () => {
       throw new Error("Tried to write JSON file to file system without specifying explicit override.");

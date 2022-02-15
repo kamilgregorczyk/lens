@@ -4,6 +4,8 @@
  */
 
 import type { RequestDirectory } from "../common/file-system-provisioner/request-directory.injectable";
+import type { AddCategoryFilter } from "../renderer/catalog/category/add-filter.injectable";
+import type { AddEntityFilter } from "../renderer/catalog/entity/add-filter.injectable";
 
 // This symbol encapsulates setting of dependencies to only happen locally in Lens Core
 // and not by e.g. authors of extensions
@@ -15,6 +17,8 @@ export interface LensExtensionDependencies {
 
 export interface LensRendererExtensionDependencies extends LensExtensionDependencies {
   navigate: (url: string) => void;
+  addEntityFilter: AddEntityFilter;
+  addCategoryFilter: AddCategoryFilter;
 }
 
 export interface LensMainExtensionDependencies extends LensExtensionDependencies {

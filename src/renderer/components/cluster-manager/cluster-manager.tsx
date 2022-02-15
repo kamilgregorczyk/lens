@@ -21,22 +21,44 @@ import { Welcome } from "../+welcome";
 import * as routes from "../../../common/routes";
 import { DeleteClusterDialog } from "../delete-cluster-dialog";
 import { reaction } from "mobx";
-import { navigation } from "../../navigation";
-import { setEntityOnRouteMatch } from "../../api/helpers/general-active-sync";
 import { catalogURL, getPreviousTabUrl } from "../../../common/routes";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import { TopBar } from "../layout/top-bar/top-bar";
 import catalogPreviousActiveTabStorageInjectable from "../+catalog/catalog-previous-active-tab-storage/catalog-previous-active-tab-storage.injectable";
+import type { CatalogEntityRegistry } from "../../catalog/entity/registry";
+import type { CatalogCategoryRegistry } from "../../catalog/category/registry";
+import type { ObservableHistory } from "mobx-observable-history";
+import { isActiveRoute } from "../../navigation";
+import catalogCategoryRegistryInjectable from "../../catalog/category/registry.injectable";
+import catalogEntityRegistryInjectable from "../../catalog/entity/registry.injectable";
+import observableHistoryInjectable from "../../navigation/observable-history.injectable";
 
 interface Dependencies {
-  catalogPreviousActiveTabStorage: { get: () => string }
+  catalogPreviousActiveTabStorage: { get: () => string };
+  entityRegistry: CatalogEntityRegistry;
+  categoryRegistry: CatalogCategoryRegistry;
+  navigation: ObservableHistory;
 }
 
 @observer
 class NonInjectedClusterManager extends React.Component<Dependencies> {
   componentDidMount() {
     disposeOnUnmount(this, [
-      reaction(() => navigation.location, () => setEntityOnRouteMatch(), { fireImmediately: true }),
+      reaction(
+        () => [this.props.navigation.location, this.props.entityRegistry.entities.get().length > 0] as const,
+        ([, hasEntities]) => {
+          if (hasEntities) {
+            const entities = this.props.entityRegistry.getItemsForCategory(this.props.categoryRegistry.getByName("General"));
+            const activeEntity = entities.find(entity => isActiveRoute(entity.spec.path));
+
+            if (activeEntity) {
+              this.props.entityRegistry.setActiveEntity(activeEntity);
+            }
+          }
+        },
+        {
+          fireImmediately: true,
+        }),
     ]);
   }
 
@@ -81,5 +103,8 @@ class NonInjectedClusterManager extends React.Component<Dependencies> {
 export const ClusterManager = withInjectables<Dependencies>(NonInjectedClusterManager, {
   getProps: di => ({
     catalogPreviousActiveTabStorage: di.inject(catalogPreviousActiveTabStorageInjectable),
+    categoryRegistry: di.inject(catalogCategoryRegistryInjectable),
+    entityRegistry: di.inject(catalogEntityRegistryInjectable),
+    navigation: di.inject(observableHistoryInjectable),
   }),
 });

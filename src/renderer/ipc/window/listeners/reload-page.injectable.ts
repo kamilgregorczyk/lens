@@ -11,11 +11,12 @@ const listener = () => {
   location.reload();
 };
 
-const initReloadPageListenerInjectable = getInjectable({
-  instantiate: (di) => () => {
+const reloadPageListenerInjectable = getInjectable({
+  setup: (di) => {
     setupListener(di, emitWindowReloadPageInjectionToken, listener);
   },
+  instantiate: () => undefined,
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default initReloadPageListenerInjectable;
+export default reloadPageListenerInjectable;

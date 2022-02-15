@@ -3,24 +3,17 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { LocationDescriptor } from "history";
-import { createPath } from "history";
 import { matchPath, RouteProps } from "react-router";
 import { navigation } from "./history";
 import { ClusterViewRouteParams, clusterViewRoute } from "../../common/routes";
 import { PageParam, PageParamInit } from "./page-param";
+import { asLegacyGlobalFunctionForExtensionApi } from "../../extensions/di-legacy-globals/as-legacy-global-function-for-extension-api";
+import navigateInjectable from "./navigate.injectable";
 
-export function navigate(location: LocationDescriptor) {
-  const currentLocation = createPath(navigation.location);
-
-  navigation.push(location);
-
-  const newLocation = createPath(navigation.location);
-
-  if (currentLocation === newLocation) {
-    navigation.goBack(); // prevent sequences of same url in history
-  }
-}
+/**
+ * @deprecated use di.inject(navigateInjectable) instead
+ */
+export const navigate = asLegacyGlobalFunctionForExtensionApi(navigateInjectable);
 
 export function navigateWithoutHistoryChange(location: Partial<Location>) {
   navigation.merge(location, true);

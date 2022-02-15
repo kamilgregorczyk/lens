@@ -8,18 +8,25 @@ import { isNull } from "lodash";
 import path from "path";
 import * as uuid from "uuid";
 import type { ClusterStoreModel } from "../../../common/clusters/store";
-import { defaultHotbarCells, getEmptyHotbar, Hotbar, HotbarItem } from "../../../common/hotbars/hotbar-types";
+import { defaultHotbarCells, HotbarItem, HotbarItems } from "../../../common/hotbars/hotbar-types";
 import { catalogEntity } from "../../catalog-sources/general";
 import type { MigrationDeclaration } from "../../utils/join-migrations";
 import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
 import { generateNewIdFor } from "../../../common/utils/generate-new-id-for";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
+import { tuple } from "../../../common/utils";
 
 interface Pre500WorkspaceStoreModel {
   workspaces: {
     id: string;
     name: string;
   }[];
+}
+
+interface Pre500Beta10Hotbar {
+  id: string;
+  name: string;
+  items: HotbarItems;
 }
 
 interface PartialHotbar {
@@ -32,11 +39,19 @@ interface Dependencies {
   userDataPath: string;
 }
 
+function getEmptyHotbar(name: string): Pre500Beta10Hotbar {
+  return {
+    id: uuid.v4(),
+    name,
+    items: tuple.filled(defaultHotbarCells, null),
+  };
+}
+
 const v500Beta10Migration = ({ userDataPath }: Dependencies): MigrationDeclaration => ({
   version: "5.0.0-beta.10",
   run(log, store) {
     const rawHotbars = store.get("hotbars");
-    const hotbars: Hotbar[] = Array.isArray(rawHotbars) ? rawHotbars.filter(h => h && typeof h === "object") : [];
+    const hotbars: Pre500Beta10Hotbar[] = Array.isArray(rawHotbars) ? rawHotbars.filter(h => h && typeof h === "object") : [];
 
     // Hotbars might be empty, if some of the previous migrations weren't run
     if (hotbars.length === 0) {
@@ -108,7 +123,7 @@ const v500Beta10Migration = ({ userDataPath }: Dependencies): MigrationDeclarati
           hotbar.items.push(null);
         }
 
-        hotbars.push(hotbar as Hotbar);
+        hotbars.push(hotbar as Pre500Beta10Hotbar);
       }
 
       /**

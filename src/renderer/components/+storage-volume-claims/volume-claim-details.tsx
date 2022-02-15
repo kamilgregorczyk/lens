@@ -16,21 +16,27 @@ import { ResourceMetrics } from "../resource-metrics";
 import { VolumeClaimDiskChart } from "./volume-claim-disk-chart";
 import type { KubeObjectDetailsProps } from "../kube-object-details";
 import { getMetricsForPvc, IPvcMetrics, PersistentVolumeClaim } from "../../../common/k8s-api/endpoints";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
 import { KubeObjectMeta } from "../kube-object-meta";
 import { getDetailsUrl } from "../kube-detail-params";
 import { boundMethod } from "../../utils";
 import logger from "../../../common/logger";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import { withInjectables } from "@ogre-tools/injectable-react";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Props extends KubeObjectDetailsProps<PersistentVolumeClaim> {
 }
 
+interface Dependencies {
+  shouldDisplayMetric: ShouldDisplayMetric;
+}
+
 @observer
-export class PersistentVolumeClaimDetails extends React.Component<Props> {
+class NonInjectedPersistentVolumeClaimDetails extends React.Component<Props & Dependencies> {
   @observable metrics: IPvcMetrics = null;
 
-  constructor(props: Props) {
+  constructor(props: Props & Dependencies) {
     super(props);
     makeObservable(this);
   }
@@ -51,7 +57,7 @@ export class PersistentVolumeClaimDetails extends React.Component<Props> {
   }
 
   render() {
-    const { object: volumeClaim } = this.props;
+    const { object: volumeClaim, shouldDisplayMetric } = this.props;
 
     if (!volumeClaim) {
       return null;
@@ -69,11 +75,10 @@ export class PersistentVolumeClaimDetails extends React.Component<Props> {
     const metricTabs = [
       "Disk",
     ];
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.VolumeClaim);
 
     return (
       <div className="PersistentVolumeClaimDetails">
-        {!isMetricHidden && (
+        {shouldDisplayMetric(ClusterMetricsResourceType.VolumeClaim) && (
           <ResourceMetrics
             loader={this.loadMetrics}
             tabs={metricTabs} object={volumeClaim} params={{ metrics }}
@@ -121,3 +126,10 @@ export class PersistentVolumeClaimDetails extends React.Component<Props> {
     );
   }
 }
+
+export const PersistentVolumeClaimDetails = withInjectables<Dependencies, Props>(NonInjectedPersistentVolumeClaimDetails, {
+  getProps: (di, props) => ({
+    ...props,
+    shouldDisplayMetric: di.inject(shouldDisplayMetricInjectable),
+  }),
+});

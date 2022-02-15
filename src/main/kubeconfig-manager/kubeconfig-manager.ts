@@ -5,15 +5,15 @@
 
 import type { KubeConfig } from "@kubernetes/client-node";
 import type { Cluster } from "../../common/cluster/cluster";
-import type { ContextHandler } from "../context-handler/context-handler";
 import path from "path";
 import fs from "fs-extra";
 import { dumpConfigYaml } from "../../common/kube-helpers";
 import logger from "../logger";
-import { LensProxy } from "../lens-proxy";
+import type { LensProxyPort } from "../lens-proxy/port.injectable";
 
 interface Dependencies {
-  directoryForTemp: string
+  readonly directoryForTemp: string
+  readonly proxyPort: LensProxyPort;
 }
 
 export class KubeconfigManager {
@@ -26,10 +26,11 @@ export class KubeconfigManager {
    */
   protected tempFilePath: string | null | undefined = null;
 
-  protected contextHandler: ContextHandler;
+  get contextHandler() {
+    return this.cluster.contextHandler;
+  }
 
-  constructor(private dependencies: Dependencies, protected cluster: Cluster) {
-    this.contextHandler = cluster.contextHandler;
+  constructor(private readonly dependencies: Dependencies, protected cluster: Cluster) {
   }
 
   /**
@@ -79,7 +80,7 @@ export class KubeconfigManager {
   }
 
   get resolveProxyUrl() {
-    return `http://127.0.0.1:${LensProxy.getInstance().port}/${this.cluster.id}`;
+    return `http://127.0.0.1:${this.dependencies.proxyPort.get()}/${this.cluster.id}`;
   }
 
   /**

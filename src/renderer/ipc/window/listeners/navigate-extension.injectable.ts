@@ -6,7 +6,7 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { emitNavigateExtensionInjectionToken, NavigateExtension } from "../../../../common/ipc/window/navigate-extension.token";
 import type { LensLogger } from "../../../../common/logger";
-import baseLoggerInjectable from "../../../../common/logger/base-logger.injectable";
+import { baseLoggerInjectionToken } from "../../../../common/logger/base-logger.token";
 import type { LensRendererExtension } from "../../../../extensions/lens-renderer-extension";
 import getExtensionByIdInjectable from "../../../extensions/get-by-id.injectable";
 import { setupListener } from "../../setup-listener";
@@ -29,14 +29,15 @@ const listener = ({ logger, getExtensionById }: Dependencies): NavigateExtension
   }
 );
 
-const initNavigateExtensionListenerInjectable = getInjectable({
-  instantiate: (di) => () => {
+const navigateExtensionListenerInjectable = getInjectable({
+  setup: (di) => {
     setupListener(di, emitNavigateExtensionInjectionToken, listener({
-      logger: di.inject(baseLoggerInjectable),
+      logger: di.inject(baseLoggerInjectionToken),
       getExtensionById: di.inject(getExtensionByIdInjectable),
     }));
   },
+  instantiate: () => undefined,
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default initNavigateExtensionListenerInjectable;
+export default navigateExtensionListenerInjectable;

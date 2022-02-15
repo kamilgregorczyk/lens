@@ -20,7 +20,6 @@ import { limitRangeStore } from "../+config-limit-ranges/limit-ranges.store";
 import { ResourceMetrics } from "../resource-metrics";
 import { PodCharts, podMetricTabs } from "../+workloads-pods/pod-charts";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { getDetailsUrl } from "../kube-detail-params";
 import logger from "../../../common/logger";
 import type { KubeObjectStore } from "../../../common/k8s-api/kube-object.store";
@@ -28,12 +27,15 @@ import type { KubeObject } from "../../../common/k8s-api/kube-object";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import kubeWatchApiInjectable
   from "../../kube-watch-api/kube-watch-api.injectable";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Props extends KubeObjectDetailsProps<Namespace> {
 }
 
 interface Dependencies {
-  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer
+  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer;
+  shouldDisplayMetric: ShouldDisplayMetric;
 }
 
 @observer
@@ -76,7 +78,7 @@ class NonInjectedNamespaceDetails extends React.Component<Props & Dependencies> 
   }
 
   render() {
-    const { object: namespace } = this.props;
+    const { object: namespace, shouldDisplayMetric } = this.props;
 
     if (!namespace) {
       return null;
@@ -89,11 +91,10 @@ class NonInjectedNamespaceDetails extends React.Component<Props & Dependencies> 
     }
 
     const status = namespace.getStatus();
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.Namespace);
 
     return (
       <div className="NamespaceDetails">
-        {!isMetricHidden && (
+        {shouldDisplayMetric(ClusterMetricsResourceType.Namespace) && (
           <ResourceMetrics
             loader={this.loadMetrics}
             tabs={podMetricTabs} object={namespace} params={{ metrics: this.metrics }}
@@ -132,14 +133,11 @@ class NonInjectedNamespaceDetails extends React.Component<Props & Dependencies> 
   }
 }
 
-export const NamespaceDetails = withInjectables<Dependencies, Props>(
-  NonInjectedNamespaceDetails,
-
-  {
-    getProps: (di, props) => ({
-      subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
-      ...props,
-    }),
-  },
-);
+export const NamespaceDetails = withInjectables<Dependencies, Props>(NonInjectedNamespaceDetails, {
+  getProps: (di, props) => ({
+    subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
+    shouldDisplayMetric: di.inject(shouldDisplayMetricInjectable),
+    ...props,
+  }),
+});
 

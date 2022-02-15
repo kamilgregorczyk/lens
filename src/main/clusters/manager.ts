@@ -255,7 +255,7 @@ export class ClusterManager {
     }
   }
 
-  getClusterForRequest(req: http.IncomingMessage): Cluster {
+  getClusterForRequest(req: http.IncomingMessage): Cluster | undefined {
     // lens-server is connecting to 127.0.0.1:<port>/<uid>
     if (req.headers.host.startsWith("127.0.0.1")) {
       const clusterId = req.url.split("/")[1];

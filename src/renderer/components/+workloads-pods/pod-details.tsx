@@ -24,20 +24,26 @@ import type { KubeObjectDetailsProps } from "../kube-object-details";
 import { getItemMetrics } from "../../../common/k8s-api/endpoints/metrics.api";
 import { PodCharts, podMetricTabs } from "./pod-charts";
 import { KubeObjectMeta } from "../kube-object-meta";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
 import { getDetailsUrl } from "../kube-detail-params";
 import logger from "../../../common/logger";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import { withInjectables } from "@ogre-tools/injectable-react";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Props extends KubeObjectDetailsProps<Pod> {
 }
 
+interface Dependencies {
+  shouldDisplayMetric: ShouldDisplayMetric;
+}
+
 @observer
-export class PodDetails extends React.Component<Props> {
+class NonInjectedPodDetails extends React.Component<Props & Dependencies> {
   @observable metrics: IPodMetrics;
   @observable containerMetrics: IPodMetrics;
 
-  constructor(props: Props) {
+  constructor(props: Props & Dependencies) {
     super(props);
     makeObservable(this);
   }
@@ -60,7 +66,7 @@ export class PodDetails extends React.Component<Props> {
   }
 
   render() {
-    const { object: pod } = this.props;
+    const { object: pod, shouldDisplayMetric } = this.props;
 
     if (!pod) {
       return null;
@@ -78,11 +84,10 @@ export class PodDetails extends React.Component<Props> {
     const { nodeName } = spec;
     const nodeSelector = pod.getNodeSelectors();
     const volumes = pod.getVolumes();
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.Pod);
 
     return (
       <div className="PodDetails">
-        {!isMetricHidden && (
+        {shouldDisplayMetric(ClusterMetricsResourceType.Pod) && (
           <ResourceMetrics
             loader={this.loadMetrics}
             tabs={podMetricTabs} object={pod} params={{ metrics: this.metrics }}
@@ -244,3 +249,10 @@ export class PodDetails extends React.Component<Props> {
     );
   }
 }
+
+export const PodDetails = withInjectables<Dependencies, Props>(NonInjectedPodDetails, {
+  getProps: (di, props) => ({
+    ...props,
+    shouldDisplayMetric: di.inject(shouldDisplayMetricInjectable),
+  }),
+});

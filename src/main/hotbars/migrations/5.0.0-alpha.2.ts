@@ -4,15 +4,20 @@
  */
 
 // Cleans up a store that had the state related data stored
-import type { Hotbar } from "../../../common/hotbars/hotbar-types";
 import * as uuid from "uuid";
 import type { MigrationDeclaration } from "../../utils/join-migrations";
+
+interface Pre500Alpha2Hotbar {
+  id?: string;
+  name: string;
+  items: any[];
+}
 
 export default {
   version: "5.0.0-alpha.2",
   run(log, store) {
     const rawHotbars = store.get("hotbars");
-    const hotbars: Hotbar[] = Array.isArray(rawHotbars) ? rawHotbars : [];
+    const hotbars: Pre500Alpha2Hotbar[] = Array.isArray(rawHotbars) ? rawHotbars : [];
 
     store.set("hotbars", hotbars.map((hotbar) => ({
       id: uuid.v4(),

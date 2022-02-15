@@ -3,11 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { catalogCategoryRegistry } from "../catalog/catalog-category-registry";
-import { CatalogEntity, CatalogEntityActionContext, CatalogEntityContextMenuContext, CatalogEntityMetadata, CatalogEntityStatus, CatalogCategory, CatalogCategorySpec } from "../catalog";
-import { broadcastMessage } from "../ipc";
-import type { CatalogEntitySpec } from "../catalog/catalog-entity";
-import { IpcRendererNavigationEvents } from "../../renderer/navigation/events";
+import { CatalogEntity, CatalogEntityActionContext, CatalogEntityContextMenuContext, CatalogEntityMetadata, CatalogEntityStatus } from "../catalog/entity/entity";
+import { CatalogCategory, CatalogCategorySpec } from "../catalog/category";
+import type { CatalogEntitySpec } from "../catalog/entity/entity";
 import { requestClusterDisconnection } from "../../renderer/ipc";
 import { activateClusterInjectionToken } from "../ipc/cluster/activate.token";
 import { disconnectClusterInjectionToken } from "../ipc/cluster/disconnect.token";
@@ -98,10 +96,9 @@ export class KubernetesCluster<
       context.menuItems.push({
         title: "Settings",
         icon: "settings",
-        onClick: () => broadcastMessage(
-          IpcRendererNavigationEvents.NAVIGATE_IN_APP,
-          `/entity/${this.getId()}/settings`,
-        ),
+        onClick: () => context.navigate(`/entity/${this.getId()}/settings`, {
+          forceRootFrame: true,
+        }),
       });
     }
 
@@ -122,14 +119,10 @@ export class KubernetesCluster<
         });
         break;
     }
-
-    catalogCategoryRegistry
-      .getCategoryForEntity<KubernetesClusterCategory>(this)
-      ?.emit("contextMenuOpen", this, context);
   }
 }
 
-class KubernetesClusterCategory extends CatalogCategory {
+export class KubernetesClusterCategory extends CatalogCategory {
   public readonly apiVersion = "catalog.k8slens.dev/v1alpha1";
   public readonly kind = "CatalogCategory";
   public metadata = {
@@ -149,7 +142,3 @@ class KubernetesClusterCategory extends CatalogCategory {
     },
   };
 }
-
-export const kubernetesClusterCategory = new KubernetesClusterCategory();
-
-catalogCategoryRegistry.add(kubernetesClusterCategory);

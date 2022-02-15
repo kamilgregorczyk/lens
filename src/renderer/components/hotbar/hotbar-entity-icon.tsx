@@ -6,19 +6,21 @@
 import styles from "./hotbar-entity-icon.module.scss";
 
 import React, { HTMLAttributes } from "react";
-import { makeObservable, observable } from "mobx";
+import { IComputedValue, makeObservable, observable } from "mobx";
 import { observer } from "mobx-react";
 
-import type { CatalogEntity, CatalogEntityContextMenu, CatalogEntityContextMenuContext } from "../../../common/catalog";
-import { catalogCategoryRegistry } from "../../api/catalog-category-registry";
-import { catalogEntityRegistry } from "../../api/catalog-entity-registry";
-import { navigate } from "../../navigation";
 import { cssNames, IClassName } from "../../utils";
 import { Icon } from "../icon";
 import { HotbarIcon } from "./hotbar-icon";
 import { LensKubernetesClusterStatus } from "../../../common/catalog-entities/kubernetes-cluster";
+import type { CatalogEntity, CatalogEntityContextMenu, NavigateAction } from "../../../common/catalog/entity/entity";
+import { withInjectables } from "@ogre-tools/injectable-react";
+import type { GetCategoryForEntity } from "../../catalog/category/get-for-entity.injectable";
+import activeEntityInjectable from "../../catalog/entity/active-entity.injectable";
+import getCategoryForEntityInjectable from "../../catalog/category/get-for-entity.injectable";
+import navigateActionInjectable from "../../window/navigate-action.injectable";
 
-interface Props extends HTMLAttributes<HTMLElement> {
+export interface HotbarEntityIconProps extends HTMLAttributes<HTMLElement> {
   entity: CatalogEntity;
   index: number;
   errorClass?: IClassName;
@@ -27,21 +29,24 @@ interface Props extends HTMLAttributes<HTMLElement> {
   size?: number;
 }
 
-@observer
-export class HotbarEntityIcon extends React.Component<Props> {
-  @observable private contextMenu: CatalogEntityContextMenuContext = {
-    menuItems: [],
-    navigate: (url: string) => navigate(url),
-  };
+interface Dependencies {
+  activeEntity: IComputedValue<CatalogEntity | undefined>;
+  getCategoryForEntity: GetCategoryForEntity;
+  navigate: NavigateAction;
+}
 
-  constructor(props: Props) {
+@observer
+class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps & Dependencies> {
+  private readonly menuItems = observable.array<CatalogEntityContextMenu>();
+
+  constructor(props: HotbarEntityIconProps & Dependencies) {
     super(props);
     makeObservable(this);
   }
 
   get kindIcon() {
     const className = styles.badge;
-    const category = catalogCategoryRegistry.getCategoryForEntity(this.props.entity);
+    const category = this.props.getCategoryForEntity(this.props.entity);
 
     if (!category) {
       return <Icon material="bug_report" className={className} />;
@@ -65,27 +70,22 @@ export class HotbarEntityIcon extends React.Component<Props> {
   }
 
   isActive(item: CatalogEntity) {
-    return catalogEntityRegistry.activeEntity?.metadata?.uid == item.getId();
+    return this.props.activeEntity.get()?.metadata?.uid == item.getId();
   }
 
-  async onMenuOpen() {
-    const menuItems: CatalogEntityContextMenu[] = [];
-
-    menuItems.unshift({
+  onMenuOpen() {
+    this.menuItems.replace([{
       title: "Remove from Hotbar",
       onClick: () => this.props.remove(this.props.entity.getId()),
+    }]);
+
+    this.props.entity.onContextMenuOpen({
+      menuItems: this.menuItems,
+      navigate: this.props.navigate,
     });
-
-    this.contextMenu.menuItems = menuItems;
-
-    await this.props.entity.onContextMenuOpen(this.contextMenu);
   }
 
   render() {
-    if (!this.contextMenu) {
-      return null;
-    }
-
     const { entity, errorClass, add, remove, index, children, ...elemProps } = this.props;
 
     return (
@@ -100,7 +100,7 @@ export class HotbarEntityIcon extends React.Component<Props> {
         active={this.isActive(entity)}
         onMenuOpen={() => this.onMenuOpen()}
         disabled={!entity}
-        menuItems={this.contextMenu.menuItems}
+        menuItems={this.menuItems}
         tooltip={`${entity.getName()} (${entity.metadata.source})`}
         {...elemProps}
       >
@@ -110,3 +110,12 @@ export class HotbarEntityIcon extends React.Component<Props> {
     );
   }
 }
+
+export const HotbarEntityIcon = withInjectables<Dependencies, HotbarEntityIconProps>(NonInjectedHotbarEntityIcon, {
+  getProps: (di, props) => ({
+    ...props,
+    activeEntity: di.inject(activeEntityInjectable),
+    getCategoryForEntity: di.inject(getCategoryForEntityInjectable),
+    navigate: di.inject(navigateActionInjectable),
+  }),
+});

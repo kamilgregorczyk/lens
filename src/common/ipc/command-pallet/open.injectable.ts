@@ -21,6 +21,7 @@ const openCommandPallet = ({ broadcastMessage, openCommandPalletChannel }: Depen
   }
 );
 
+// TODO: make this like the rest of the IPC items when we remove IFRAMEs
 const openCommandPalletInjectable = getInjectable({
   instantiate: (di) => openCommandPallet({
     broadcastMessage: di.inject(broadcastMessageInjectionToken.token),

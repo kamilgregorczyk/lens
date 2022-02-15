@@ -12,8 +12,6 @@ import type { KubeconfigManager } from "../../main/kubeconfig-manager/kubeconfig
 import { loadConfigFromFile, loadConfigFromFileSync, validateKubeConfig } from "../kube-helpers";
 import { apiResourceRecord, apiResources, KubeApiResource, KubeResource } from "../rbac";
 import logger from "../../main/logger";
-import { VersionDetector } from "../../main/cluster-detectors/version-detector";
-import { DetectorRegistry } from "../../main/cluster-detectors/detector-registry";
 import plimit from "p-limit";
 import type { ClusterState, ClusterRefreshOptions, ClusterMetricsResourceType, ClusterId, ClusterMetadata, ClusterModel, ClusterPreferences, ClusterPrometheusPreferences, UpdateClusterModel, KubeAuthUpdate } from "../cluster-types";
 import { ClusterMetadataKey, initialNodeShellImage, ClusterStatus } from "../cluster-types";
@@ -21,6 +19,7 @@ import { disposer, toJS } from "../utils";
 import type { Response } from "request";
 import type { CanI } from "./authorization-review.injectable";
 import type { ListNamespaces } from "./list-namespaces.injectable";
+import type { ClusterDetectionResult } from "../../main/cluster-metadata/cluster-detector";
 
 export interface ClusterDependencies {
   readonly directoryForKubeConfigs: string;
@@ -31,6 +30,9 @@ export interface ClusterDependencies {
   createListNamespaces: (config: KubeConfig) => ListNamespaces;
   emitListNamespacesForbidden: (clusterId: ClusterId) => void;
   emitClusterState: (clusterId: ClusterId, state: ClusterState) => void;
+  emitConnectionUpdate: (clusterId: ClusterId, update: KubeAuthUpdate) => void;
+  detectMetadataForCluster: (cluster: Cluster) => Promise<ClusterMetadata>;
+  detectSpecificMetadataForCluster: (cluster: Cluster, kind: string) => Promise<ClusterDetectionResult>;
 }
 
 /**
@@ -419,7 +421,7 @@ export class Cluster implements ClusterModel, ClusterState {
   @action
   async refreshMetadata() {
     logger.info(`[CLUSTER]: refreshMetadata`, this.getMeta());
-    const metadata = await DetectorRegistry.getInstance().detectForCluster(this);
+    const metadata = await this.dependencies.detectMetadataForCluster(this);
     const existingMetadata = this.metadata;
 
     this.metadata = Object.assign(existingMetadata, metadata);
@@ -482,8 +484,7 @@ export class Cluster implements ClusterModel, ClusterState {
 
   protected async getConnectionStatus(): Promise<ClusterStatus> {
     try {
-      const versionDetector = new VersionDetector(this);
-      const versionData = await versionDetector.detect();
+      const versionData = await this.dependencies.detectSpecificMetadataForCluster(this, ClusterMetadataKey.VERSION);
 
       this.metadata.version = versionData.value;
 
@@ -565,7 +566,7 @@ export class Cluster implements ClusterModel, ClusterState {
    * @param state cluster state
    */
   pushState(state = this.getState()) {
-    logger.silly(`[CLUSTER]: push-state`, state);
+    // logger.debug(`[CLUSTER]: push-state`, state);
     this.dependencies.emitClusterState(this.id, state);
   }
 
@@ -589,7 +590,7 @@ export class Cluster implements ClusterModel, ClusterState {
     const update: KubeAuthUpdate = { message, isError };
 
     logger.debug(`[CLUSTER]: broadcasting connection update`, { ...update, meta: this.getMeta() });
-    broadcastMessage(`cluster:${this.id}:connection-update`, update);
+    this.dependencies.emitConnectionUpdate(this.id, update);
   }
 
   protected async getAllowedNamespaces(proxyConfig: KubeConfig) {

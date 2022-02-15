@@ -11,6 +11,8 @@ export function isAllowedResource(...args: any[]) {
   return Boolean(void args);
 }
 
+export * from "../common-api/k8s-api";
+
 export { ResourceStack } from "../../common/k8s/resource-stack";
 export { apiManager } from "../../common/k8s-api/api-manager";
 export { KubeApi, forCluster, forRemoteCluster } from "../../common/k8s-api/kube-api";

@@ -20,21 +20,22 @@ import { ResourceMetrics, ResourceMetricsText } from "../resource-metrics";
 import { PodCharts, podMetricTabs } from "../+workloads-pods/pod-charts";
 import { PodDetailsList } from "../+workloads-pods/pod-details-list";
 import { KubeObjectMeta } from "../kube-object-meta";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
 import { boundMethod, Disposer } from "../../utils";
 import logger from "../../../common/logger";
 import type { KubeObjectStore } from "../../../common/k8s-api/kube-object.store";
 import type { KubeObject } from "../../../common/k8s-api/kube-object";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import kubeWatchApiInjectable
-  from "../../kube-watch-api/kube-watch-api.injectable";
+import kubeWatchApiInjectable from "../../kube-watch-api/kube-watch-api.injectable";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Props extends KubeObjectDetailsProps<ReplicaSet> {
 }
 
 interface Dependencies {
-  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer
+  subscribeStores: (stores: KubeObjectStore<KubeObject>[]) => Disposer;
+  shouldDisplayMetric: ShouldDisplayMetric;
 }
 
 @observer
@@ -66,7 +67,7 @@ class NonInjectedReplicaSetDetails extends React.Component<Props & Dependencies>
   }
 
   render() {
-    const { object: replicaSet } = this.props;
+    const { object: replicaSet, shouldDisplayMetric } = this.props;
 
     if (!replicaSet) {
       return null;
@@ -85,11 +86,10 @@ class NonInjectedReplicaSetDetails extends React.Component<Props & Dependencies>
     const nodeSelector = replicaSet.getNodeSelectors();
     const images = replicaSet.getImages();
     const childPods = replicaSetStore.getChildPods(replicaSet);
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.ReplicaSet);
 
     return (
       <div className="ReplicaSetDetails">
-        {!isMetricHidden && podsStore.isLoaded && (
+        {shouldDisplayMetric(ClusterMetricsResourceType.ReplicaSet) && podsStore.isLoaded && (
           <ResourceMetrics
             loader={this.loadMetrics}
             tabs={podMetricTabs} object={replicaSet} params={{ metrics }}
@@ -134,13 +134,10 @@ class NonInjectedReplicaSetDetails extends React.Component<Props & Dependencies>
   }
 }
 
-export const ReplicaSetDetails = withInjectables<Dependencies, Props>(
-  NonInjectedReplicaSetDetails,
-
-  {
-    getProps: (di, props) => ({
-      subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
-      ...props,
-    }),
-  },
-);
+export const ReplicaSetDetails = withInjectables<Dependencies, Props>(NonInjectedReplicaSetDetails, {
+  getProps: (di, props) => ({
+    ...props,
+    subscribeStores: di.inject(kubeWatchApiInjectable).subscribeStores,
+    shouldDisplayMetric: di.inject(shouldDisplayMetricInjectable),
+  }),
+});

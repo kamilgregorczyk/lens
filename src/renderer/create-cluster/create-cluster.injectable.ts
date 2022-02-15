@@ -16,6 +16,11 @@ const createClusterInjectable = getInjectable({
       createContextHandler: () => { throw new Error("Tried to access back-end feature in front-end."); },
       createAuthorizationReview: () => { throw new Error("Tried to access back-end feature in front-end."); },
       createListNamespaces: () => { throw new Error("Tried to access back-end feature in front-end."); },
+      detectMetadataForCluster: () => { throw new Error("Tried to access back-end feature in front-end."); },
+      detectSpecificMetadataForCluster: () => { throw new Error("Tried to access back-end feature in front-end."); },
+      emitClusterState: () => { throw new Error("Tried to access back-end feature in front-end."); },
+      emitConnectionUpdate: () => { throw new Error("Tried to access back-end feature in front-end."); },
+      emitListNamespacesForbidden: () => { throw new Error("Tried to access back-end feature in front-end."); },
     };
 
     return (model) => new Cluster(dependencies, model);

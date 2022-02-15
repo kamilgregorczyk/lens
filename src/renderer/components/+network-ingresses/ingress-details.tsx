@@ -16,19 +16,25 @@ import type { KubeObjectDetailsProps } from "../kube-object-details";
 import { IngressCharts } from "./ingress-charts";
 import { KubeObjectMeta } from "../kube-object-meta";
 import { getBackendServiceNamePort, getMetricsForIngress, IIngressMetrics } from "../../../common/k8s-api/endpoints/ingress.api";
-import { getActiveClusterEntity } from "../../api/catalog-entity-registry";
 import { ClusterMetricsResourceType } from "../../../common/cluster-types";
 import { boundMethod } from "../../utils";
 import logger from "../../../common/logger";
+import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
+import { withInjectables } from "@ogre-tools/injectable-react";
+import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 
 interface Props extends KubeObjectDetailsProps<Ingress> {
 }
 
+interface Dependencies {
+  shouldDisplayMetric: ShouldDisplayMetric;
+}
+
 @observer
-export class IngressDetails extends React.Component<Props> {
+class NonInjectedIngressDetails extends React.Component<Props & Dependencies> {
   @observable metrics: IIngressMetrics = null;
 
-  constructor(props: Props) {
+  constructor(props: Props & Dependencies) {
     super(props);
     makeObservable(this);
   }
@@ -114,7 +120,7 @@ export class IngressDetails extends React.Component<Props> {
   }
 
   render() {
-    const { object: ingress } = this.props;
+    const { object: ingress, shouldDisplayMetric } = this.props;
 
     if (!ingress) {
       return null;
@@ -133,12 +139,11 @@ export class IngressDetails extends React.Component<Props> {
       "Network",
       "Duration",
     ];
-    const isMetricHidden = getActiveClusterEntity()?.isMetricHidden(ClusterMetricsResourceType.Ingress);
     const { serviceName, servicePort } = ingress.getServiceNamePort();
 
     return (
       <div className="IngressDetails">
-        {!isMetricHidden && (
+        {shouldDisplayMetric(ClusterMetricsResourceType.Ingress) && (
           <ResourceMetrics
             loader={this.loadMetrics}
             tabs={metricTabs} object={ingress} params={{ metrics }}
@@ -169,3 +174,10 @@ export class IngressDetails extends React.Component<Props> {
     );
   }
 }
+
+export const IngressDetails = withInjectables<Dependencies, Props>(NonInjectedIngressDetails, {
+  getProps: (di, props) => ({
+    shouldDisplayMetric: di.inject(shouldDisplayMetricInjectable),
+    ...props,
+  }),
+});
