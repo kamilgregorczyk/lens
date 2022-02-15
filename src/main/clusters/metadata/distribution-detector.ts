@@ -4,7 +4,7 @@
  */
 
 import type { ClusterDetector, K8sClusterRequest } from "./cluster-detector";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 
 function isGKE(version: string) {
   return version.includes("gke");

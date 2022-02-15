@@ -3,8 +3,8 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { ClusterMetadataKey } from "../../common/cluster-types";
-import k8sRequestInjectable from "../k8s-api/request.injectable";
+import { ClusterMetadataKey } from "../../../common/cluster-types";
+import k8sRequestInjectable from "../../k8s-api/request.injectable";
 import { clusterIdDetector } from "./cluster-id-detector";
 import { DetectorRegistry } from "./detector-registry";
 import { distributionDetector } from "./distribution-detector";

@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { KubeAuthProxy } from "./kube-auth-proxy";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import bundledKubectlInjectable from "../kubectl/bundled-kubectl.injectable";
 
 const createKubeAuthProxyInjectable = getInjectable({

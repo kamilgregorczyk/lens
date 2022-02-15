@@ -2,7 +2,7 @@
  * Copyright (c) OpenLens Authors. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import type { CatalogEntityRegistry } from "../../catalog/entity/registry";
 import { Terminal } from "../../components/dock/terminal/terminal";
 import type { KubernetesCluster } from "../../../common/catalog-entities";

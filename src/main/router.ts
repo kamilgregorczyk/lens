@@ -8,7 +8,7 @@ import Subtext from "@hapi/subtext";
 import type http from "http";
 import path from "path";
 import { readFile } from "fs-extra";
-import type { Cluster } from "../common/cluster/cluster";
+import type { Cluster } from "../common/clusters/cluster";
 import { apiPrefix, appName, publicPath, isDevelopment, webpackDevServerPort } from "../common/vars";
 import { HelmApiRoute, KubeconfigRoute, MetricsRoute, PortForwardRoute, ResourceApplierApiRoute, VersionRoute } from "./routes";
 import logger from "./logger";

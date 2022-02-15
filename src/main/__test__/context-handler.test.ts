@@ -9,7 +9,7 @@ import { PrometheusProvider, PrometheusProviderRegistry, PrometheusService } fro
 import mockFs from "mock-fs";
 import { getDiForUnitTesting } from "../getDiForUnitTesting";
 import createContextHandlerInjectable from "../context-handler/create-context-handler.injectable";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 
 jest.mock("electron", () => ({
   app: {

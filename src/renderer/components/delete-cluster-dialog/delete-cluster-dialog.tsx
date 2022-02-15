@@ -10,7 +10,7 @@ import React from "react";
 
 import { Button } from "../button";
 import type { KubeConfig } from "@kubernetes/client-node";
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import { saveKubeconfig } from "./save-config";
 import { Notifications } from "../notifications";
 import { HotbarStore } from "../../../common/hotbars/store";

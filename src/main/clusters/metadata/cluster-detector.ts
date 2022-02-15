@@ -5,7 +5,7 @@
 
 import type { RequestPromiseOptions } from "request-promise-native";
 import type { JsonObject } from "type-fest";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 
 export interface ClusterDetectionResult {
   value: string | number | boolean

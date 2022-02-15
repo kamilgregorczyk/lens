@@ -10,7 +10,7 @@ import { disposeOnUnmount, observer } from "mobx-react";
 import type { RouteComponentProps } from "react-router";
 import { ClusterStatus } from "./cluster-status";
 import { ClusterFrameHandler } from "./lens-views";
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import { catalogURL, ClusterViewRouteParams } from "../../../common/routes";
 import { requestClusterActivation } from "../../ipc";
 import type { Navigate } from "../../navigation/navigate.injectable";

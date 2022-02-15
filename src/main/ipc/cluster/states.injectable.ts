@@ -5,7 +5,7 @@
 
 import { clusterStatesInjectionToken } from "../../../common/ipc/cluster/states.token";
 import clusterStoreInjectable from "../../clusters/store.injectable";
-import { implWithHandle } from "../impl-with-handle";
+import { implWithHandle } from "../impl-channel";
 
 const clusterStatesInjectable = implWithHandle(clusterStatesInjectionToken, (di) => {
   const store = di.inject(clusterStoreInjectable);

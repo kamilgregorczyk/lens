@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { JsonObject } from "type-fest";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import type { IMetricsReqParams } from "../../common/k8s-api/endpoints/metrics.api";
 import k8sRequestInjectable, { K8sRequest } from "./request.injectable";
 

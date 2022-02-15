@@ -7,7 +7,7 @@ import type WebSocket from "ws";
 import { v4 as uuid } from "uuid";
 import * as k8s from "@kubernetes/client-node";
 import type { KubeConfig } from "@kubernetes/client-node";
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import { ShellOpenError, ShellSession } from "../shell-session";
 import { get } from "lodash";
 import { Node, NodesApi } from "../../../common/k8s-api/endpoints";

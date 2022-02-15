@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import type { ClusterDetectionResult } from "./cluster-detector";
 import type { DetectorRegistry } from "./detector-registry";
 import clusterMetadataDetectorRegistryInjectable from "./detector-registry.injectable";

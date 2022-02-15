@@ -34,7 +34,7 @@ jest.mock("../../common/ipc");
 jest.mock("child_process");
 jest.mock("tcp-port-used");
 
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import type { KubeAuthProxy } from "../kube-auth-proxy/kube-auth-proxy";
 import { broadcastMessage } from "../../common/ipc";
 import { ChildProcess, spawn } from "child_process";
@@ -48,7 +48,7 @@ import { stdout, stderr } from "process";
 import mockFs from "mock-fs";
 import { getDiForUnitTesting } from "../getDiForUnitTesting";
 import createKubeAuthProxyInjectable from "../kube-auth-proxy/create-kube-auth-proxy.injectable";
-import { createClusterInjectionToken } from "../../common/cluster/create-cluster-injection-token";
+import { createClusterInjectionToken } from "../../common/clusters/create-cluster-injection-token";
 
 console = new Console(stdout, stderr);
 

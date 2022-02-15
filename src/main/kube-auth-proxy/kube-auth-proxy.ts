@@ -6,7 +6,7 @@
 import { ChildProcess, spawn } from "child_process";
 import { waitUntilUsed } from "tcp-port-used";
 import { randomBytes } from "crypto";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import logger from "../logger";
 import * as url from "url";
 import { getPortFrom } from "../utils/get-port";

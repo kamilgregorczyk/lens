@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { Cluster } from "../common/cluster/cluster";
+import type { Cluster } from "../common/clusters/cluster";
 import type { KubernetesObject } from "@kubernetes/client-node";
 import { exec } from "child_process";
 import fs from "fs-extra";

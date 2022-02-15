@@ -9,7 +9,7 @@ import { Select, SelectOption } from "../../select/select";
 import { Icon } from "../../icon/icon";
 import { Button } from "../../button/button";
 import { SubTitle } from "../../layout/sub-title";
-import type { Cluster } from "../../../../common/cluster/cluster";
+import type { Cluster } from "../../../../common/clusters/cluster";
 import { observable, reaction, makeObservable } from "mobx";
 import { ClusterMetricsResourceType } from "../../../../common/cluster-types";
 

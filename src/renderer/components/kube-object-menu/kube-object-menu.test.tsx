@@ -15,7 +15,7 @@ import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import clusterInjectable from "./dependencies/cluster.injectable";
 import hideDetailsInjectable from "./dependencies/hide-details.injectable";
 import { DiRender, renderFor } from "../test-utils/renderFor";
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import type { ApiManager } from "../../../common/k8s-api/api-manager";
 import apiManagerInjectable from "./dependencies/api-manager.injectable";
 import { KubeObjectMenu } from "./index";

@@ -4,7 +4,7 @@
  */
 
 import type { KubeConfig } from "@kubernetes/client-node";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import path from "path";
 import fs from "fs-extra";
 import { dumpConfigYaml } from "../../common/kube-helpers";

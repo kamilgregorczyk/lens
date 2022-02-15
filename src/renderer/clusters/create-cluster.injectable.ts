@@ -3,9 +3,10 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { Cluster, ClusterDependencies } from "../../common/cluster/cluster";
+import { Cluster, ClusterDependencies } from "../../common/clusters/cluster";
 import directoryForKubeConfigsInjectable from "../../common/directory-path/local-kube-configs.injectable";
-import { createClusterInjectionToken } from "../../common/cluster/create-cluster-injection-token";
+import { createClusterInjectionToken } from "../../common/clusters/create-cluster-injection-token";
+import clusterLoggerInjectable from "../../common/clusters/cluster-logger.injectable";
 
 const createClusterInjectable = getInjectable({
   instantiate: (di) => {
@@ -21,6 +22,7 @@ const createClusterInjectable = getInjectable({
       emitClusterState: () => { throw new Error("Tried to access back-end feature in front-end."); },
       emitConnectionUpdate: () => { throw new Error("Tried to access back-end feature in front-end."); },
       emitListNamespacesForbidden: () => { throw new Error("Tried to access back-end feature in front-end."); },
+      logger: di.inject(clusterLoggerInjectable),
     };
 
     return (model) => new Cluster(dependencies, model);

@@ -4,10 +4,10 @@
  */
 
 import { observable } from "mobx";
-import type { ClusterMetadata } from "../../common/cluster-types";
-import type { Cluster } from "../../common/cluster/cluster";
-import { iter } from "../../common/utils";
-import type { K8sRequest } from "../k8s-api/request.injectable";
+import type { ClusterMetadata } from "../../../common/cluster-types";
+import type { Cluster } from "../../../common/clusters/cluster";
+import { iter } from "../../../common/utils";
+import type { K8sRequest } from "../../k8s-api/request.injectable";
 import type { ClusterDetectionResult, ClusterDetector, ClusterDetectorDependencies } from "./cluster-detector";
 
 export interface DetectorRegistryDependencies {

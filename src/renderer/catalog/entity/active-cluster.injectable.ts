@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { computed, IComputedValue } from "mobx";
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import type { GetClusterById } from "../../../common/clusters/get-by-id.injectable";
 import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injectable";
 import type { CatalogEntityRegistry } from "./registry";

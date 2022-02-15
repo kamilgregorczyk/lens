@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { ClusterId } from "../cluster-types";
-import type { Cluster } from "../cluster/cluster";
+import type { Cluster } from "../clusters/cluster";
 import type { ClusterStore } from "./store";
 import { clusterStoreInjectionToken } from "./store-injection-token";
 

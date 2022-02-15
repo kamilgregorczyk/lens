@@ -6,7 +6,7 @@
 import logger from "../../logger";
 import WebSocket, { Server as WebSocketServer } from "ws";
 import type { ClusterProxyApiRequestArgs } from "../types";
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import type { ClusterId } from "../../../common/cluster-types";
 import URLParse from "url-parse";
 

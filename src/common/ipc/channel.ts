@@ -19,14 +19,14 @@ export class Channel<Args extends any[], R> {
     this.token = getInjectionToken();
   }
 
-  getInjectable(init: (di: DependencyInjectionContainer, channel: string) => (...args: Args) => R) {
+  getInjectable(init: (di: DependencyInjectionContainer, channel: string) => (...args: Args) => R, allowLocal = true) {
     let handler: (...args: Args) => R;
 
     return getInjectable({
       setup: (di) => {
         handler = init(di, this.channel);
       },
-      instantiate: () => handler,
+      instantiate: () => allowLocal ? handler : undefined,
       injectionToken: this.token,
       lifecycle: lifecycleEnum.singleton,
     });

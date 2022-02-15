@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import logger from "../logger";
 import { HelmRepoManager } from "./helm-repo-manager";
 import { HelmChartManager } from "./helm-chart-manager";

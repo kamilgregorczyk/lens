@@ -7,7 +7,7 @@ import fs from "fs";
 import mockFs from "mock-fs";
 import path from "path";
 import fse from "fs-extra";
-import type { Cluster } from "../cluster/cluster";
+import type { Cluster } from "../clusters/cluster";
 import { ClusterStore } from "../clusters/store";
 import { Console } from "console";
 import { stdout, stderr } from "process";

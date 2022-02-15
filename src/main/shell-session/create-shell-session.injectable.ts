@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import type WebSocket from "ws";
 import localShellSessionInjectable from "./local-shell-session/local-shell-session.injectable";
 import nodeShellSessionInjectable from "./node-shell-session/node-shell-session.injectable";

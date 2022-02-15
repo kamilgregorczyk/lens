@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { Cluster } from "../../../../common/cluster/cluster";
+import type { Cluster } from "../../../../common/clusters/cluster";
 import { makeObservable, observable } from "mobx";
 import { SubTitle } from "../../layout/sub-title";
 import React from "react";

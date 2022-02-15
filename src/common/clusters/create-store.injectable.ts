@@ -5,9 +5,9 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import appEventBusInjectable from "../app-event-bus/app-event-bus.injectable";
 import type { BaseStoreParams } from "../base-store";
-import { createClusterInjectionToken } from "../cluster/create-cluster-injection-token";
+import { createClusterInjectionToken } from "../clusters/create-cluster-injection-token";
 import { ClusterStore, ClusterStoreDependencies, ClusterStoreModel } from "./store";
-import clusterStoreLoggerInjectable from "./logger.injectable";
+import clusterStoreLoggerInjectable from "./store-logger.injectable";
 import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
 
 const createClusterStoreInjectable = getInjectable({

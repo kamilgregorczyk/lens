@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import type { Cluster } from "../../../../common/cluster/cluster";
+import type { Cluster } from "../../../../common/clusters/cluster";
 import { boundMethod } from "../../../utils";
 import { observable } from "mobx";
 import { observer } from "mobx-react";

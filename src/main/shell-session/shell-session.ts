@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import type { Kubectl } from "../kubectl/kubectl";
 import type WebSocket from "ws";
 import { shellEnv } from "../utils/shell-env";

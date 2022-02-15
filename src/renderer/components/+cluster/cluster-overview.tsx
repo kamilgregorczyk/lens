@@ -25,7 +25,7 @@ import type { KubeObjectStore } from "../../../common/k8s-api/kube-object.store"
 import type { KubeObject } from "../../../common/k8s-api/kube-object";
 import clusterOverviewStoreInjectable from "./cluster-overview-store/cluster-overview-store.injectable";
 import type { ShouldDisplayMetric } from "../../clusters/should-display-metric.injectable";
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import hostedClusterInjectable from "../../clusters/hosted-cluster.injectable";
 import shouldDisplayMetricInjectable from "../../clusters/should-display-metric.injectable";
 

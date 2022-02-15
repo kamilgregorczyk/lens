@@ -9,12 +9,12 @@ import mockFs from "mock-fs";
 import React from "react";
 import * as selectEvent from "react-select-event";
 
-import type { Cluster } from "../../../../common/cluster/cluster";
+import type { Cluster } from "../../../../common/clusters/cluster";
 import { DeleteClusterDialog } from "../delete-cluster-dialog";
 
 import type { ClusterModel } from "../../../../common/cluster-types";
 import { getDisForUnitTesting } from "../../../../test-utils/get-dis-for-unit-testing";
-import { createClusterInjectionToken } from "../../../../common/cluster/create-cluster-injection-token";
+import { createClusterInjectionToken } from "../../../../common/clusters/create-cluster-injection-token";
 
 jest.mock("electron", () => ({
   app: {

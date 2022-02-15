@@ -4,14 +4,13 @@
  */
 
 
-import { ipcMain, ipcRenderer, webFrame } from "electron";
 import { action, comparer, computed, makeObservable, observable } from "mobx";
 import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../base-store";
-import { Cluster } from "../cluster/cluster";
+import { Cluster } from "../clusters/cluster";
 import logger from "../../main/logger";
 import type { AppEventBus } from "../app-event-bus/event-bus";
 import { toJS } from "../utils";
-import type { ClusterModel, ClusterId, ClusterState } from "../cluster-types";
+import type { ClusterModel, ClusterId } from "../cluster-types";
 
 export interface ClusterStoreModel {
   clusters?: ClusterModel[];
@@ -36,15 +35,6 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
 
     makeObservable(this);
     this.load();
-  }
-
-  registerIpcListener() {
-    logger.info(`[CLUSTER-STORE] start to listen (${webFrame.routingId})`);
-    const ipc = ipcMain ?? ipcRenderer;
-
-    ipc?.on("cluster:state", (event, clusterId: ClusterId, state: ClusterState) => {
-      this.getById(clusterId)?.setState(state);
-    });
   }
 
   @computed get clustersList(): Cluster[] {

@@ -6,7 +6,7 @@
 import "../../common/ipc/cluster";
 import type http from "http";
 import { action, makeObservable, observable, reaction, toJS } from "mobx";
-import { Cluster } from "../../common/cluster/cluster";
+import { Cluster } from "../../common/clusters/cluster";
 import logger from "../logger";
 import { apiKubePrefix } from "../../common/vars";
 import { getClusterIdFromHost } from "../../common/utils";

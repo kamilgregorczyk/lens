@@ -5,7 +5,7 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import directoryForKubeConfigsInjectable from "../../../common/directory-path/local-kube-configs.injectable";
 import { KubeconfigSyncManager } from "./kubeconfig-sync-manager";
-import { createClusterInjectionToken } from "../../../common/cluster/create-cluster-injection-token";
+import { createClusterInjectionToken } from "../../../common/clusters/create-cluster-injection-token";
 
 const kubeconfigSyncManagerInjectable = getInjectable({
   instantiate: (di) => new KubeconfigSyncManager({

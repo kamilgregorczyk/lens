@@ -8,7 +8,7 @@ import { disposeOnUnmount, observer } from "mobx-react";
 import { Redirect, Route, Router, Switch } from "react-router";
 import { UserManagementRoute } from "../../components/+user-management/route";
 import { ConfirmDialog } from "../../components/confirm-dialog";
-import { ClusterOverview } from "../../components/+cluster/cluster-overview";
+import { ClusterOverview } from "../../components/+clusters/cluster-overview";
 import { Events } from "../../components/+events/events";
 import { DeploymentScaleDialog } from "../../components/+workloads-deployments/deployment-scale-dialog";
 import { CronJobTriggerDialog } from "../../components/+workloads-cronjobs/cronjob-trigger-dialog";

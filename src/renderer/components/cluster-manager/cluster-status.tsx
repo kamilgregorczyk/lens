@@ -6,31 +6,39 @@
 import styles from "./cluster-status.module.scss";
 
 import { computed, observable, makeObservable } from "mobx";
-import { disposeOnUnmount, observer } from "mobx-react";
+import { observer } from "mobx-react";
 import React from "react";
-import { ipcRendererOn } from "../../../common/ipc";
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 import { cssNames, IClassName } from "../../utils";
 import { Button } from "../button";
 import { Icon } from "../icon";
 import { Spinner } from "../spinner";
-import { navigate } from "../../navigation";
 import { entitySettingsURL } from "../../../common/routes";
 import type { KubeAuthUpdate } from "../../../common/cluster-types";
-import { catalogEntityRegistry } from "../../catalog/entity/registry";
 import { requestClusterActivation } from "../../ipc";
+import { withInjectables } from "@ogre-tools/injectable-react";
+import clusterConnectionStatusStateInjectable, { ClusterConnectionStatus } from "./status-state.injectable";
+import type { Navigate } from "../../navigation/navigate.injectable";
+import navigateInjectable from "../../navigation/navigate.injectable";
+import type { GetEntityById } from "../../../common/catalog/entity/get-by-id.injectable";
+import getEntityByIdInjectable from "../../../common/catalog/entity/get-by-id.injectable";
 
-interface Props {
+export interface ClusterStatusProps {
   className?: IClassName;
   cluster: Cluster;
 }
 
+interface Dependencies {
+  state: ClusterConnectionStatus;
+  navigate: Navigate;
+  getEntityById: GetEntityById;
+}
+
 @observer
-export class ClusterStatus extends React.Component<Props> {
-  @observable authOutput: KubeAuthUpdate[] = [];
+class NonInjectedClusterStatus extends React.Component<ClusterStatusProps & Dependencies> {
   @observable isReconnecting = false;
 
-  constructor(props: Props) {
+  constructor(props: ClusterStatusProps & Dependencies) {
     super(props);
     makeObservable(this);
   }
@@ -40,29 +48,29 @@ export class ClusterStatus extends React.Component<Props> {
   }
 
   @computed get entity() {
-    return catalogEntityRegistry.getById(this.cluster.id);
+    return this.props.getEntityById(this.cluster.id);
   }
 
-  @computed get hasErrors(): boolean {
-    return this.authOutput.some(({ isError }) => isError);
+  hasErrors(authOutput: KubeAuthUpdate[]): boolean {
+    return authOutput.some(({ isError }) => isError);
   }
 
-  componentDidMount() {
-    disposeOnUnmount(this, [
-      ipcRendererOn(`cluster:${this.cluster.id}:connection-update`, (evt, res: KubeAuthUpdate) => {
-        this.authOutput.push(res);
-      }),
-    ]);
+  @computed get authOutput() {
+    return this.props.state.get(this.cluster.id);
+  }
+
+  clearAuthOutput() {
+    this.props.state.clear(this.cluster.id);
   }
 
   reconnect = async () => {
-    this.authOutput = [];
+    this.clearAuthOutput();
     this.isReconnecting = true;
 
     try {
       await requestClusterActivation(this.cluster.id, true);
     } catch (error) {
-      this.authOutput.push({
+      this.props.state.push(this.cluster.id, {
         message: error.toString(),
         isError: true,
       });
@@ -72,7 +80,7 @@ export class ClusterStatus extends React.Component<Props> {
   };
 
   manageProxySettings = () => {
-    navigate(entitySettingsURL({
+    this.props.navigate(entitySettingsURL({
       params: {
         entityId: this.cluster.id,
       },
@@ -146,3 +154,12 @@ export class ClusterStatus extends React.Component<Props> {
     );
   }
 }
+
+export const ClusterStatus = withInjectables<Dependencies, ClusterStatusProps>(NonInjectedClusterStatus, {
+  getProps: (di, props) => ({
+    ...props,
+    state: di.inject(clusterConnectionStatusStateInjectable),
+    navigate: di.inject(navigateInjectable),
+    getEntityById: di.inject(getEntityByIdInjectable),
+  }),
+});

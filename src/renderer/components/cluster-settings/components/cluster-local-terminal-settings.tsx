@@ -5,7 +5,7 @@
 
 import React, { useEffect, useState } from "react";
 import { observer } from "mobx-react";
-import type { Cluster } from "../../../../common/cluster/cluster";
+import type { Cluster } from "../../../../common/clusters/cluster";
 import { Input } from "../../input";
 import { SubTitle } from "../../layout/sub-title";
 import { stat } from "fs/promises";

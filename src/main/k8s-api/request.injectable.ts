@@ -5,7 +5,7 @@
 
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { JsonObject } from "type-fest";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import lensProxyPortInjectable, { LensProxyPort } from "../lens-proxy/port.injectable";
 import request, { RequestPromiseOptions } from "request-promise-native";
 import { apiKubePrefix } from "../../common/vars";

@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { IncomingMessage } from "http";
-import type { Cluster } from "../../common/cluster/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import type { ClusterManager } from "./manager";
 import clusterManagerInjectable from "./manager.injectable";
 

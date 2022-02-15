@@ -22,7 +22,7 @@ import { homedir } from "os";
 import globToRegExp from "glob-to-regexp";
 import { inspect } from "util";
 import type { ClusterModel, UpdateClusterModel } from "../../../common/cluster-types";
-import type { Cluster } from "../../../common/cluster/cluster";
+import type { Cluster } from "../../../common/clusters/cluster";
 
 const logPrefix = "[KUBECONFIG-SYNC]:";
 
