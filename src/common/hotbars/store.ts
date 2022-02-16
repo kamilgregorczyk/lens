@@ -6,11 +6,11 @@
 import { action, observable, makeObservable, computed } from "mobx";
 import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../base-store";
 import { iter, toJS } from "../utils";
-import { catalogEntity } from "../../main/catalog-sources/general";
 import { defaultHotbarCells, CreateHotbarData, CreateHotbarOptions } from "./hotbar-types";
 import type { SelectOption } from "../../renderer/components/select";
 import type { HotbarModel, Hotbar } from "./hotbar";
 import { merge } from "lodash";
+import { catalogEntity } from "../../main/catalog/local-sources/general/view-catalog-entity";
 
 export enum OrderDirection {
   NEXT = 1,

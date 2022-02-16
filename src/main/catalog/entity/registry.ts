@@ -3,34 +3,35 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { action, computed, IComputedValue, IObservableArray, makeObservable, observable } from "mobx";
-import type { CatalogEntityConstructor } from "../../../common/catalog/category";
+import { computed, IComputedValue, IObservableArray, observable } from "mobx";
+import type { CatalogEntityConstructor } from "../../../common/catalog/category/category";
 import type { CatalogEntity } from "../../../common/catalog/entity/entity";
 import type { BaseCatalogEntityRegistry } from "../../../common/catalog/entity/registry";
-import { iter } from "../../../common/utils";
+import { Disposer, iter } from "../../../common/utils";
 import type { CatalogCategoryRegistry } from "../category/registry";
 
 export interface CatalogEntityRegistryDependencies {
   readonly categoryRegistry: CatalogCategoryRegistry;
 }
 
+export type EntitySource = IComputedValue<CatalogEntity[]>;
+export type ArrayEntitySource = IObservableArray<CatalogEntity>;
+
 export class CatalogEntityRegistry implements BaseCatalogEntityRegistry {
-  protected sources = observable.map<string, IComputedValue<CatalogEntity[]>>();
+  protected sources = observable.set<EntitySource>();
 
-  constructor(protected readonly dependencies: CatalogEntityRegistryDependencies) {
-    makeObservable(this);
+  constructor(protected readonly dependencies: CatalogEntityRegistryDependencies) {}
+
+  addObservableSource(source: ArrayEntitySource): Disposer {
+    return this.addComputedSource(computed(() => [...source]));
   }
 
-  @action addObservableSource(id: string, source: IObservableArray<CatalogEntity>) {
-    this.sources.set(id, computed(() => source));
-  }
+  addComputedSource(source: EntitySource): Disposer {
+    this.sources.add(source);
 
-  @action addComputedSource(id: string, source: IComputedValue<CatalogEntity[]>) {
-    this.sources.set(id, source);
-  }
-
-  @action removeSource(id: string) {
-    this.sources.delete(id);
+    return () => {
+      this.sources.delete(source);
+    };
   }
 
   readonly entities = computed(() => Array.from(

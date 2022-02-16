@@ -9,12 +9,12 @@ import path from "path";
 import * as uuid from "uuid";
 import type { ClusterStoreModel } from "../../../common/clusters/store";
 import { defaultHotbarCells, HotbarItem, HotbarItems } from "../../../common/hotbars/hotbar-types";
-import { catalogEntity } from "../../catalog-sources/general";
 import type { MigrationDeclaration } from "../../utils/join-migrations";
 import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
 import { generateNewIdFor } from "../../../common/utils/generate-new-id-for";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { tuple } from "../../../common/utils";
+import { catalogEntity } from "../../catalog/local-sources/general/view-catalog-entity";
 
 interface Pre500WorkspaceStoreModel {
   workspaces: {

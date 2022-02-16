@@ -7,9 +7,9 @@ import { EventEmitter } from "http-proxy";
 import { once } from "lodash";
 import { observable } from "mobx";
 import type TypedEventEmitter from "typed-emitter";
-import type { CategoryColumnRegistration } from "../../extensions/renderer-api/components";
-import { type Disposer, iter } from "../utils";
-import type { CatalogEntity, CatalogEntityData, CatalogEntityAddMenu, CatalogEntityAddMenuContext, CatalogEntityContextMenuContext } from "./entity/entity";
+import type { CategoryColumnRegistration } from "../../../extensions/renderer-api/components";
+import { type Disposer, iter } from "../../utils";
+import type { CatalogEntity, CatalogEntityData, CatalogEntityAddMenu, CatalogEntityAddMenuContext, CatalogEntityContextMenuContext } from "../entity/entity";
 
 export type CatalogEntityDataFor<Entity> = Entity extends CatalogEntity<infer Metadata, infer Status, infer Spec>
   ? CatalogEntityData<Metadata, Status, Spec>

@@ -3,29 +3,12 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { observable } from "mobx";
-import { GeneralEntity } from "../../common/catalog-entities/general";
-import { catalogURL, preferencesURL, welcomeURL } from "../../common/routes";
-import { catalogEntityRegistry } from "../catalog";
-
-export const catalogEntity = new GeneralEntity({
-  metadata: {
-    uid: "catalog-entity",
-    name: "Catalog",
-    source: "app",
-    labels: {},
-  },
-  spec: {
-    path: catalogURL(),
-    icon: {
-      material: "view_list",
-      background: "#3d90ce",
-    },
-  },
-  status: {
-    phase: "active",
-  },
-});
+import { computed } from "mobx";
+import { GeneralEntity } from "../../../../common/catalog/entity/declarations/general";
+import { preferencesURL, welcomeURL } from "../../../../common/routes";
+import { catalogEntity } from "./view-catalog-entity";
+import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
+import addComputedSourceInjectable from "../../entity/add-computed-source.injectable";
 
 const preferencesEntity = new GeneralEntity({
   metadata: {
@@ -65,12 +48,17 @@ const welcomePageEntity = new GeneralEntity({
   },
 });
 
-const generalEntities = observable([
-  catalogEntity,
-  preferencesEntity,
-  welcomePageEntity,
-]);
+const syncGeneralEntitiesInjectable = getInjectable({
+  instantiate: (di) => {
+    const addComputedSource = di.inject(addComputedSourceInjectable);
 
-export function syncGeneralEntities() {
-  catalogEntityRegistry.addObservableSource("lens:general", generalEntities);
-}
+    return () => addComputedSource(computed(() => [
+      catalogEntity,
+      preferencesEntity,
+      welcomePageEntity,
+    ]));
+  },
+  lifecycle: lifecycleEnum.singleton,
+});
+
+export default syncGeneralEntitiesInjectable;

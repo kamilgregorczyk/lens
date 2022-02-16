@@ -3,9 +3,8 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { navigate } from "../../renderer/navigation";
-import { CatalogEntity, CatalogEntityMetadata, CatalogEntitySpec, CatalogEntityStatus } from "../catalog/entity/entity";
-import { CatalogCategory } from "../catalog/category";
+import { CatalogEntity, CatalogEntityActionContext, CatalogEntityMetadata, CatalogEntitySpec, CatalogEntityStatus } from "../entity";
+import { CatalogCategory } from "../../category/category";
 
 interface GeneralEntitySpec extends CatalogEntitySpec {
   path: string;
@@ -19,20 +18,8 @@ export class GeneralEntity extends CatalogEntity<CatalogEntityMetadata, CatalogE
   public readonly apiVersion = "entity.k8slens.dev/v1alpha1";
   public readonly kind = "General";
 
-  async onRun() {
-    navigate(this.spec.path);
-  }
-
-  public onSettingsOpen(): void {
-    return;
-  }
-
-  public onDetailsOpen(): void {
-    return;
-  }
-
-  public onContextMenuOpen(): void {
-    return;
+  onRun(context: CatalogEntityActionContext) {
+    context.navigate(this.spec.path);
   }
 }
 

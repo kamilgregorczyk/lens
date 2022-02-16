@@ -3,6 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
+import appEventBusInjectable from "../app-event-bus/app-event-bus.injectable";
 import type { BaseStoreParams } from "../base-store";
 import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
 import userStoreLoggerInjectable from "./logger.injectable";
@@ -13,6 +14,7 @@ const createUserStoreInjectable = getInjectable({
     const dependencies: UserStoreDependencies = {
       logger: di.inject(userStoreLoggerInjectable),
       userDataPath: di.inject(directoryForUserDataInjectable),
+      appEventBus: di.inject(appEventBusInjectable),
     };
 
     return (params: BaseStoreParams<UserPereferencesStoreModel>) => new UserPereferencesStore(dependencies, params);

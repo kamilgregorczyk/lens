@@ -3,26 +3,26 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import "../../common/ipc/cluster";
 import type http from "http";
 import { action, makeObservable, observable, reaction, toJS } from "mobx";
 import { Cluster } from "../../common/clusters/cluster";
-import logger from "../logger";
 import { apiKubePrefix } from "../../common/vars";
 import { getClusterIdFromHost } from "../../common/utils";
-import { catalogEntityRegistry } from "../catalog";
-import { KubernetesCluster, KubernetesClusterPrometheusMetrics, LensKubernetesClusterStatus } from "../../common/catalog-entities/kubernetes-cluster";
-import { ipcMainOn } from "../../common/ipc";
-import { once } from "lodash";
+import { KubernetesCluster, KubernetesClusterPrometheusMetrics, LensKubernetesClusterStatus } from "../../common/catalog/entity/declarations/kubernetes-cluster";
 import type { ClusterStore } from "../../common/clusters/store";
 import type { ClusterId } from "../../common/cluster-types";
-
-const logPrefix = "[CLUSTER-MANAGER]:";
+import type { GetEntitiesByClass } from "../../common/catalog/entity/get-by-class.injectable";
+import type { LensLogger } from "../../common/logger";
+import type { GetEntityById } from "../../common/catalog/entity/get-by-id.injectable";
+import type { CatalogEntity } from "../../common/catalog/entity/entity";
 
 const lensSpecificClusterStatuses: Set<string> = new Set(Object.values(LensKubernetesClusterStatus));
 
 export interface ClusterManagerDependencies {
   readonly store: ClusterStore;
+  readonly logger: LensLogger;
+  getEntitiesByClass: GetEntitiesByClass;
+  getEntityById: GetEntityById;
 }
 
 export class ClusterManager {
@@ -32,9 +32,7 @@ export class ClusterManager {
 
   constructor(protected readonly dependencies: ClusterManagerDependencies) {
     makeObservable(this);
-  }
 
-  init = once(() => {
     // reacting to every cluster's state change and total amount of items
     reaction(
       () => this.dependencies.store.clustersList.map(c => c.getState()),
@@ -50,12 +48,12 @@ export class ClusterManager {
     );
 
     reaction(
-      () => catalogEntityRegistry.getItemsByEntityClass(KubernetesCluster) as KubernetesCluster[],
+      () => this.dependencies.getEntitiesByClass(KubernetesCluster) as KubernetesCluster[],
       entities => this.syncClustersFromCatalog(entities),
     );
 
     reaction(() => [
-      catalogEntityRegistry.getItemsByEntityClass(KubernetesCluster),
+      this.dependencies.getEntitiesByClass(KubernetesCluster),
       this.visibleCluster,
     ] as const, ([entities, visibleCluster]) => {
       for (const entity of entities) {
@@ -66,14 +64,11 @@ export class ClusterManager {
         }
       }
     });
-
-    ipcMainOn("network:offline", this.onNetworkOffline);
-    ipcMainOn("network:online", this.onNetworkOnline);
-  });
+  }
 
   @action
   protected updateCatalog(clusters: Cluster[]) {
-    logger.debug("[CLUSTER-MANAGER]: updating catalog from cluster store");
+    this.dependencies.logger.debug("updating catalog from cluster store");
 
     for (const cluster of clusters) {
       this.updateEntityFromCluster(cluster);
@@ -82,22 +77,21 @@ export class ClusterManager {
 
   public setAsDeleting(clusterId: ClusterId): void {
     this.deleting.add(clusterId);
-    this.updateEntityStatus(catalogEntityRegistry.getById(clusterId));
+    this.updateEntityStatus(this.dependencies.getEntityById(clusterId));
   }
 
   public clearAsDeleting(clusterId: ClusterId): void {
     this.deleting.delete(clusterId);
-    this.updateEntityStatus(catalogEntityRegistry.getById(clusterId));
+    this.updateEntityStatus(this.dependencies.getEntityById(clusterId));
   }
 
+  @action
   protected updateEntityFromCluster(cluster: Cluster) {
-    const index = catalogEntityRegistry.items.findIndex((entity) => entity.getId() === cluster.id);
+    const entity = this.dependencies.getEntityById(cluster.id) as KubernetesCluster;
 
-    if (index === -1) {
+    if (!entity) {
       return;
     }
-
-    const entity = catalogEntityRegistry.items[index] as KubernetesCluster;
 
     this.updateEntityStatus(entity, cluster);
 
@@ -137,12 +131,10 @@ export class ClusterManager {
       entity.spec.icon = undefined;
       cluster.preferences.icon = undefined;
     }
-
-    catalogEntityRegistry.items.splice(index, 1, entity);
   }
 
   @action
-  protected updateEntityStatus(entity: KubernetesCluster, cluster?: Cluster) {
+  protected updateEntityStatus(entity: CatalogEntity, cluster?: Cluster) {
     if (this.deleting.has(entity.getId())) {
       entity.status.phase = LensKubernetesClusterStatus.DELETING;
       entity.status.enabled = false;
@@ -193,9 +185,9 @@ export class ClusterManager {
           this.dependencies.store.addCluster(model);
         } catch (error) {
           if (error.code === "ENOENT" && error.path === entity.spec.kubeconfigPath) {
-            logger.warn(`${logPrefix} kubeconfig file disappeared`, model);
+            this.dependencies.logger.warn("kubeconfig file disappeared", model);
           } else {
-            logger.error(`${logPrefix} failed to add cluster: ${error}`, model);
+            this.dependencies.logger.error(`failed to add cluster: ${error}`, model);
           }
         }
       } else {
@@ -227,8 +219,8 @@ export class ClusterManager {
     }
   }
 
-  protected onNetworkOffline = () => {
-    logger.info(`${logPrefix} network is offline`);
+  onNetworkOffline() {
+    this.dependencies.logger.info("network is offline");
 
     for (const cluster of this.dependencies.store.clustersList) {
       if (!cluster.disconnected) {
@@ -237,17 +229,17 @@ export class ClusterManager {
         cluster.refreshConnectionStatus().catch((e) => e);
       }
     }
-  };
+  }
 
-  protected onNetworkOnline = () => {
-    logger.info(`${logPrefix} network is online`);
+  onNetworkOnline() {
+    this.dependencies.logger.info("network is online");
 
     for (const cluster of this.dependencies.store.clustersList) {
       if (!cluster.disconnected) {
         cluster.refreshConnectionStatus().catch((e) => e);
       }
     }
-  };
+  }
 
   stop() {
     for (const cluster of this.dependencies.store.clustersList) {

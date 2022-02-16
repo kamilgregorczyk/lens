@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { CatalogEntityConstructor } from "../category";
+import type { CatalogEntityConstructor } from "../category/category";
 import type { CatalogEntity } from "./entity";
 
 export interface BaseCatalogEntityRegistry {

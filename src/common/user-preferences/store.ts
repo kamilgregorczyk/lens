@@ -3,13 +3,12 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { app } from "electron";
 import semver, { SemVer } from "semver";
-import { action, computed, makeObservable, observable, reaction } from "mobx";
+import { action, computed, makeObservable, observable } from "mobx";
 import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../base-store";
 import { getAppVersion } from "../utils/app-version";
 import { kubeConfigDefaultPath } from "../kube-helpers";
-import { appEventBus } from "../app-event-bus/event-bus";
+import type { AppEventBus } from "../app-event-bus/event-bus";
 import { getOrInsertSet, toggle, toJS } from "../../renderer/utils";
 import { DESCRIPTORS, EditorConfiguration, ExtensionRegistry, KubeconfigSyncValue, UserPreferencesModel, TerminalConfig } from "./preferences-helpers";
 import logger from "../../main/logger";
@@ -19,10 +18,12 @@ export interface UserPereferencesStoreModel {
   preferences: UserPreferencesModel;
 }
 
-export interface UserStoreDependencies extends BaseStoreDependencies {}
+export interface UserStoreDependencies extends BaseStoreDependencies {
+  readonly appEventBus: AppEventBus;
+}
 
 export class UserPereferencesStore extends BaseStore<UserPereferencesStoreModel> /* implements UserStoreFlatModel (when strict null is enabled) */ {
-  constructor(dependencies: UserStoreDependencies, baseStoreParams: BaseStoreParams<UserPereferencesStoreModel> = {}) {
+  constructor(protected readonly dependencies: UserStoreDependencies, baseStoreParams: BaseStoreParams<UserPereferencesStoreModel> = {}) {
     super(dependencies, {
       ...baseStoreParams,
       name: "lens-user-store",
@@ -89,24 +90,6 @@ export class UserPereferencesStore extends BaseStore<UserPereferencesStoreModel>
     return new SemVer(getAppVersion()).prerelease[0] !== this.updateChannel;
   }
 
-  startMainReactions() {
-    // track telemetry availability
-    reaction(() => this.allowTelemetry, allowed => {
-      appEventBus.emit({ name: "telemetry", action: allowed ? "enabled" : "disabled" });
-    });
-
-    // open at system start-up
-    reaction(() => this.openAtLogin, openAtLogin => {
-      app.setLoginItemSettings({
-        openAtLogin,
-        openAsHidden: true,
-        args: ["--hidden"],
-      });
-    }, {
-      fireImmediately: true,
-    });
-  }
-
   /**
    * Checks if a column (by ID) for a table (by ID) is configured to be hidden
    * @param tableId The ID of the table to be checked against
@@ -141,7 +124,7 @@ export class UserPereferencesStore extends BaseStore<UserPereferencesStoreModel>
 
   @action
   saveLastSeenAppVersion() {
-    appEventBus.emit({ name: "app", action: "whats-new-seen" });
+    this.dependencies.appEventBus.emit({ name: "app", action: "whats-new-seen" });
     this.lastSeenAppVersion = getAppVersion();
   }
 

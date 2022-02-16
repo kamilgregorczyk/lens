@@ -7,7 +7,6 @@
 import { action, comparer, computed, makeObservable, observable } from "mobx";
 import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../base-store";
 import { Cluster } from "../clusters/cluster";
-import logger from "../../main/logger";
 import type { AppEventBus } from "../app-event-bus/event-bus";
 import { toJS } from "../utils";
 import type { ClusterModel, ClusterId } from "../cluster-types";
@@ -86,7 +85,7 @@ export class ClusterStore extends BaseStore<ClusterStoreModel> {
         }
         newClusters.set(clusterModel.id, cluster);
       } catch (error) {
-        logger.warn(`[CLUSTER-STORE]: Failed to update/create a cluster: ${error}`);
+        this.dependencies.logger.warn(`Failed to update/create a cluster: ${error}`);
       }
     }
 

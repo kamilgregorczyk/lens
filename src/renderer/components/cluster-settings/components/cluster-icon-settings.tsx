@@ -8,7 +8,7 @@ import type { Cluster } from "../../../../common/clusters/cluster";
 import { boundMethod } from "../../../utils";
 import { observable } from "mobx";
 import { observer } from "mobx-react";
-import type { KubernetesCluster } from "../../../../common/catalog-entities";
+import type { KubernetesCluster } from "../../../../common/catalog/entity/declarations";
 import { FilePicker, OverSizeLimitStyle } from "../../file-picker";
 import { MenuActions, MenuItem } from "../../menu";
 import { Avatar } from "../../avatar";

@@ -6,7 +6,7 @@
 import { action, computed, observable, makeObservable } from "mobx";
 import { Disposer, ExtendedMap } from "../../../common/utils";
 import type { CatalogEntity, CatalogEntityData, CatalogEntityKindData } from "../../../common/catalog/entity/entity";
-import type { CatalogCategory } from "../../../common/catalog/category";
+import type { CatalogCategory } from "../../../common/catalog/category/category";
 
 export type CategoryFilter = (category: CatalogCategory) => any;
 

@@ -10,7 +10,7 @@ import type { CatalogEntity } from "../common/catalog/entity/entity";
 import type { Disposer } from "../common/utils";
 import type { EntityFilter } from "../renderer/catalog/entity/registry";
 import type { TopBarRegistration } from "../renderer/components/layout/top-bar/top-bar-registration";
-import type { KubernetesCluster } from "../common/catalog-entities";
+import type { KubernetesCluster } from "../common/catalog/entity/declarations";
 import type { WelcomeMenuRegistration } from "../renderer/components/+welcome/welcome-menu-items/welcome-menu-registration";
 import type { WelcomeBannerRegistration } from "../renderer/components/+welcome/welcome-banner-items/welcome-banner-registration";
 import type { CommandRegistration } from "../renderer/components/command-palette/registered-commands/commands";

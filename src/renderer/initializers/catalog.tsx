@@ -5,7 +5,7 @@
 
 import React from "react";
 import fs from "fs";
-import "../../common/catalog-entities/kubernetes-cluster";
+import "../../common/catalog/entity/declarations/kubernetes-cluster";
 import { ClusterStore } from "../../common/clusters/store";
 import { catalogCategoryRegistry } from "../api/catalog-category-registry";
 import { WeblinkAddCommand } from "../components/catalog-entities/weblink-add-command";

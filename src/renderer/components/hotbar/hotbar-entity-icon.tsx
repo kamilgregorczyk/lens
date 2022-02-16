@@ -12,7 +12,7 @@ import { observer } from "mobx-react";
 import { cssNames, IClassName } from "../../utils";
 import { Icon } from "../icon";
 import { HotbarIcon } from "./hotbar-icon";
-import { LensKubernetesClusterStatus } from "../../../common/catalog-entities/kubernetes-cluster";
+import { LensKubernetesClusterStatus } from "../../../common/catalog/entity/declarations/kubernetes-cluster";
 import type { CatalogEntity, CatalogEntityContextMenu, NavigateAction } from "../../../common/catalog/entity/entity";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { GetCategoryForEntity } from "../../catalog/category/get-for-entity.injectable";

@@ -3,8 +3,8 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { CatalogEntity, CatalogEntityMetadata, CatalogEntityStatus } from "../catalog/entity/entity";
-import { CatalogCategory } from "../catalog/category";
+import { CatalogEntity, CatalogEntityMetadata, CatalogEntityStatus } from "../entity";
+import { CatalogCategory } from "../../category/category";
 
 export type WebLinkStatusPhase = "available" | "unavailable";
 

@@ -19,9 +19,9 @@ export default {
     const rawHotbars = store.get("hotbars");
     const hotbars: Pre500Alpha2Hotbar[] = Array.isArray(rawHotbars) ? rawHotbars : [];
 
-    store.set("hotbars", hotbars.map((hotbar) => ({
-      id: uuid.v4(),
-      ...hotbar,
+    store.set("hotbars", hotbars.map(({ id = uuid.v4(), ...rest }) => ({
+      id,
+      ...rest,
     })));
   },
 } as MigrationDeclaration;

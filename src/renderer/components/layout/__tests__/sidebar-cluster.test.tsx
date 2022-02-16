@@ -7,7 +7,7 @@ import React from "react";
 import "@testing-library/jest-dom/extend-expect";
 import { render, fireEvent } from "@testing-library/react";
 import { SidebarCluster } from "../sidebar-cluster";
-import { KubernetesCluster } from "../../../../common/catalog-entities";
+import { KubernetesCluster } from "../../../../common/catalog/entity/declarations";
 
 jest.mock("../../../../common/hotbar-store", () => ({
   HotbarStore: {

@@ -5,8 +5,8 @@
 
 import { computed, observable, makeObservable, action } from "mobx";
 import type { CatalogEntity, CatalogEntityData, CatalogEntityKindData } from "../../../common/catalog/entity/entity";
-import type { CatalogCategory, CatalogEntityConstructor } from "../../../common/catalog/category";
-import "../../../common/catalog-entities";
+import type { CatalogCategory, CatalogEntityConstructor } from "../../../common/catalog/category/category";
+import "../../../common/catalog/entity/declarations";
 import { Disposer, iter } from "../../utils";
 import { once } from "lodash";
 import type { LensLogger } from "../../../common/logger";

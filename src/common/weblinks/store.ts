@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { observable } from "mobx";
+import { computed, observable } from "mobx";
 import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../base-store";
 import * as uuid from "uuid";
 import { toJS } from "../utils";
@@ -46,6 +46,8 @@ export class WeblinkStore extends BaseStore<WeblinkStoreModel> {
 
     this.weblinks.replace(weblinks.map(({ id, ...rest }) => [id, rest]));
   }
+
+  readonly links = computed(() => Array.from(this.weblinks, ([id, data]) => ({ id, ...data })));
 
   add(data: WeblinkCreateOptions): WeblinkData {
     const { id = uuid.v4(), ...weblink } = data;

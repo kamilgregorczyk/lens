@@ -5,7 +5,7 @@
 import type { Cluster } from "../../../common/clusters/cluster";
 import type { CatalogEntityRegistry } from "../../catalog/entity/registry";
 import { Terminal } from "../../components/dock/terminal/terminal";
-import type { KubernetesCluster } from "../../../common/catalog-entities";
+import type { KubernetesCluster } from "../../../common/catalog/entity/declarations";
 import type { AppEvent } from "../../../common/app-event-bus/event-bus";
 import type { CatalogEntity } from "../../../common/catalog/entity/entity";
 import { when } from "mobx";

@@ -3,13 +3,13 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { CatalogEntity, CatalogEntityActionContext, CatalogEntityContextMenuContext, CatalogEntityMetadata, CatalogEntityStatus } from "../catalog/entity/entity";
-import { CatalogCategory, CatalogCategorySpec } from "../catalog/category";
-import type { CatalogEntitySpec } from "../catalog/entity/entity";
-import { requestClusterDisconnection } from "../../renderer/ipc";
-import { activateClusterInjectionToken } from "../ipc/cluster/activate.token";
-import { disconnectClusterInjectionToken } from "../ipc/cluster/disconnect.token";
-import { asLegacyGlobalChannelForExtensionApi } from "../../extensions/di-legacy-globals/as-legacy-global-channel-for-extension-api";
+import { CatalogEntity, CatalogEntityActionContext, CatalogEntityContextMenuContext, CatalogEntityMetadata, CatalogEntityStatus } from "../entity";
+import { CatalogCategory, CatalogCategorySpec } from "../../category/category";
+import type { CatalogEntitySpec } from "../entity";
+import { requestClusterDisconnection } from "../../../../renderer/ipc";
+import { activateClusterInjectionToken } from "../../../ipc/cluster/activate.token";
+import { disconnectClusterInjectionToken } from "../../../ipc/cluster/disconnect.token";
+import { asLegacyGlobalChannelForExtensionApi } from "../../../../extensions/di-legacy-globals/as-legacy-global-channel-for-extension-api";
 
 export interface KubernetesClusterPrometheusMetrics {
   address?: {
@@ -71,27 +71,19 @@ export class KubernetesCluster<
   public readonly apiVersion = KubernetesCluster.apiVersion;
   public readonly kind = KubernetesCluster.kind;
 
-  async connect(): Promise<void> {
-    await activateCluster(this.getId());
+  connect(): Promise<void> {
+    return activateCluster(this.getId());
   }
 
-  async disconnect(): Promise<void> {
-    await disconnectCluster(this.getId());
+  disconnect(): Promise<void> {
+    return disconnectCluster(this.getId());
   }
 
-  async onRun(context: CatalogEntityActionContext) {
+  onRun(context: CatalogEntityActionContext) {
     context.navigate(`/cluster/${this.getId()}`);
   }
 
-  onDetailsOpen(): void {
-    //
-  }
-
-  onSettingsOpen(): void {
-    //
-  }
-
-  async onContextMenuOpen(context: CatalogEntityContextMenuContext) {
+  onContextMenuOpen(context: CatalogEntityContextMenuContext) {
     if (!this.metadata.source || this.metadata.source === "local") {
       context.menuItems.push({
         title: "Settings",

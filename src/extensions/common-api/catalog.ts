@@ -7,7 +7,7 @@ export {
   KubernetesCluster,
   GeneralEntity,
   WebLink,
-} from "../../common/catalog-entities";
+} from "../../common/catalog/entity/declarations";
 
 export type {
   KubernetesClusterPrometheusMetrics,
@@ -18,6 +18,6 @@ export type {
   WebLinkStatusPhase,
   KubernetesClusterStatusPhase,
   KubernetesClusterStatus,
-} from "../../common/catalog-entities";
+} from "../../common/catalog/entity/declarations";
 
 export * from "../../common/catalog/entity/entity";

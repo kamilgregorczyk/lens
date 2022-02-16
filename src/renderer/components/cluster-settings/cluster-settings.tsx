@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import type { KubernetesCluster } from "../../../common/catalog-entities";
+import type { KubernetesCluster } from "../../../common/catalog/entity/declarations";
 import { ClusterStore } from "../../../common/clusters/store";
 import type { EntitySettingViewProps } from "../../../extensions/registries";
 import type { CatalogEntity } from "../../api/catalog-entity";

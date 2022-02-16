@@ -4,7 +4,7 @@
  */
 
 import { observable, reaction } from "mobx";
-import { WebLink, WebLinkSpec, WebLinkStatus } from "../../../common/catalog-entities";
+import { WebLink, WebLinkSpec, WebLinkStatus } from "../../../common/catalog/entity/declarations";
 import { CatalogEntity, type CatalogEntityMetadata } from "../../../common/catalog/entity/entity";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import type { CatalogEntityRegistry } from "../entity/registry";

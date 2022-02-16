@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { kubernetesClusterCategory } from "../../common/catalog-entities";
+import { kubernetesClusterCategory } from "../../common/catalog/entity/declarations";
 import { addClusterURL, kubernetesURL } from "../../common/routes";
 import { multiSet } from "../utils";
 import { UserStore } from "../../common/user-preferences";

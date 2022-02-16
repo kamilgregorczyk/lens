@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import createChildLoggerInjectable from "../logger/create-child-logger.injectable";
+import createChildLoggerInjectable from "../../logger/create-child-logger.injectable";
 
 const catalogCategoryRegistryLoggerInjectable = getInjectable({
   instantiate: (di) => {

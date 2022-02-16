@@ -4,17 +4,14 @@
  */
 
 import { ObservableMap } from "mobx";
-import type { CatalogEntity } from "../../../common/catalog";
-import { loadFromOptions } from "../../../common/kube-helpers";
-import type { Cluster } from "../../../common/clusters/cluster";
-import { computeDiff as computeDiffFor, configToModels } from "../kubeconfig-sync-manager/kubeconfig-sync-manager";
+import { loadFromOptions } from "../../../../common/kube-helpers";
+import type { Cluster } from "../../../../common/clusters/cluster";
 import mockFs from "mock-fs";
 import fs from "fs";
-import { ClusterManager } from "../../clusters/manager";
-import clusterStoreInjectable from "../../../common/clusters/cluster-store.injectable";
-import { getDiForUnitTesting } from "../../getDiForUnitTesting";
-import { createClusterInjectionToken } from "../../../common/clusters/create-cluster-injection-token";
-import directoryForKubeConfigsInjectable from "../../../common/directory-path/local-kube-configs.injectable";
+import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
+import { createClusterInjectionToken } from "../../../../common/clusters/create-cluster-injection-token";
+import directoryForKubeConfigsInjectable from "../../../../common/directory-path/local-kube-configs.injectable";
+import type { CatalogEntity } from "../../../../common/catalog/entity/entity";
 
 
 jest.mock("electron", () => ({
@@ -47,15 +44,10 @@ describe("kubeconfig-sync.source tests", () => {
       directoryForKubeConfigs: di.inject(directoryForKubeConfigsInjectable),
       createCluster: di.inject(createClusterInjectionToken),
     });
-
-    di.inject(clusterStoreInjectable);
-
-    ClusterManager.createInstance();
   });
 
   afterEach(() => {
     mockFs.restore();
-    ClusterManager.resetInstance();
   });
 
   describe("configsToModels", () => {

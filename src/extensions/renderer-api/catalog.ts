@@ -5,7 +5,7 @@
 
 
 import type { CatalogEntity } from "../../common/catalog/entity/entity";
-import type { CatalogCategory } from "../../common/catalog/category";
+import type { CatalogCategory } from "../../common/catalog/category/category";
 import type { Disposer } from "../../common/utils";
 import type { CatalogEntityOnBeforeRun } from "../../renderer/catalog/entity/registry";
 import catalogEntityRegistryInjectable from "../../renderer/catalog/entity/registry.injectable";

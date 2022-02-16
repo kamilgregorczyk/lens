@@ -4,7 +4,7 @@
  */
 
 import React from "react";
-import { KubernetesCluster, WebLink } from "../../common/catalog-entities";
+import { KubernetesCluster, WebLink } from "../../common/catalog/entity/declarations";
 import { CatalogEntityDetailRegistry, CatalogEntityDetailsProps } from "../../extensions/registries";
 import { DrawerItem, DrawerTitle } from "../components/drawer";
 

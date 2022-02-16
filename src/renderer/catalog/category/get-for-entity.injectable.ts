@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { CatalogCategory } from "../../../common/catalog/category";
+import type { CatalogCategory } from "../../../common/catalog/category/category";
 import type { CatalogEntity } from "../../../common/catalog/entity/entity";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import catalogCategoryRegistryInjectable from "./registry.injectable";
