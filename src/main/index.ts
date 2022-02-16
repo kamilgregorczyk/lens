@@ -3,8 +3,6 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-// Main process
-
 import { injectSystemCAs } from "../common/system-ca";
 import * as Mobx from "mobx";
 import * as LensExtensionsCommonApi from "../extensions/common-api";
@@ -23,7 +21,6 @@ import configurePackages from "../common/configure-packages";
 import { PrometheusProviderRegistry } from "./prometheus";
 import * as initializers from "./initializers";
 import { SentryInit } from "../common/sentry";
-import { ShellSession } from "./shell-session/shell-session";
 import { getDi } from "./getDi";
 import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
 import lensProtocolRouterMainInjectable from "./protocol-handler/router.injectable";
@@ -39,246 +36,251 @@ import initAppMenuUpdaterInjectable from "./menu/init-app-menu-updater.injectabl
 import clusterManagerInjectable from "./clusters/manager.injectable";
 import initTrayMenuUpdaterInjectable from "./tray/init-tray-menu-updater.injectable";
 import startUpdateCheckingInjectable from "./updater/start-update-checking.injectable";
+import type { ConfigurableDependencyInjectionContainer } from "@ogre-tools/injectable";
+import cleanupShellProcessesInjectable from "./shell-session/cleanup-processes.injectable";
 
 app.setName(appName);
 injectSystemCAs();
 SentryInit();
 
-const di = getDi();
+async function main(di: ConfigurableDependencyInjectionContainer) {
+  await di.runSetups();
 
-await di.runSetups();
+  const onQuitCleanup = disposer();
+  const logger = di.inject(baseLoggerInjectable);
+  const appEventBus = di.inject(appEventBusInjectable);
+  const windowManager = di.inject(windowManagerInjectable);
+  const clusterManager = di.inject(clusterManagerInjectable);
 
-const onQuitCleanup = disposer();
-const logger = di.inject(baseLoggerInjectable);
-const appEventBus = di.inject(appEventBusInjectable);
-const windowManager = di.inject(windowManagerInjectable);
-const clusterManager = di.inject(clusterManagerInjectable);
+  logger.info(`📟 Setting ${productName} as protocol client for lens://`);
 
-logger.info(`📟 Setting ${productName} as protocol client for lens://`);
-
-if (app.setAsDefaultProtocolClient("lens")) {
-  logger.info("📟 Protocol client register succeeded ✅");
-} else {
-  logger.info("📟 Protocol client register failed ❗");
-}
-
-if (process.env.LENS_DISABLE_GPU) {
-  app.disableHardwareAcceleration();
-}
-
-logger.debug("[APP-MAIN] configuring packages");
-configurePackages();
-
-mangleProxyEnv();
-
-if (app.commandLine.getSwitchValue("proxy-server") !== "") {
-  process.env.HTTPS_PROXY = app.commandLine.getSwitchValue("proxy-server");
-}
-
-logger.debug("[APP-MAIN] Lens protocol routing main");
-
-const lensProtocolRouterMain = di.inject(lensProtocolRouterMainInjectable);
-
-if (!app.requestSingleInstanceLock()) {
-  app.exit();
-} else {
-  for (const arg of process.argv) {
-    if (arg.toLowerCase().startsWith("lens://")) {
-      lensProtocolRouterMain.route(arg);
-    }
+  if (app.setAsDefaultProtocolClient("lens")) {
+    logger.info("📟 Protocol client register succeeded ✅");
+  } else {
+    logger.info("📟 Protocol client register failed ❗");
   }
-}
 
-app.on("second-instance", (event, argv) => {
-  logger.debug("second-instance message");
+  if (process.env.LENS_DISABLE_GPU) {
+    app.disableHardwareAcceleration();
+  }
 
-  for (const arg of argv) {
-    if (arg.toLowerCase().startsWith("lens://")) {
-      lensProtocolRouterMain.route(arg);
+  logger.debug("[APP-MAIN] configuring packages");
+  configurePackages();
+
+  mangleProxyEnv();
+
+  if (app.commandLine.getSwitchValue("proxy-server") !== "") {
+    process.env.HTTPS_PROXY = app.commandLine.getSwitchValue("proxy-server");
+  }
+
+  logger.debug("[APP-MAIN] Lens protocol routing main");
+
+  const lensProtocolRouterMain = di.inject(lensProtocolRouterMainInjectable);
+
+  if (!app.requestSingleInstanceLock()) {
+    app.exit();
+  } else {
+    for (const arg of process.argv) {
+      if (arg.toLowerCase().startsWith("lens://")) {
+        lensProtocolRouterMain.route(arg);
+      }
     }
   }
 
-  windowManager.ensureMainWindow();
-});
+  app.on("second-instance", (event, argv) => {
+    logger.debug("second-instance message");
 
-app.on("ready", async () => {
-  const directoryForExes = di.inject(directoryForExesInjectable);
+    for (const arg of argv) {
+      if (arg.toLowerCase().startsWith("lens://")) {
+        lensProtocolRouterMain.route(arg);
+      }
+    }
 
-  logger.info(`🚀 Starting ${productName} from "${directoryForExes}"`);
-  logger.info("🐚 Syncing shell environment");
-  await shellSync();
+    windowManager.ensureMainWindow();
+  });
 
-  powerMonitor.on("shutdown", () => app.exit());
+  app.on("ready", async () => {
+    const directoryForExes = di.inject(directoryForExesInjectable);
 
-  registerFileProtocol("static", __static);
+    logger.info(`🚀 Starting ${productName} from "${directoryForExes}"`);
+    logger.info("🐚 Syncing shell environment");
+    await shellSync();
 
-  PrometheusProviderRegistry.createInstance();
-  initializers.initPrometheusProviderRegistry();
+    powerMonitor.on("shutdown", () => app.exit());
 
-  logger.info("💾 Loading stores");
+    registerFileProtocol("static", __static);
 
-  HelmRepoManager.createInstance(); // create the instance
+    PrometheusProviderRegistry.createInstance();
+    initializers.initPrometheusProviderRegistry();
 
-  const lensProxy = di.inject(lensProxyInjectable);
+    logger.info("💾 Loading stores");
 
-  try {
-    logger.info("🔌 Starting LensProxy");
-    await lensProxy.listen();
-  } catch (error) {
-    dialog.showErrorBox("Lens Error", `Could not start proxy: ${error?.message || "unknown error"}`);
+    HelmRepoManager.createInstance(); // create the instance
 
-    return app.exit();
-  }
+    const lensProxy = di.inject(lensProxyInjectable);
 
-  // test proxy connection
-  try {
-    logger.info("🔎 Testing LensProxy connection ...");
-    const getAppVersionFromProxyServer = di.inject(getAppVersionFromProxyInjectable);
-    const versionFromProxy = await getAppVersionFromProxyServer();
-
-    if (getAppVersion() !== versionFromProxy) {
-      logger.error("Proxy server responded with invalid response");
+    try {
+      logger.info("🔌 Starting LensProxy");
+      await lensProxy.listen();
+    } catch (error) {
+      dialog.showErrorBox("Lens Error", `Could not start proxy: ${error?.message || "unknown error"}`);
 
       return app.exit();
     }
 
-    logger.info("⚡ LensProxy connection OK");
-  } catch (error) {
-    logger.error(`🛑 LensProxy: failed connection test: ${error}`);
+    // test proxy connection
+    try {
+      logger.info("🔎 Testing LensProxy connection ...");
+      const getAppVersionFromProxyServer = di.inject(getAppVersionFromProxyInjectable);
+      const versionFromProxy = await getAppVersionFromProxyServer();
 
-    const hostsPath = isWindows
-      ? "C:\\windows\\system32\\drivers\\etc\\hosts"
-      : "/etc/hosts";
-    const message = [
-      `Failed connection test: ${error}`,
-      "Check to make sure that no other versions of Lens are running",
-      `Check ${hostsPath} to make sure that it is clean and that the localhost loopback is at the top and set to 127.0.0.1`,
-      "If you have HTTP_PROXY or http_proxy set in your environment, make sure that the localhost and the ipv4 loopback address 127.0.0.1 are added to the NO_PROXY environment variable.",
-    ];
+      if (getAppVersion() !== versionFromProxy) {
+        logger.error("Proxy server responded with invalid response");
 
-    dialog.showErrorBox("Lens Proxy Error", message.join("\n\n"));
+        return app.exit();
+      }
 
-    return app.exit();
-  }
+      logger.info("⚡ LensProxy connection OK");
+    } catch (error) {
+      logger.error(`🛑 LensProxy: failed connection test: ${error}`);
 
-  const extensionLoader = di.inject(extensionLoaderInjectable);
-  const extensionDiscovery = di.inject(extensionDiscoveryInjectable);
-  const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
-  const startUpdateChecking = di.inject(startUpdateCheckingInjectable);
+      const hostsPath = isWindows
+        ? "C:\\windows\\system32\\drivers\\etc\\hosts"
+        : "/etc/hosts";
+      const message = [
+        `Failed connection test: ${error}`,
+        "Check to make sure that no other versions of Lens are running",
+        `Check ${hostsPath} to make sure that it is clean and that the localhost loopback is at the top and set to 127.0.0.1`,
+        "If you have HTTP_PROXY or http_proxy set in your environment, make sure that the localhost and the ipv4 loopback address 127.0.0.1 are added to the NO_PROXY environment variable.",
+      ];
 
-  extensionLoader.init();
-  extensionDiscovery.init();
-  kubeConfigSyncManager.startSync();
-  startUpdateChecking();
+      dialog.showErrorBox("Lens Proxy Error", message.join("\n\n"));
 
-  // Start the app without showing the main window when auto starting on login
-  // (On Windows and Linux, we get a flag. On MacOS, we get special API.)
-  const startHidden = process.argv.includes("--hidden") || (isMac && app.getLoginItemSettings().wasOpenedAsHidden);
+      return app.exit();
+    }
 
-  logger.info("🖥️  Starting WindowManager");
+    const extensionLoader = di.inject(extensionLoaderInjectable);
+    const extensionDiscovery = di.inject(extensionDiscoveryInjectable);
+    const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
+    const startUpdateChecking = di.inject(startUpdateCheckingInjectable);
 
-  const initMenu = di.inject(initAppMenuUpdaterInjectable);
-  const initTray = di.inject(initTrayMenuUpdaterInjectable);
+    extensionLoader.init();
+    extensionDiscovery.init();
+    kubeConfigSyncManager.startSync();
+    startUpdateChecking();
 
-  onQuitCleanup.push(
-    initMenu(),
-    initTray(),
-    () => ShellSession.cleanup(),
-  );
+    // Start the app without showing the main window when auto starting on login
+    // (On Windows and Linux, we get a flag. On MacOS, we get special API.)
+    const startHidden = process.argv.includes("--hidden") || (isMac && app.getLoginItemSettings().wasOpenedAsHidden);
 
-  installDeveloperTools();
+    logger.info("🖥️  Starting WindowManager");
 
-  if (!startHidden) {
-    windowManager.ensureMainWindow();
-  }
+    const initMenu = di.inject(initAppMenuUpdaterInjectable);
+    const initTray = di.inject(initTrayMenuUpdaterInjectable);
+    const cleanupShellProcesses = di.inject(cleanupShellProcessesInjectable);
 
-  logger.info("🧩 Initializing extensions");
+    onQuitCleanup.push(
+      initMenu(),
+      initTray(),
+      cleanupShellProcesses,
+    );
 
-  // call after windowManager to see splash earlier
-  try {
-    const extensions = await extensionDiscovery.load();
+    installDeveloperTools();
 
-    // Start watching after bundled extensions are loaded
-    extensionDiscovery.watchExtensions();
+    if (!startHidden) {
+      windowManager.ensureMainWindow();
+    }
 
-    // Subscribe to extensions that are copied or deleted to/from the extensions folder
-    extensionDiscovery.events
-      .on("add", (extension: InstalledExtension) => {
-        extensionLoader.addExtension(extension);
-      })
-      .on("remove", (lensExtensionId: LensExtensionId) => {
-        extensionLoader.removeExtension(lensExtensionId);
-      });
+    logger.info("🧩 Initializing extensions");
 
-    extensionLoader.initExtensions(extensions);
-  } catch (error) {
-    dialog.showErrorBox("Lens Error", `Could not load extensions${error?.message ? `: ${error.message}` : ""}`);
-    console.error(error);
-    console.trace();
-  }
+    // call after windowManager to see splash earlier
+    try {
+      const extensions = await extensionDiscovery.load();
 
-  setTimeout(() => {
-    appEventBus.emit({ name: "service", action: "start" });
-  }, 1000);
-});
+      // Start watching after bundled extensions are loaded
+      extensionDiscovery.watchExtensions();
 
-app.on("activate", (event, hasVisibleWindows) => {
-  logger.info("APP:ACTIVATE", { hasVisibleWindows });
+      // Subscribe to extensions that are copied or deleted to/from the extensions folder
+      extensionDiscovery.events
+        .on("add", (extension: InstalledExtension) => {
+          extensionLoader.addExtension(extension);
+        })
+        .on("remove", (lensExtensionId: LensExtensionId) => {
+          extensionLoader.removeExtension(lensExtensionId);
+        });
 
-  if (!hasVisibleWindows) {
-    windowManager.ensureMainWindow(false);
-  }
-});
+      extensionLoader.initExtensions(extensions);
+    } catch (error) {
+      dialog.showErrorBox("Lens Error", `Could not load extensions${error?.message ? `: ${error.message}` : ""}`);
+      console.error(error);
+      console.trace();
+    }
 
-/**
+    setTimeout(() => {
+      appEventBus.emit({ name: "service", action: "start" });
+    }, 1000);
+  });
+
+  app.on("activate", (event, hasVisibleWindows) => {
+    logger.info("APP:ACTIVATE", { hasVisibleWindows });
+
+    if (!hasVisibleWindows) {
+      windowManager.ensureMainWindow(false);
+    }
+  });
+
+  /**
  * This variable should is used so that `autoUpdater.installAndQuit()` works
  */
-let blockQuit = !isIntegrationTesting;
+  let blockQuit = !isIntegrationTesting;
 
-autoUpdater.on("before-quit-for-update", () => {
-  logger.debug("Unblocking quit for update");
-  blockQuit = false;
-});
+  autoUpdater.on("before-quit-for-update", () => {
+    logger.debug("Unblocking quit for update");
+    blockQuit = false;
+  });
 
-app.on("will-quit", (event) => {
-  logger.debug("will-quit message");
+  app.on("will-quit", (event) => {
+    logger.debug("will-quit message");
 
-  // This is called when the close button of the main window is clicked
+    // This is called when the close button of the main window is clicked
 
 
-  logger.info("APP:QUIT");
-  appEventBus.emit({ name: "app", action: "close" });
-  clusterManager.stop(); // close cluster connections
+    logger.info("APP:QUIT");
+    appEventBus.emit({ name: "app", action: "close" });
+    clusterManager.stop(); // close cluster connections
 
-  const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
+    const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
 
-  kubeConfigSyncManager.stopSync();
+    kubeConfigSyncManager.stopSync();
 
-  // This is set to false here so that LPRM can wait to send future lens://
-  // requests until after it loads again
-  lensProtocolRouterMain.rendererLoaded = false;
+    // This is set to false here so that LPRM can wait to send future lens://
+    // requests until after it loads again
+    lensProtocolRouterMain.rendererLoaded = false;
 
-  if (blockQuit) {
+    if (blockQuit) {
     // Quit app on Cmd+Q (MacOS)
 
-    event.preventDefault(); // prevent app's default shutdown (e.g. required for telemetry, etc.)
+      event.preventDefault(); // prevent app's default shutdown (e.g. required for telemetry, etc.)
 
-    return; // skip exit to make tray work, to quit go to app's global menu or tray's menu
-  }
+      return; // skip exit to make tray work, to quit go to app's global menu or tray's menu
+    }
 
-  lensProtocolRouterMain.cleanup();
-  onQuitCleanup();
-});
+    lensProtocolRouterMain.cleanup();
+    onQuitCleanup();
+  });
 
-app.on("open-url", (event, rawUrl) => {
-  logger.debug("open-url message");
+  app.on("open-url", (event, rawUrl) => {
+    logger.debug("open-url message");
 
-  // lens:// protocol handler
-  event.preventDefault();
-  lensProtocolRouterMain.route(rawUrl);
-});
+    // lens:// protocol handler
+    event.preventDefault();
+    lensProtocolRouterMain.route(rawUrl);
+  });
 
-logger.debug("[APP-MAIN] waiting for 'ready' and other messages");
+  logger.debug("[APP-MAIN] waiting for 'ready' and other messages");
+}
+
+main(getDi());
 
 /**
  * Exports for virtual package "@k8slens/extensions" for main-process.
