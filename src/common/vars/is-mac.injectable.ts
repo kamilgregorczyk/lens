@@ -3,10 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { isMac } from "../vars";
 
 const isMacInjectable = getInjectable({
-  instantiate: () => isMac,
+  instantiate: () => process.platform === "darwin",
   lifecycle: lifecycleEnum.singleton,
 });
 

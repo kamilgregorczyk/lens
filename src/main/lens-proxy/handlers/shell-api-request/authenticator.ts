@@ -4,7 +4,6 @@
  */
 import { ExtendedMap } from "../../../../common/utils";
 import type { ClusterId } from "../../../../common/cluster-types";
-import { ipcMainHandle } from "../../../../common/ipc";
 import crypto from "crypto";
 import { promisify } from "util";
 
@@ -13,16 +12,14 @@ const randomBytes = promisify(crypto.randomBytes);
 export class ShellRequestAuthenticator {
   private tokens = new ExtendedMap<ClusterId, Map<string, Uint8Array>>();
 
-  init() {
-    ipcMainHandle("cluster:shell-api", async (event, clusterId, tabId) => {
-      const authToken = Uint8Array.from(await randomBytes(128));
+  async requestToken(clusterId: ClusterId, tabId: string): Promise<Uint8Array> {
+    const authToken = Uint8Array.from(await randomBytes(128));
 
-      this.tokens
-        .getOrInsert(clusterId, () => new Map())
-        .set(tabId, authToken);
+    this.tokens
+      .getOrInsert(clusterId, () => new Map())
+      .set(tabId, authToken);
 
-      return authToken;
-    });
+    return authToken;
   }
 
   /**
@@ -32,7 +29,7 @@ export class ShellRequestAuthenticator {
    * @param token The value that is being presented as a one time authentication token
    * @returns `true` if `token` was valid, false otherwise
    */
-  authenticate = (clusterId: ClusterId, tabId: string, token: string): boolean => {
+  authenticate(clusterId: ClusterId, tabId: string, token: string): boolean {
     const clusterTokens = this.tokens.get(clusterId);
 
     if (!clusterTokens) {
@@ -50,5 +47,5 @@ export class ShellRequestAuthenticator {
     }
 
     return false;
-  };
+  }
 }

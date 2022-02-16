@@ -6,12 +6,14 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { FileSystemProvisionerStore } from "./store";
 import fileSystemProvisionerStoreLoggerInjectable from "./logger.injectable";
 import directoryForExtensionDataInjectable from "../directory-path/extension-data.injectable";
+import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
 
 const fileSystemProvisionerStoreInjectable = getInjectable({
   instantiate: (di) => new FileSystemProvisionerStore(
     {
       directoryForExtensionData: di.inject(directoryForExtensionDataInjectable),
       logger: di.inject(fileSystemProvisionerStoreLoggerInjectable),
+      userDataPath: di.inject(directoryForUserDataInjectable),
     },
     {},
   ),

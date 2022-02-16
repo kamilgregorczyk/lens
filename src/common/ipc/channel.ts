@@ -5,6 +5,7 @@
 
 import { DependencyInjectionContainer, getInjectable, getInjectionToken, InjectionToken, lifecycleEnum } from "@ogre-tools/injectable";
 import sendToViewInjectable from "../../main/ipc/send-to-view.injectable";
+import { IpcOneWayStream, OneWayStreamChannels, RequestCatalogSyncStreamChannels } from "./steam";
 
 export type ChannelCallable<T> = T extends Channel<infer Args, infer R> ? (...args: Args) => R : never;
 
@@ -47,22 +48,30 @@ export class Channel<Args extends any[], R> {
 
 const channelNames = new Set<string>();
 
-export function getChannelInjectionToken<Fn extends (...args: any[]) => Promise<any>>(channel: string): Channel<Parameters<Fn>, ReturnType<Fn>> {
+function claimChannelName(channel: string) {
   if (channelNames.has(channel)) {
     throw new Error(`Cannot use IPC channel name "${channel}" multiple times`);
   } else {
     channelNames.add(channel);
   }
+}
+
+export function getChannelInjectionToken<Fn extends (...args: any[]) => Promise<any>>(channel: string): Channel<Parameters<Fn>, ReturnType<Fn>> {
+  claimChannelName(channel);
 
   return new Channel(channel);
 }
 
 export function getChannelEmitterInjectionToken<Fn extends (...args: any[]) => void>(channel: string): Channel<Parameters<Fn>, ReturnType<Fn>> {
-  if (channelNames.has(channel)) {
-    throw new Error(`Cannot use IPC channel name "${channel}" multiple times`);
-  } else {
-    channelNames.add(channel);
-  }
+  claimChannelName(channel);
 
   return new Channel(channel);
+}
+
+export function getStreamInjectionToken<T>(baseToken: Channel<[], Promise<OneWayStreamChannels>>) {
+  return new IpcOneWayStream<T>(baseToken);
+}
+
+export function getStreamChannelsInjectionToken(channel: string) {
+  return getChannelInjectionToken<RequestCatalogSyncStreamChannels>(channel);
 }

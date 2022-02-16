@@ -5,13 +5,14 @@
 
 import request from "request";
 import requestPromise from "request-promise-native";
-import { UserStore } from "./user-preferences";
+import { asLegacyGlobalObjectForExtensionApi } from "../extensions/di-legacy-globals/as-legacy-global-object-for-extension-api";
+import { userPreferencesStoreInjectionToken } from "./user-preferences/store-injection-token";
 
 // todo: get rid of "request" (deprecated)
 // https://github.com/lensapp/lens/issues/459
 
 function getDefaultRequestOpts(): Partial<request.Options> {
-  const { httpsProxy, allowUntrustedCAs } = UserStore.getInstance();
+  const { httpsProxy, allowUntrustedCAs } = asLegacyGlobalObjectForExtensionApi(userPreferencesStoreInjectionToken);
 
   return {
     proxy: httpsProxy || undefined,

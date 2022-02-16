@@ -3,16 +3,10 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { ShellRequestAuthenticator } from "./shell-request-authenticator";
+import { ShellRequestAuthenticator } from "./authenticator";
 
 const shellRequestAuthenticatorInjectable = getInjectable({
-  instantiate: () => {
-    const authenticator = new ShellRequestAuthenticator();
-
-    authenticator.init();
-
-    return authenticator;
-  },
+  instantiate: () => new ShellRequestAuthenticator(),
 
   lifecycle: lifecycleEnum.singleton,
 });

@@ -4,7 +4,7 @@
  */
 
 import { emitWindowLoadedInjectionToken } from "../../../common/ipc/window/loaded.token";
-import { implWithSend } from "../impl-with-send";
+import { implWithSend } from "../impl-channel";
 
 const emitWindowLoadedInjectable = implWithSend(emitWindowLoadedInjectionToken);
 

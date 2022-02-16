@@ -20,7 +20,6 @@ import { HelmRepoManager } from "./helm/helm-repo-manager";
 import configurePackages from "../common/configure-packages";
 import { PrometheusProviderRegistry } from "./prometheus";
 import * as initializers from "./initializers";
-import { SentryInit } from "../common/sentry";
 import { getDi } from "./getDi";
 import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
 import lensProtocolRouterMainInjectable from "./protocol-handler/router.injectable";
@@ -38,13 +37,17 @@ import initTrayMenuUpdaterInjectable from "./tray/init-tray-menu-updater.injecta
 import startUpdateCheckingInjectable from "./updater/start-update-checking.injectable";
 import type { ConfigurableDependencyInjectionContainer } from "@ogre-tools/injectable";
 import cleanupShellProcessesInjectable from "./shell-session/cleanup-processes.injectable";
+import initSentryInjectable from "../common/error-reporting/init-sentry.injectable";
 
 app.setName(appName);
 injectSystemCAs();
-SentryInit();
 
 async function main(di: ConfigurableDependencyInjectionContainer) {
   await di.runSetups();
+
+  const initSentry = di.inject(initSentryInjectable);
+
+  initSentry();
 
   const onQuitCleanup = disposer();
   const logger = di.inject(baseLoggerInjectable);

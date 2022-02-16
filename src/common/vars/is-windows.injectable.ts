@@ -3,10 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { isWindows } from "../vars";
 
 const isWindowsInjectable = getInjectable({
-  instantiate: () => isWindows,
+  instantiate: () => process.platform === "win32",
   lifecycle: lifecycleEnum.singleton,
 });
 

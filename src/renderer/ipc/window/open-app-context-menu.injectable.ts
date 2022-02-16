@@ -4,7 +4,7 @@
  */
 
 import { windowOpenAppContextMenuInjectionToken } from "../../../common/ipc/window/open-app-context-menu.token";
-import { implWithSend } from "../impl-with-send";
+import { implWithSend } from "../impl-channel";
 
 const windowOpenAppContextMenuInjectable = implWithSend(windowOpenAppContextMenuInjectionToken);
 

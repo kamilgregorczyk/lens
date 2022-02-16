@@ -4,7 +4,7 @@
  */
 
 import { kubectlApplyAllInjectionToken } from "../../../common/ipc/kubectl/apply-all.token";
-import { implWithInvoke } from "../impl-with-invoke";
+import { implWithInvoke } from "../impl-channel";
 
 const kubectlApplyAllInjectable = implWithInvoke(kubectlApplyAllInjectionToken);
 

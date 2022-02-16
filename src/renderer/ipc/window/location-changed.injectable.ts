@@ -4,7 +4,7 @@
  */
 
 import { windowLocationChangedInjectionToken } from "../../../common/ipc/window/location-changed.token";
-import { implWithSend } from "../impl-with-send";
+import { implWithSend } from "../impl-channel";
 
 const windowLocationChangedInjectable = implWithSend(windowLocationChangedInjectionToken);
 

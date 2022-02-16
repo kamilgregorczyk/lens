@@ -5,14 +5,14 @@
 
 import { Server as WebSocketServer } from "ws";
 import type { ClusterProxyApiRequestArgs } from "../types";
-import type { ClusterId } from "../../../common/cluster-types";
 import URLParse from "url-parse";
-import type { OpenShellSession } from "../../shell-session/open.injectable";
+import type { OpenShellSession } from "../../../shell-session/open.injectable";
+import type { AuthenticateRequest } from "./authenticate.injectable";
 
 export type ShellApiRequest = (args: ClusterProxyApiRequestArgs) => void;
 
 interface Dependencies {
-  authenticateRequest: (clusterId: ClusterId, tabId: string, shellToken: string) => boolean,
+  authenticateRequest: AuthenticateRequest,
   openShellSession: OpenShellSession;
 }
 

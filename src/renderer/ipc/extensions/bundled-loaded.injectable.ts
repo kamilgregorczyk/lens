@@ -4,7 +4,7 @@
  */
 
 import { bundledExtensionsLoadedInjectionToken } from "../../../common/ipc/extensions/bundled-loaded.token";
-import { implWithSend } from "../impl-with-send";
+import { implWithSend } from "../impl-channel";
 
 const bundledExtensionsLoadedInjectable = implWithSend(bundledExtensionsLoadedInjectionToken);
 

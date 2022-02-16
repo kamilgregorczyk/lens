@@ -5,7 +5,7 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { initRootFrame } from "./init";
 import extensionLoaderInjectable from "../../../extensions/extension-loader/extension-loader.injectable";
-import initCatalogEntityRunListenerInjectable from "../../ipc/catalog-entity/listeners/run.injectable";
+import initCatalogEntityRunListenerInjectable from "../../ipc/catalog/listeners/entity-run.injectable";
 import bundledExtensionsLoadedInjectable from "../../ipc/extensions/bundled-loaded.injectable";
 import initNavigateInAppListenerInjectable from "../../ipc/window/listeners/navigate-in-app.injectable";
 import initNetworkEmittersInjectable from "../../window/init-network-emitters.injectable";

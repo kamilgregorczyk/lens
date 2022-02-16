@@ -4,7 +4,7 @@
  */
 
 import { kubectlDeleteAllInjectionToken } from "../../../common/ipc/kubectl/delete-all.token";
-import { implWithInvoke } from "../impl-with-invoke";
+import { implWithInvoke } from "../impl-channel";
 
 const kubectlDeleteAllInjectable = implWithInvoke(kubectlDeleteAllInjectionToken);
 

@@ -11,7 +11,7 @@ import { apiPrefix, apiKubePrefix } from "../../common/vars";
 import type { Router } from "../router";
 import type { ContextHandler } from "../context-handler/context-handler";
 import { entries } from "../../common/utils";
-import type { ClusterProxyApiRequestArgs, KubeApiRequestArgs, ProxyApiRequestArgs } from "../proxy-functions";
+import type { ClusterProxyApiRequestArgs, KubeApiRequestArgs } from "./handlers";
 import type { AppEventBus } from "../../common/app-event-bus/event-bus";
 import { getBoolean } from "../utils/parse-query";
 import { matchPath } from "react-router";
@@ -49,13 +49,11 @@ const disallowedPorts = new Set([
 enum ProxyRouteKey {
   KUBE = "kube",
   SHELL = "shell",
-  CATALOG = "catalog",
 }
 
 export interface LensProxyDependencies {
   getClusterForRequest: GetClusterForRequest;
   shellApiRequest: (args: ClusterProxyApiRequestArgs) => void;
-  catalogApiRequest: (args: ProxyApiRequestArgs) => Promise<void>;
   kubeApiRequest: (args: KubeApiRequestArgs) => Promise<void>;
   readonly proxyPort: LensProxyPort;
   readonly router: Router;
@@ -76,7 +74,6 @@ export class LensProxy {
 
   constructor({
     getClusterForRequest,
-    catalogApiRequest,
     kubeApiRequest,
     shellApiRequest,
     proxyPort,
@@ -101,7 +98,6 @@ export class LensProxy {
 
     const routes: Record<ProxyRouteKey, string> = {
       [ProxyRouteKey.KUBE]: `${apiKubePrefix}/:rest*`,
-      [ProxyRouteKey.CATALOG]: `${apiPrefix}/catalog-sync`,
       [ProxyRouteKey.SHELL]: `${apiPrefix}/shell`,
     };
     const routeHandlers: Record<ProxyRouteKey, (req: http.IncomingMessage, socket: net.Socket, head: Buffer, restUrl: string | undefined) => Promise<void>> = {
@@ -115,9 +111,6 @@ export class LensProxy {
         }
 
         return kubeApiRequest({ req, socket, head, cluster, restUrl });
-      },
-      [ProxyRouteKey.CATALOG]: (req, socket, head) => {
-        return catalogApiRequest({ req, socket, head });
       },
       [ProxyRouteKey.SHELL]: (req, socket, head) => {
         const cluster = getClusterForRequest(req);

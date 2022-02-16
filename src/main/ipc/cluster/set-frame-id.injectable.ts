@@ -6,7 +6,7 @@
 import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injectable";
 import { setClusterFrameIdInjectionToken } from "../../../common/ipc/cluster/set-frame-id.token";
 import clusterFramesInjectable from "../../clusters/frames.injectable";
-import { implWithRawHandle } from "../impl-with-handle";
+import { implWithRawHandle } from "../impl-channel";
 
 const setClusterFrameIdInjectable = implWithRawHandle(setClusterFrameIdInjectionToken, (di) => {
   const getClusterById = di.inject(getClusterByIdInjectable);

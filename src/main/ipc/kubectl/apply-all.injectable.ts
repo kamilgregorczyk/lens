@@ -7,7 +7,7 @@ import appEventBusInjectable from "../../../common/app-event-bus/app-event-bus.i
 import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injectable";
 import { kubectlApplyAllInjectionToken } from "../../../common/ipc/kubectl/apply-all.token";
 import { ResourceApplier } from "../../resource-applier";
-import { implWithHandle } from "../impl-with-handle";
+import { implWithHandle } from "../impl-channel";
 
 const kubectlApplyAllInjectable = implWithHandle(kubectlApplyAllInjectionToken, (di) => {
   const appEventBus = di.inject(appEventBusInjectable);

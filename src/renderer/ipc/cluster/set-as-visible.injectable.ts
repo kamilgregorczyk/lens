@@ -4,7 +4,7 @@
  */
 
 import { setClusterAsVisibleInjectionToken } from "../../../common/ipc/cluster/set-as-visible.token";
-import { implWithSend } from "../impl-with-send";
+import { implWithSend } from "../impl-channel";
 
 const setClusterAsVisibleInjectable = implWithSend(setClusterAsVisibleInjectionToken);
 

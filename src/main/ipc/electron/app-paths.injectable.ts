@@ -5,7 +5,7 @@
 
 import { getAppPathsInjectionToken } from "../../../common/ipc/electron/get-app-paths.token";
 import appPathsInjectable from "../../electron/app-paths.injectable";
-import { implWithHandle } from "../impl-with-handle";
+import { implWithHandle } from "../impl-channel";
 
 export const getAppPathsInjectable = implWithHandle(getAppPathsInjectionToken, (di) => {
   const appPaths = di.inject(appPathsInjectable);

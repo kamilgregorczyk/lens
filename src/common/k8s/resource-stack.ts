@@ -9,10 +9,13 @@ import { ResourceApplier } from "../../main/resource-applier";
 import type { KubernetesCluster } from "../catalog/entity/declarations";
 import logger from "../../main/logger";
 import { app } from "electron";
-import { ClusterStore } from "../clusters/store";
 import yaml from "js-yaml";
 import { productName } from "../vars";
 import { requestKubectlApplyAll, requestKubectlDeleteAll } from "../../renderer/ipc";
+import { asLegacyGlobalFunctionForExtensionApi } from "../../extensions/di-legacy-globals/as-legacy-global-function-for-extension-api";
+import getClusterByIdInjectable from "../clusters/get-by-id.injectable";
+
+const getClusterById = asLegacyGlobalFunctionForExtensionApi(getClusterByIdInjectable);
 
 export class ResourceStack {
   constructor(protected cluster: KubernetesCluster, protected name: string) {}
@@ -40,7 +43,7 @@ export class ResourceStack {
   }
 
   protected async applyResources(resources: string[], extraArgs?: string[]): Promise<string> {
-    const clusterModel = ClusterStore.getInstance().getById(this.cluster.getId());
+    const clusterModel = getClusterById(this.cluster.getId());
 
     if (!clusterModel) {
       throw new Error(`cluster not found`);
@@ -64,7 +67,7 @@ export class ResourceStack {
   }
 
   protected async deleteResources(resources: string[], extraArgs?: string[]): Promise<string> {
-    const clusterModel = ClusterStore.getInstance().getById(this.cluster.getId());
+    const clusterModel = getClusterById(this.cluster.getId());
 
     if (!clusterModel) {
       throw new Error(`cluster not found`);

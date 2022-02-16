@@ -4,7 +4,7 @@
  */
 
 import { broadcastMessageInjectionToken } from "../../../common/ipc/broadcast/message.token";
-import { implWithSend } from "../impl-with-send";
+import { implWithSend } from "../impl-channel";
 
 const broadcastMessageInjectable = implWithSend(broadcastMessageInjectionToken);
 

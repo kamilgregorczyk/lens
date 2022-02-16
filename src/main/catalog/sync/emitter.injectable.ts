@@ -8,13 +8,10 @@ import { isEqual } from "lodash";
 import { autorun, IComputedValue } from "mobx";
 import type { CatalogEntity } from "../../../common/catalog/entity/entity";
 import { toJS } from "../../../renderer/utils";
-import catalogEntitiesInjectable from "../../catalog/entity/entities.injectable";
-import type { ProxyApiRequestArgs } from "../types";
-import WebSocket, { Server as WebSocketServer } from "ws";
-import logger from "../../logger";
+import catalogEntitiesInjectable from "../entity/entities.injectable";
 import EventEmitter from "events";
 import type TypedEventEmitter from "typed-emitter";
-import type { RawCatalogEntity, RawCatalogEntityUpdate, EntityChangeEvents, CatalogSyncAddMessage, CatalogSyncDeleteMessage, CatalogSyncUpdateMessage } from "../../../common/catalog/entity/sync-types";
+import type { RawCatalogEntity, RawCatalogEntityUpdate, EntityChangeEvents } from "../../../common/catalog/entity/sync-types";
 
 interface Dependencies {
   entities: IComputedValue<CatalogEntity[]>;
@@ -53,31 +50,7 @@ function createRawEntityUpdate(prevRaw: RawCatalogEntity, rawEntity: RawCatalogE
   return res as RawCatalogEntityUpdate;
 }
 
-function wrapWebsocketForChangeEvents(websocket: WebSocket): EntityChangeEvents {
-  return {
-    add: (data) => {
-      websocket.send(JSON.stringify({
-        data,
-        type: "add",
-      } as CatalogSyncAddMessage));
-    },
-    delete: (uid) => {
-      websocket.send(JSON.stringify({
-        uid,
-        type: "delete",
-      } as CatalogSyncDeleteMessage));
-    },
-    update: (uid, data) => {
-      websocket.send(JSON.stringify({
-        uid,
-        data,
-        type: "update",
-      } as CatalogSyncUpdateMessage));
-    },
-  };
-}
-
-const catalogApiRequestHandler = ({ entities }: Dependencies) => {
+const catalogSyncEmitter = ({ entities }: Dependencies) => {
   const rawEntityMap = new Map<string, RawCatalogEntity>();
   const entityChangeEmitter = new EventEmitter() as TypedEventEmitter<EntityChangeEvents>;
 
@@ -111,37 +84,17 @@ const catalogApiRequestHandler = ({ entities }: Dependencies) => {
     }
   });
 
-  return async ({ req, socket, head }: ProxyApiRequestArgs): Promise<void> => {
-    const ws = new WebSocketServer({ noServer: true });
-
-    return ws.handleUpgrade(req, socket, head, (websocket) => {
-      logger.info("[CATALOG-SYNC]: starting new catalog entity sync");
-      const events = wrapWebsocketForChangeEvents(websocket);
-
-      for (const rawEntity of rawEntityMap.values()) {
-        // initialize with current values
-        events.add(rawEntity);
-      }
-
-      // Set up passing changes on
-      entityChangeEmitter.on("add", events.add);
-      entityChangeEmitter.on("update", events.update);
-      entityChangeEmitter.on("delete", events.delete);
-
-      websocket.on("close", () => {
-        entityChangeEmitter.off("add", events.add);
-        entityChangeEmitter.off("update", events.update);
-        entityChangeEmitter.off("delete", events.delete);
-      });
-    });
+  return {
+    emitter: entityChangeEmitter,
+    initial: () => rawEntityMap.values(),
   };
 };
 
-const catalogApiRequestHandlerInjectable = getInjectable({
-  instantiate: (di) => catalogApiRequestHandler({
+const catalogSyncEmitterInjectable = getInjectable({
+  instantiate: (di) => catalogSyncEmitter({
     entities: di.inject(catalogEntitiesInjectable),
   }),
-  lifecycle: lifecycleEnum.singleton,
+  lifecycle: lifecycleEnum.transient,
 });
 
-export default catalogApiRequestHandlerInjectable;
+export default catalogSyncEmitterInjectable;

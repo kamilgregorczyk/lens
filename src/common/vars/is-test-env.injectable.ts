@@ -3,10 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { isTestEnv } from "../vars";
 
 const isTestEnvInjectable = getInjectable({
-  instantiate: () => isTestEnv,
+  instantiate: () => !!process.env.JEST_WORKER_ID,
   lifecycle: lifecycleEnum.singleton,
 });
 

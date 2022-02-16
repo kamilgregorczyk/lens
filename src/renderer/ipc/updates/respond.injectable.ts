@@ -4,7 +4,7 @@
  */
 
 import { updateAvailableRespondInjectionToken } from "../../../common/ipc/updates/respond.token";
-import { implWithSend } from "../impl-with-send";
+import { implWithSend } from "../impl-channel";
 
 const updateAvailableRespondInjectable = implWithSend(updateAvailableRespondInjectionToken);
 

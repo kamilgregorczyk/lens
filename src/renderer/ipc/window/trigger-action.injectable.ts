@@ -4,7 +4,7 @@
  */
 
 import { triggerWindowActionInjectionToken } from "../../../common/ipc/window/trigger-action.token";
-import { implWithSend } from "../impl-with-send";
+import { implWithSend } from "../impl-channel";
 
 const triggerWindowActionInjectable = implWithSend(triggerWindowActionInjectionToken);
 

@@ -5,7 +5,7 @@
 
 import { clearClusterDeletingInjectionToken } from "../../../common/ipc/cluster/clear-deleting.token";
 import clusterManagerInjectable from "../../clusters/manager.injectable";
-import { implWithHandle } from "../impl-with-handle";
+import { implWithHandle } from "../impl-channel";
 
 const clearClusterDeletingInjectable = implWithHandle(clearClusterDeletingInjectionToken, (di) => {
   const manager = di.inject(clusterManagerInjectable);

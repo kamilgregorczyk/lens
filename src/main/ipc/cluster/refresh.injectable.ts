@@ -5,7 +5,7 @@
 
 import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injectable";
 import { refreshClusterInjectionToken } from "../../../common/ipc/cluster/refresh.token";
-import { implWithHandle } from "../impl-with-handle";
+import { implWithHandle } from "../impl-channel";
 
 const refreshClusterInjectable = implWithHandle(refreshClusterInjectionToken, (di) => {
   const getClusterById = di.inject(getClusterByIdInjectable);

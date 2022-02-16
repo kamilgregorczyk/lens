@@ -4,7 +4,7 @@
  */
 
 import { refreshClusterInjectionToken } from "../../../common/ipc/cluster/refresh.token";
-import { implWithInvoke } from "../impl-with-invoke";
+import { implWithInvoke } from "../impl-channel";
 
 const refreshClusterInjectable = implWithInvoke(refreshClusterInjectionToken);
 

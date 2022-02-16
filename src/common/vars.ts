@@ -7,17 +7,41 @@
 import path from "path";
 import { SemVer } from "semver";
 import packageInfo from "../../package.json";
+import { asLegacyGlobalObjectForExtensionApi } from "../extensions/di-legacy-globals/as-legacy-global-object-for-extension-api";
 import { defineGlobal } from "./utils/defineGlobal";
+import isLinuxInjectable from "./vars/is-linux.injectable";
+import isMacInjectable from "./vars/is-mac.injectable";
+import isTestEnvInjectable from "./vars/is-test-env.injectable";
+import isWindowsInjectable from "./vars/is-windows.injectable";
 
-export const isMac = process.platform === "darwin";
-export const isWindows = process.platform === "win32";
-export const isLinux = process.platform === "linux";
+/**
+ * @deprecated use di.inject(isMacInjectable) instead
+ */
+export const isMac = asLegacyGlobalObjectForExtensionApi(isMacInjectable);
+
+/**
+ * @deprecated use di.inject(isWindowsInjectable) instead
+ */
+export const isWindows = asLegacyGlobalObjectForExtensionApi(isWindowsInjectable);
+
+/**
+ * @deprecated use di.inject(isLinuxInjectable) instead
+ */
+export const isLinux = asLegacyGlobalObjectForExtensionApi(isLinuxInjectable);
+
+/**
+ * @deprecated use di.inject(isTestEnvInjectable) instead
+ */
+export const isTestEnv = asLegacyGlobalObjectForExtensionApi(isTestEnvInjectable);
+
+/**
+ * @deprecated use di.inject(isProductionInjectable) instead
+ */
+export const isProduction = process.env.NODE_ENV === "production";
+
 export const isDebugging = ["true", "1", "yes", "y", "on"].includes((process.env.DEBUG ?? "").toLowerCase());
 export const isSnap = !!process.env.SNAP;
-export const isProduction = process.env.NODE_ENV === "production";
-export const isTestEnv = !!process.env.JEST_WORKER_ID;
 export const isDevelopment = !isTestEnv && !isProduction;
-export const isPublishConfigured = Object.keys(packageInfo.build).includes("publish");
 
 export const integrationTestingArg = "--integration-testing";
 export const isIntegrationTesting = process.argv.includes(integrationTestingArg);
@@ -55,7 +79,6 @@ defineGlobal("__static", {
 export const apiPrefix = "/api" as string; // local router apis
 export const apiKubePrefix = "/api-kube" as string; // k8s cluster apis
 export const shellRoute = "/shell" as string;
-export const catalogSyncRoute = "/catalog-sync" as string;
 
 // Links
 export const issuesTrackerUrl = "https://github.com/lensapp/lens/issues" as string;
@@ -64,5 +87,3 @@ export const supportUrl = "https://docs.k8slens.dev/latest/support/" as string;
 
 export const appSemVer = new SemVer(packageInfo.version);
 export const docsUrl = "https://docs.k8slens.dev/main/" as string;
-
-export const sentryDsn = packageInfo.config?.sentryDsn ?? "";

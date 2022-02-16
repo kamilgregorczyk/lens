@@ -6,7 +6,7 @@ import appEventBusInjectable from "../../../common/app-event-bus/app-event-bus.i
 import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injectable";
 import { disconnectClusterInjectionToken } from "../../../common/ipc/cluster/disconnect.token";
 import clusterFramesInjectable from "../../clusters/frames.injectable";
-import { implWithHandle } from "../impl-with-handle";
+import { implWithHandle } from "../impl-channel";
 
 const disconnectClusterInjectable = implWithHandle(disconnectClusterInjectionToken, (di) => {
   const getClusterById = di.inject(getClusterByIdInjectable);

@@ -5,9 +5,8 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import appEventBusInjectable from "../../common/app-event-bus/app-event-bus.injectable";
 import getClusterForRequestInjectable from "../clusters/get-cluster-for-request.injectable";
-import { kubeApiRequest } from "../proxy-functions";
-import catalogApiRequestHandlerInjectable from "../proxy-functions/catalog-api-request/handler.injectable";
-import shellApiRequestInjectable from "../proxy-functions/shell-api-request/shell-api-request.injectable";
+import { kubeApiRequest } from "./handlers";
+import shellApiRequestInjectable from "./handlers/shell-api-request/shell-api-request.injectable";
 import routerInjectable from "../router/router.injectable";
 import lensProxyLoggerInjectable from "./logger.injectable";
 import lensProxyPortInjectable from "./port.injectable";
@@ -20,7 +19,6 @@ const lensProxyInjectable = getInjectable({
     getClusterForRequest: di.inject(getClusterForRequestInjectable),
     kubeApiRequest,
     shellApiRequest: di.inject(shellApiRequestInjectable),
-    catalogApiRequest: di.inject(catalogApiRequestHandlerInjectable),
     logger: di.inject(lensProxyLoggerInjectable),
     proxyPort: di.inject(lensProxyPortInjectable),
   }),

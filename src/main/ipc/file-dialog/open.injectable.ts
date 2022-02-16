@@ -6,7 +6,7 @@
 import { openFileDialogInjectionToken } from "../../../common/ipc/file-dialog/open.token";
 import openFilePickerInjectable from "../../dialog/file-picker.injectable";
 import getBrowserWindowByIdInjectable from "../../window/get-browser-window-by-id.injectable";
-import { implWithRawHandle } from "../impl-with-handle";
+import { implWithRawHandle } from "../impl-channel";
 
 const openFileDialogInjectable = implWithRawHandle(openFileDialogInjectionToken, (di) => {
   const getBrowserWindowById = di.inject(getBrowserWindowByIdInjectable);

@@ -4,7 +4,7 @@
  */
 
 import { setClusterFrameIdInjectionToken } from "../../../common/ipc/cluster/set-frame-id.token";
-import { implWithInvoke } from "../impl-with-invoke";
+import { implWithInvoke } from "../impl-channel";
 
 const setClusterFrameIdInjectable = implWithInvoke(setClusterFrameIdInjectionToken);
 

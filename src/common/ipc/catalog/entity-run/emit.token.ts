@@ -7,4 +7,4 @@ import { getChannelEmitterInjectionToken } from "../../channel";
 
 export type CatalogEntityRun = (entityId: string) => void;
 
-export const emitCatalogEntityRunInjectionToken = getChannelEmitterInjectionToken<CatalogEntityRun>("catalog-entity:run");
+export const emitCatalogEntityRunInjectionToken = getChannelEmitterInjectionToken<CatalogEntityRun>("catalog:entity-run");

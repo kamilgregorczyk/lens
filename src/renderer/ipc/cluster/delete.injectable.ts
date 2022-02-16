@@ -4,7 +4,7 @@
  */
 
 import { deleteClusterInjectionToken } from "../../../common/ipc/cluster/delete.token";
-import { implWithInvoke } from "../impl-with-invoke";
+import { implWithInvoke } from "../impl-channel";
 
 const deleteClusterInjectable = implWithInvoke(deleteClusterInjectionToken);
 

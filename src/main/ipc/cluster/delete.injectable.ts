@@ -10,7 +10,7 @@ import getClusterByIdInjectable from "../../../common/clusters/get-by-id.injecta
 import removeInjectable from "../../../common/fs/remove.injectable";
 import { deleteClusterInjectionToken } from "../../../common/ipc/cluster/delete.token";
 import clusterFramesInjectable from "../../clusters/frames.injectable";
-import { implWithHandle } from "../impl-with-handle";
+import { implWithHandle } from "../impl-channel";
 
 const deleteClusterInjectable = implWithHandle(deleteClusterInjectionToken, (di) => {
   const getClusterById = di.inject(getClusterByIdInjectable);
