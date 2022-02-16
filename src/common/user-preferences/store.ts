@@ -82,9 +82,9 @@ export class UserPereferencesStore extends BaseStore<UserPereferencesStoreModel>
     return semver.gt(getAppVersion(), this.lastSeenAppVersion);
   }
 
-  @computed get resolvedShell(): string | undefined {
-    return this.shell || process.env.SHELL || process.env.PTYSHELL;
-  }
+  readonly resolvedShell = computed(() => (
+    this.shell || process.env.SHELL || process.env.PTYSHELL
+  ));
 
   @computed get isAllowedToDowngrade() {
     return new SemVer(getAppVersion()).prerelease[0] !== this.updateChannel;

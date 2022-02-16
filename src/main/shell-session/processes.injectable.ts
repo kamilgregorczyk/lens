@@ -3,11 +3,11 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import electronAppInjectable from "./app.injectable";
+import type { IPty } from "node-pty";
 
-const appNameInjectable = getInjectable({
-  instantiate: (di) => di.inject(electronAppInjectable).getName(),
+const shellSessionProcessesInjectable = getInjectable({
+  instantiate: () => new Map<string, IPty>(),
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default appNameInjectable;
+export default shellSessionProcessesInjectable;

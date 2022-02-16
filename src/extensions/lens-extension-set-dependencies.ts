@@ -4,8 +4,11 @@
  */
 
 import type { RequestDirectory } from "../common/file-system-provisioner/request-directory.injectable";
+import type { NavigateExtension } from "../common/ipc/window/navigate-extension.token";
+import type { AddComputedSource } from "../main/catalog/entity/add-computed-source.injectable";
 import type { AddCategoryFilter } from "../renderer/catalog/category/add-filter.injectable";
 import type { AddEntityFilter } from "../renderer/catalog/entity/add-filter.injectable";
+import type { Navigate } from "../renderer/navigation/navigate.injectable";
 
 // This symbol encapsulates setting of dependencies to only happen locally in Lens Core
 // and not by e.g. authors of extensions
@@ -16,11 +19,12 @@ export interface LensExtensionDependencies {
 }
 
 export interface LensRendererExtensionDependencies extends LensExtensionDependencies {
-  navigate: (url: string) => void;
+  navigate: Navigate;
   addEntityFilter: AddEntityFilter;
   addCategoryFilter: AddCategoryFilter;
 }
 
 export interface LensMainExtensionDependencies extends LensExtensionDependencies {
-  navigateExtension: (extId: string, pageId?: string, params?: Record<string, any>, frameId?: number) => void;
+  navigateExtension: NavigateExtension;
+  addComputedSource: AddComputedSource;
 }

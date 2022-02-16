@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { CatalogEntity } from "../../../common/catalog";
+import type { CatalogEntity } from "../../../common/catalog/entity/entity";
 
 export interface ShellEnvContext {
   catalogEntity: CatalogEntity;

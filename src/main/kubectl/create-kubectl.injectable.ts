@@ -3,24 +3,21 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { Kubectl } from "./kubectl";
+import { Kubectl, KubectlDependencies } from "./kubectl";
 import directoryForKubectlBinariesInjectable from "./directory-for-kubectl-binaries/directory-for-kubectl-binaries.injectable";
-import userStoreInjectable from "../../common/user-preferences/user-store.injectable";
+import userPereferencesStoreInjectableInjectable from "../user-pereferences/store.injectable";
+
+export type CreateKubectl = (clusterVersion: string) => Kubectl;
+
+const createKubectl = (deps: KubectlDependencies): CreateKubectl => (
+  (version) => new Kubectl(deps, version)
+);
 
 const createKubectlInjectable = getInjectable({
-  instantiate: (di) => {
-    const dependencies = {
-      userStore: di.inject(userStoreInjectable),
-
-      directoryForKubectlBinaries: di.inject(
-        directoryForKubectlBinariesInjectable,
-      ),
-    };
-
-    return (clusterVersion: string) =>
-      new Kubectl(dependencies, clusterVersion);
-  },
-
+  instantiate: (di) => createKubectl({
+    userStore: di.inject(userPereferencesStoreInjectableInjectable),
+    directoryForKubectlBinaries: di.inject(directoryForKubectlBinariesInjectable),
+  }),
   lifecycle: lifecycleEnum.singleton,
 });
 

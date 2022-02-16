@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import { computed, IComputedValue, IObservableArray, observable } from "mobx";
+import { computed, IComputedValue, observable } from "mobx";
 import type { CatalogEntityConstructor } from "../../../common/catalog/category/category";
 import type { CatalogEntity } from "../../../common/catalog/entity/entity";
 import type { BaseCatalogEntityRegistry } from "../../../common/catalog/entity/registry";
@@ -15,16 +15,11 @@ export interface CatalogEntityRegistryDependencies {
 }
 
 export type EntitySource = IComputedValue<CatalogEntity[]>;
-export type ArrayEntitySource = IObservableArray<CatalogEntity>;
 
 export class CatalogEntityRegistry implements BaseCatalogEntityRegistry {
   protected sources = observable.set<EntitySource>();
 
   constructor(protected readonly dependencies: CatalogEntityRegistryDependencies) {}
-
-  addObservableSource(source: ArrayEntitySource): Disposer {
-    return this.addComputedSource(computed(() => [...source]));
-  }
 
   addComputedSource(source: EntitySource): Disposer {
     this.sources.add(source);

@@ -3,40 +3,37 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import logger from "../../logger";
-import WebSocket, { Server as WebSocketServer } from "ws";
+import { Server as WebSocketServer } from "ws";
 import type { ClusterProxyApiRequestArgs } from "../types";
-import type { Cluster } from "../../../common/clusters/cluster";
 import type { ClusterId } from "../../../common/cluster-types";
 import URLParse from "url-parse";
+import type { OpenShellSession } from "../../shell-session/open.injectable";
+
+export type ShellApiRequest = (args: ClusterProxyApiRequestArgs) => void;
 
 interface Dependencies {
   authenticateRequest: (clusterId: ClusterId, tabId: string, shellToken: string) => boolean,
-
-  createShellSession: (args: {
-    webSocket: WebSocket;
-    cluster: Cluster;
-    tabId: string;
-    nodeName?: string;
-  }) => { open: () => Promise<void> };
+  openShellSession: OpenShellSession;
 }
 
-export const shellApiRequest = ({ createShellSession, authenticateRequest }: Dependencies) => ({ req, socket, head, cluster }: ClusterProxyApiRequestArgs): void => {
-  const url = new URLParse(req.url, true);
-  const { query: { node: nodeName, shellToken, id: tabId }} = url;
+export const shellApiRequest = ({
+  openShellSession,
+  authenticateRequest,
+}: Dependencies): ShellApiRequest => (
+  ({ req, socket, head, cluster }: ClusterProxyApiRequestArgs): void => {
+    const url = new URLParse(req.url, true);
+    const { query: { node: nodeName, shellToken, id: tabId }} = url;
 
-  if (!cluster || !authenticateRequest(cluster.id, tabId, shellToken)) {
-    socket.write("Invalid shell request");
+    if (!cluster || !authenticateRequest(cluster.id, tabId, shellToken)) {
+      socket.write("Invalid shell request");
 
-    return void socket.end();
+      return void socket.end();
+    }
+
+    const ws = new WebSocketServer({ noServer: true });
+
+    ws.handleUpgrade(req, socket, head, (websocket) => {
+      openShellSession({ websocket, cluster, tabId, nodeName });
+    });
   }
-
-  const ws = new WebSocketServer({ noServer: true });
-
-  ws.handleUpgrade(req, socket, head, (webSocket) => {
-    const shell = createShellSession({ webSocket, cluster, tabId, nodeName });
-
-    shell.open()
-      .catch(error => logger.error(`[SHELL-SESSION]: failed to open a ${nodeName ? "node" : "local"} shell`, error));
-  });
-};
+);

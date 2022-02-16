@@ -3,11 +3,11 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import electronAppInjectable from "./app.injectable";
+import { userPreferencesStoreInjectionToken } from "./store-injection-token";
 
-const appNameInjectable = getInjectable({
-  instantiate: (di) => di.inject(electronAppInjectable).getName(),
+const resolvedShellInjectable = getInjectable({
+  instantiate: (di) => di.inject(userPreferencesStoreInjectionToken).resolvedShell,
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default appNameInjectable;
+export default resolvedShellInjectable;

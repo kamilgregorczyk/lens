@@ -60,7 +60,7 @@ export function bundledKubectlPath(): string {
   return bundledPath;
 }
 
-interface Dependencies {
+export interface KubectlDependencies {
   directoryForKubectlBinaries: string;
 
   userStore: {
@@ -81,7 +81,7 @@ export class Kubectl {
   public static readonly bundledKubectlVersion: string = bundledVersion;
   public static invalidBundle = false;
 
-  constructor(private dependencies: Dependencies, clusterVersion: string) {
+  constructor(private dependencies: KubectlDependencies, clusterVersion: string) {
     let version: SemVer;
 
     try {

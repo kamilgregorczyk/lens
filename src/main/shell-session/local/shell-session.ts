@@ -3,19 +3,26 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type WebSocket from "ws";
 import path from "path";
 import { helmCli } from "../../helm/helm-cli";
-import type { Cluster } from "../../../common/cluster/cluster";
-import type { ClusterId } from "../../../common/cluster-types";
-import { ShellSession } from "../shell-session";
-import type { Kubectl } from "../../kubectl/kubectl";
+import { ShellSession, ShellSessionArgs, ShellSessionDependencies } from "../shell-session";
+import type { IComputedValue } from "mobx";
+import type { TerminalShellEnvModify } from "../shell-env-modifier/modifier.injectable";
+
+export interface LocalShellSessionArgs extends ShellSessionArgs {
+}
+
+export interface LocalShellSessionDependencies extends ShellSessionDependencies {
+  readonly kubectlBinariesPath: IComputedValue<string>;
+  readonly downloadKubectlBinaries: IComputedValue<boolean>;
+  shellEnvModify: TerminalShellEnvModify;
+}
 
 export class LocalShellSession extends ShellSession {
-  ShellType = "shell";
+  readonly ShellType = "shell";
 
-  constructor(protected shellEnvModify: (clusterId: ClusterId, env: Record<string, string>) => Record<string, string>, kubectl: Kubectl, websocket: WebSocket, cluster: Cluster, terminalId: string) {
-    super({ kubectl, websocket, cluster, terminalId });
+  constructor(protected readonly dependencies: LocalShellSessionDependencies, args: LocalShellSessionArgs) {
+    super(dependencies, args);
   }
 
   protected getPathEntries(): string[] {
@@ -30,7 +37,7 @@ export class LocalShellSession extends ShellSession {
     let env = await this.getCachedShellEnv();
 
     // extensions can modify the env
-    env = this.shellEnvModify(this.cluster.id, env);
+    env = this.dependencies.shellEnvModify(this.cluster.id, env);
 
     const shell = env.PTYSHELL;
     const args = await this.getShellArgs(shell);
@@ -40,8 +47,8 @@ export class LocalShellSession extends ShellSession {
 
   protected async getShellArgs(shell: string): Promise<string[]> {
     const helmpath = helmCli.getBinaryDir();
-    const pathFromPreferences = UserStore.getInstance().kubectlBinariesPath || this.kubectl.getBundledPath();
-    const kubectlPathDir = UserStore.getInstance().downloadKubectlBinaries ? await this.kubectlBinDirP : path.dirname(pathFromPreferences);
+    const pathFromPreferences = this.dependencies.kubectlBinariesPath.get() || this.kubectl.getBundledPath();
+    const kubectlPathDir = this.dependencies.downloadKubectlBinaries.get() ? await this.kubectlBinDirP : path.dirname(pathFromPreferences);
 
     switch(path.basename(shell)) {
       case "powershell.exe":
