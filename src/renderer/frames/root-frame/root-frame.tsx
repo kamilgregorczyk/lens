@@ -9,34 +9,37 @@ import { Route, Router, Switch } from "react-router";
 import { observer } from "mobx-react";
 import { ClusterManager } from "../../components/cluster-manager";
 import { ErrorBoundary } from "../../components/error-boundary";
-import { Notifications } from "../../components/notifications";
 import { ConfirmDialog } from "../../components/confirm-dialog";
 import { CommandContainer } from "../../components/command-palette/command-container";
-import { ipcRenderer } from "electron";
-import { IpcRendererNavigationEvents } from "../../navigation/events";
-import { ClusterFrameHandler } from "../../components/cluster-manager/lens-views";
 import historyInjectable from "../../navigation/history.injectable";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { History } from "history";
+import type { WindowLoaded } from "../../../common/ipc/window/loaded.token";
+import emitWindowLoadedInjectable from "../../ipc/window/loaded.injectable";
+import { NotificationsList } from "../../components/notifications/list";
 
 injectSystemCAs();
 
 interface Dependencies {
-  history: History
+  history: History;
+  emitWindowLoaded: WindowLoaded;
 }
 
 @observer
 class NonInjectedRootFrame extends React.Component<Dependencies> {
   static displayName = "RootFrame";
 
-  constructor(props: Dependencies) {
-    super(props);
-
-    ClusterFrameHandler.createInstance();
-  }
-
   componentDidMount() {
-    ipcRenderer.send(IpcRendererNavigationEvents.LOADED);
+    /**
+     * Both the `setTimeout` and `window.requestAnimationFrame` are required for
+     * the final callback to be invoked only after React has fully flushed
+     * the first render draw to the screen.
+     */
+    setTimeout(() => {
+      window.requestAnimationFrame(() => {
+        this.props.emitWindowLoaded();
+      });
+    });
   }
 
   render() {
@@ -47,7 +50,7 @@ class NonInjectedRootFrame extends React.Component<Dependencies> {
             <Route component={ClusterManager} />
           </Switch>
         </ErrorBoundary>
-        <Notifications />
+        <NotificationsList />
         <ConfirmDialog />
         <CommandContainer />
       </Router>
@@ -56,5 +59,8 @@ class NonInjectedRootFrame extends React.Component<Dependencies> {
 }
 
 export const RootFrame = withInjectables(NonInjectedRootFrame, {
-  getProps: (di) => ({ history: di.inject(historyInjectable) }),
+  getProps: (di) => ({
+    history: di.inject(historyInjectable),
+    emitWindowLoaded: di.inject(emitWindowLoadedInjectable),
+  }),
 });

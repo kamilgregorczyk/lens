@@ -4,15 +4,15 @@
  */
 
 import URLParse from "url-parse";
-import type { LensExtension } from "../../../extensions/lens-extension";
+import type { LensExtension } from "../../extensions/lens-extension";
 import { observable, when, makeObservable } from "mobx";
-import { disposer, noop } from "../../../common/utils";
-import type { WindowManager } from "../../window/manager";
-import { RoutingError, RoutingErrorType } from "../../../common/protocol-handler/error";
-import { LensProtocolRouter, type RouteAttempt, LensProtocolRouterDependencies } from "../../../common/protocol-handler/router";
-import type { InvalidProtocolUrl } from "../../../common/ipc/protocol-handler/invalid.token";
-import type { RouteProtocolInternal } from "../../../common/ipc/protocol-handler/router-internal.token";
-import type { RouteProtocolExternal } from "../../../common/ipc/protocol-handler/router-external.token";
+import { disposer, noop } from "../../common/utils";
+import type { WindowManager } from "../window/manager";
+import { RoutingError, RoutingErrorType } from "../../common/protocol-handler/error";
+import { LensProtocolRouter, type RouteAttempt, LensProtocolRouterDependencies } from "../../common/protocol-handler/router";
+import type { InvalidProtocolUrl } from "../../common/ipc/protocol-handler/invalid.token";
+import type { RouteProtocolInternal } from "../../common/ipc/protocol-handler/router-internal.token";
+import type { RouteProtocolExternal } from "../../common/ipc/protocol-handler/router-external.token";
 
 export interface FallbackHandler {
   (name: string): Promise<boolean>;

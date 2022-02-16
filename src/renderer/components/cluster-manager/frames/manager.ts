@@ -4,23 +4,27 @@
  */
 
 import { action, IReactionDisposer, makeObservable, observable, when } from "mobx";
-import logger from "../../../main/logger";
-import { clusterVisibilityHandler } from "../../../common/ipc/cluster";
-import { ClusterStore } from "../../../common/clusters/store";
-import type { ClusterId } from "../../../common/cluster-types";
-import { getClusterFrameUrl, Singleton } from "../../utils";
-import { ipcRenderer } from "electron";
+import type { ClusterId } from "../../../../common/cluster-types";
+import { getClusterFrameUrl } from "../../../utils";
+import type { GetClusterById } from "../../../../common/clusters/get-by-id.injectable";
+import type { LensLogger } from "../../../../common/logger";
+import type { SetClusterAsVisible } from "../../../../common/ipc/cluster/set-as-visible.token";
 
 export interface LensView {
   isLoaded: boolean;
   frame: HTMLIFrameElement;
 }
 
-export class ClusterFrameHandler extends Singleton {
+export interface ClusterFrameHandlerDependencies {
+  getClusterById: GetClusterById;
+  readonly logger: LensLogger;
+  setClusterAsVisible: SetClusterAsVisible;
+}
+
+export class ClusterFramesManager {
   private views = observable.map<string, LensView>();
 
-  constructor() {
-    super();
+  constructor(protected readonly dependencies: ClusterFrameHandlerDependencies) {
     makeObservable(this);
   }
 
@@ -30,13 +34,13 @@ export class ClusterFrameHandler extends Singleton {
 
   @action
   public initView(clusterId: ClusterId) {
-    const cluster = ClusterStore.getInstance().getById(clusterId);
+    const cluster = this.dependencies.getClusterById(clusterId);
 
     if (!cluster || this.views.has(clusterId)) {
       return;
     }
 
-    logger.info(`[LENS-VIEW]: init dashboard, clusterId=${clusterId}`);
+    this.dependencies.logger.info(`init dashboard, clusterId=${clusterId}`);
     const parentElem = document.getElementById("lens-views");
     const iframe = document.createElement("iframe");
 
@@ -45,17 +49,17 @@ export class ClusterFrameHandler extends Singleton {
     iframe.style.display = "none";
     iframe.setAttribute("src", getClusterFrameUrl(clusterId));
     iframe.addEventListener("load", () => {
-      logger.info(`[LENS-VIEW]: loaded from ${iframe.src}`);
+      this.dependencies.logger.info(`loaded from ${iframe.src}`);
       this.views.get(clusterId).isLoaded = true;
     }, { once: true });
     this.views.set(clusterId, { frame: iframe, isLoaded: false });
     parentElem.appendChild(iframe);
 
-    logger.info(`[LENS-VIEW]: waiting cluster to be ready, clusterId=${clusterId}`);
+    this.dependencies.logger.info(`waiting cluster to be ready, clusterId=${clusterId}`);
 
     const dispose = when(
       () => cluster.ready,
-      () => logger.info(`[LENS-VIEW]: cluster is ready, clusterId=${clusterId}`),
+      () => this.dependencies.logger.info(`cluster is ready, clusterId=${clusterId}`),
     );
 
     when(
@@ -64,12 +68,12 @@ export class ClusterFrameHandler extends Singleton {
       () => {
         when(
           () => {
-            const cluster = ClusterStore.getInstance().getById(clusterId);
+            const cluster = this.dependencies.getClusterById(clusterId);
 
             return !cluster || (cluster.disconnected && this.views.get(clusterId)?.isLoaded);
           },
           () => {
-            logger.info(`[LENS-VIEW]: remove dashboard, clusterId=${clusterId}`);
+            this.dependencies.logger.info(`remove dashboard, clusterId=${clusterId}`);
             this.views.delete(clusterId);
             iframe.parentNode.removeChild(iframe);
             dispose();
@@ -85,22 +89,22 @@ export class ClusterFrameHandler extends Singleton {
     // Clear the previous when ASAP
     this.prevVisibleClusterChange?.();
 
-    logger.info(`[LENS-VIEW]: refreshing iframe views, visible cluster id=${clusterId}`);
-    ipcRenderer.send(clusterVisibilityHandler);
+    this.dependencies.logger.info(`refreshing iframe views, visible cluster id=${clusterId}`);
+    this.dependencies.setClusterAsVisible(undefined);
 
     for (const { frame: view } of this.views.values()) {
       view.style.display = "none";
     }
 
-    const cluster = ClusterStore.getInstance().getById(clusterId);
+    const cluster = this.dependencies.getClusterById(clusterId);
 
     if (cluster) {
       this.prevVisibleClusterChange = when(
         () => cluster.available && cluster.ready && this.views.get(clusterId)?.isLoaded,
         () => {
-          logger.info(`[LENS-VIEW]: cluster id=${clusterId} should now be visible`);
+          this.dependencies.logger.info(`cluster id=${clusterId} should now be visible`);
           this.views.get(clusterId).frame.style.display = "flex";
-          ipcRenderer.send(clusterVisibilityHandler, clusterId);
+          this.dependencies.setClusterAsVisible(clusterId);
         },
       );
     }

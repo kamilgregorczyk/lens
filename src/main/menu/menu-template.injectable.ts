@@ -27,15 +27,12 @@ import type { ClusterId } from "../../common/cluster-types";
 import activeClusterIdInjectable from "../window/active-cluster-id.injectable";
 import type { OpenCommandPallet } from "../../common/ipc/command-pallet/open.injectable";
 import openCommandPalletInjectable from "../../common/ipc/command-pallet/open.injectable";
+import { ignoreIf } from "../../common/utils/array";
 
 export type MenuTopId = "mac" | "file" | "edit" | "view" | "help";
 
 export interface MenuItemsOpts extends MenuItemConstructorOptions {
   submenu?: MenuItemConstructorOptions[];
-}
-
-function ignoreIf(check: boolean, menuItems: MenuItemConstructorOptions[]) {
-  return check ? [] : menuItems;
 }
 
 interface Dependencies {
@@ -127,7 +124,7 @@ const getMenuTemplate = ({
           navigate(addClusterURL());
         },
       },
-      ...ignoreIf(isMac, [
+      ...ignoreIf<MenuItemConstructorOptions>(isMac, [
         { type: "separator" },
         {
           label: "Preferences",

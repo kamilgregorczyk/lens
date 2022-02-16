@@ -11,7 +11,6 @@ import * as LensExtensionsCommonApi from "../extensions/common-api";
 import * as LensExtensionsMainApi from "../extensions/main-api";
 import { app, autoUpdater, dialog, powerMonitor } from "electron";
 import { appName, isIntegrationTesting, isMac, isWindows, productName } from "../common/vars";
-import { ClusterManager } from "./clusters/manager";
 import { shellSync } from "./shell-sync";
 import { mangleProxyEnv } from "./proxy-env";
 import { registerFileProtocol } from "../common/register-protocol";
@@ -24,14 +23,12 @@ import configurePackages from "../common/configure-packages";
 import { PrometheusProviderRegistry } from "./prometheus";
 import * as initializers from "./initializers";
 import { SentryInit } from "../common/sentry";
-import { ensureDir } from "fs-extra";
 import { ShellSession } from "./shell-session/shell-session";
 import { getDi } from "./getDi";
 import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
-import lensProtocolRouterMainInjectable from "./protocol-handler/lens-protocol-router-main/lens-protocol-router-main.injectable";
+import lensProtocolRouterMainInjectable from "./protocol-handler/router.injectable";
 import extensionDiscoveryInjectable from "../extensions/extension-discovery/extension-discovery.injectable";
 import directoryForExesInjectable from "../common/directory-path/executables.injectable";
-import directoryForKubeConfigsInjectable from "../common/directory-path/local-kube-configs.injectable";
 import kubeconfigSyncManagerInjectable from "./catalog/local-sources/kubeconfigs/manager.injectable";
 import baseLoggerInjectable from "./logger/base-logger.injectable";
 import appEventBusInjectable from "../common/app-event-bus/app-event-bus.injectable";
@@ -39,9 +36,13 @@ import windowManagerInjectable from "./window/manager.injectable";
 import lensProxyInjectable from "./lens-proxy/proxy-injectable";
 import getAppVersionFromProxyInjectable from "./lens-proxy/get-app-version.injectable";
 import initAppMenuUpdaterInjectable from "./menu/init-app-menu-updater.injectable";
+import clusterManagerInjectable from "./clusters/manager.injectable";
+import initTrayMenuUpdaterInjectable from "./tray/init-tray-menu-updater.injectable";
+import startUpdateCheckingInjectable from "./updater/start-update-checking.injectable";
 
 app.setName(appName);
 injectSystemCAs();
+SentryInit();
 
 const di = getDi();
 
@@ -51,8 +52,7 @@ const onQuitCleanup = disposer();
 const logger = di.inject(baseLoggerInjectable);
 const appEventBus = di.inject(appEventBusInjectable);
 const windowManager = di.inject(windowManagerInjectable);
-
-SentryInit();
+const clusterManager = di.inject(clusterManagerInjectable);
 
 logger.info(`📟 Setting ${productName} as protocol client for lens://`);
 
@@ -162,12 +162,14 @@ app.on("ready", async () => {
   }
 
   const extensionLoader = di.inject(extensionLoaderInjectable);
+  const extensionDiscovery = di.inject(extensionDiscoveryInjectable);
+  const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
+  const startUpdateChecking = di.inject(startUpdateCheckingInjectable);
 
   extensionLoader.init();
-
-  const extensionDiscovery = di.inject(extensionDiscoveryInjectable);
-
   extensionDiscovery.init();
+  kubeConfigSyncManager.startSync();
+  startUpdateChecking();
 
   // Start the app without showing the main window when auto starting on login
   // (On Windows and Linux, we get a flag. On MacOS, we get special API.)
@@ -176,7 +178,7 @@ app.on("ready", async () => {
   logger.info("🖥️  Starting WindowManager");
 
   const initMenu = di.inject(initAppMenuUpdaterInjectable);
-  const initTray = di.inject(initTrayIconUpdaterInjectable);
+  const initTray = di.inject(initTrayMenuUpdaterInjectable);
 
   onQuitCleanup.push(
     initMenu(),
@@ -189,19 +191,6 @@ app.on("ready", async () => {
   if (!startHidden) {
     windowManager.ensureMainWindow();
   }
-
-  ipcMainOn(IpcRendererNavigationEvents.LOADED, async () => {
-    const directoryForKubeConfigs = di.inject(directoryForKubeConfigsInjectable);
-
-    await ensureDir(directoryForKubeConfigs);
-
-    const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
-
-    kubeConfigSyncManager.startSync();
-
-    startUpdateChecking();
-    lensProtocolRouterMain.rendererLoaded = true;
-  });
 
   logger.info("🧩 Initializing extensions");
 
@@ -259,7 +248,7 @@ app.on("will-quit", (event) => {
 
   logger.info("APP:QUIT");
   appEventBus.emit({ name: "app", action: "close" });
-  ClusterManager.getInstance(false)?.stop(); // close cluster connections
+  clusterManager.stop(); // close cluster connections
 
   const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
 

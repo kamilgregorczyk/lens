@@ -11,3 +11,7 @@
 export function filled<T>(length: number, value: T): T[] {
   return Array(length).fill(value);
 }
+
+export function ignoreIf<T>(check: boolean, src: T[]) {
+  return check ? [] : src;
+}

@@ -5,7 +5,7 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { inspect } from "util";
 import type { LensLogger } from "../../../../common/logger";
-import { disposer, Disposer, getOrInsertWith, iter } from "../../../../common/utils";
+import { disposer, Disposer, getOrInsertWith, iter, waitForPath } from "../../../../common/utils";
 import type { EntitySource } from "../../entity/registry";
 import type { DiffChangedConfig } from "./diff-changed-config.injectable";
 import diffChangedConfigInjectable from "./diff-changed-config.injectable";
@@ -57,6 +57,8 @@ const watchFileChanges = ({ logger, diffChangedConfig, stat, createWatcher }: De
 
     (async () => {
       try {
+        await waitForPath(filePath);
+
         const stats = await stat(filePath);
         const isFolderSync = stats.isDirectory();
         const cleanupFns = new Map<string, Disposer>();
