@@ -5,7 +5,7 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import requestDirectoryInjectable from "../../common/file-system-provisioner/request-directory.injectable";
 import type { LensExtensionConstructor } from "../lens-extension";
-import type { InstalledExtension } from "../extension-discovery/extension-discovery";
+import type { InstalledExtension } from "../discovery/discovery";
 import { LensExtensionDependencies, setLensExtensionDependencies } from "../lens-extension-set-dependencies";
 
 const createExtensionInstance = (dependencies: LensExtensionDependencies) => (

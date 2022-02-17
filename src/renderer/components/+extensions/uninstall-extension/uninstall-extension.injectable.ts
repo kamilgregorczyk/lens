@@ -8,7 +8,7 @@ import { uninstallExtension } from "./uninstall-extension";
 import extensionInstallationStateStoreInjectable
   from "../../../../extensions/extension-installation-state-store/extension-installation-state-store.injectable";
 import extensionDiscoveryInjectable
-  from "../../../../extensions/extension-discovery/extension-discovery.injectable";
+  from "../../../../extensions/discovery/discovery.injectable";
 
 const uninstallExtensionInjectable = getInjectable({
   instantiate: (di) =>

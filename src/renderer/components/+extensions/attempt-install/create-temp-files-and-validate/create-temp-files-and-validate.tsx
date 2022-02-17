@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { validatePackage } from "../validate-package/validate-package";
-import type { ExtensionDiscovery } from "../../../../../extensions/extension-discovery/extension-discovery";
+import type { ExtensionDiscovery } from "../../../../../extensions/discovery/discovery";
 import { getMessageFromError } from "../../get-message-from-error/get-message-from-error";
 import logger from "../../../../../main/logger";
 import { Notifications } from "../../../notifications";

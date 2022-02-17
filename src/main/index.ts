@@ -12,7 +12,7 @@ import { appName, isIntegrationTesting, isMac, isWindows, productName } from "..
 import { shellSync } from "./shell-sync";
 import { mangleProxyEnv } from "./proxy-env";
 import { registerFileProtocol } from "../common/register-protocol";
-import type { InstalledExtension } from "../extensions/extension-discovery/extension-discovery";
+import type { InstalledExtension } from "../extensions/discovery/discovery";
 import type { LensExtensionId } from "../extensions/lens-extension";
 import { installDeveloperTools } from "./developer-tools";
 import { disposer, getAppVersion } from "../common/utils";
@@ -23,7 +23,7 @@ import * as initializers from "./initializers";
 import { getDi } from "./getDi";
 import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
 import lensProtocolRouterMainInjectable from "./protocol-handler/router.injectable";
-import extensionDiscoveryInjectable from "../extensions/extension-discovery/extension-discovery.injectable";
+import extensionDiscoveryInjectable from "../extensions/discovery/discovery.injectable";
 import directoryForExesInjectable from "../common/directory-path/executables.injectable";
 import kubeconfigSyncManagerInjectable from "./catalog/local-sources/kubeconfigs/manager.injectable";
 import baseLoggerInjectable from "./logger/base-logger.injectable";

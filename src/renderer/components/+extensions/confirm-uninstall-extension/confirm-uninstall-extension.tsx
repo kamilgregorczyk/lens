@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import React from "react";
-import type { InstalledExtension } from "../../../../extensions/extension-discovery/extension-discovery";
+import type { InstalledExtension } from "../../../../extensions/discovery/discovery";
 import type { LensExtensionId } from "../../../../extensions/lens-extension";
 import { extensionDisplayName } from "../../../../extensions/lens-extension";
 import { ConfirmDialog } from "../../confirm-dialog";

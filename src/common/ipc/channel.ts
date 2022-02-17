@@ -5,7 +5,7 @@
 
 import { DependencyInjectionContainer, getInjectable, getInjectionToken, InjectionToken, lifecycleEnum } from "@ogre-tools/injectable";
 import sendToViewInjectable from "../../main/ipc/send-to-view.injectable";
-import { IpcOneWayStream, OneWayStreamChannels, RequestCatalogSyncStreamChannels } from "./steam";
+import { IpcOneWayStream } from "./steam";
 
 export type ChannelCallable<T> = T extends Channel<infer Args, infer R> ? (...args: Args) => R : never;
 
@@ -68,10 +68,8 @@ export function getChannelEmitterInjectionToken<Fn extends (...args: any[]) => v
   return new Channel(channel);
 }
 
-export function getStreamInjectionToken<T>(baseToken: Channel<[], Promise<OneWayStreamChannels>>) {
-  return new IpcOneWayStream<T>(baseToken);
-}
+export function getStreamInjectionToken<T>(channel: string) {
+  claimChannelName(channel);
 
-export function getStreamChannelsInjectionToken(channel: string) {
-  return getChannelInjectionToken<RequestCatalogSyncStreamChannels>(channel);
+  return new IpcOneWayStream<T>(channel);
 }

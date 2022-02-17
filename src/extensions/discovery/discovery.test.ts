@@ -9,8 +9,8 @@ import os from "os";
 import { Console } from "console";
 import * as fse from "fs-extra";
 import { getDiForUnitTesting } from "../../main/getDiForUnitTesting";
-import extensionDiscoveryInjectable from "../extension-discovery/extension-discovery.injectable";
-import type { ExtensionDiscovery } from "../extension-discovery/extension-discovery";
+import extensionDiscoveryInjectable from "./discovery.injectable";
+import type { ExtensionDiscovery } from "./discovery";
 import installExtensionInjectable
   from "../extension-installer/install-extension/install-extension.injectable";
 import directoryForUserDataInjectable

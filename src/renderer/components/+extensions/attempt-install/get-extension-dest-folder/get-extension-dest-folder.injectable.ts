@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 
-import extensionDiscoveryInjectable from "../../../../../extensions/extension-discovery/extension-discovery.injectable";
+import extensionDiscoveryInjectable from "../../../../../extensions/discovery/discovery.injectable";
 
 import { getExtensionDestFolder } from "./get-extension-dest-folder";
 

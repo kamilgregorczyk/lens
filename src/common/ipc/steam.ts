@@ -4,7 +4,6 @@
  */
 
 import { DependencyInjectionContainer, getInjectable, getInjectionToken, InjectionToken, lifecycleEnum } from "@ogre-tools/injectable";
-import type { Channel } from "./channel";
 
 export type StreamListener<T> = (val: T) => void;
 
@@ -25,16 +24,16 @@ export type RequestCatalogSyncStreamChannels = () => Promise<OneWayStreamChannel
 export class IpcOneWayStream<T> {
   readonly token: InjectionToken<(listeners: StreamListeners<T>) => void, void>;
 
-  constructor(protected readonly baseToken: Channel<[], Promise<OneWayStreamChannels>>) {
+  constructor(protected readonly baseChannel: string) {
     this.token = getInjectionToken();
   }
 
-  getRendererInjectable(init: (di: DependencyInjectionContainer, baseToken: Channel<[], Promise<OneWayStreamChannels>>) => (listeners: StreamListeners<T>) => void) {
+  getRendererInjectable(init: (di: DependencyInjectionContainer, baseChannel: string) => (listeners: StreamListeners<T>) => void) {
     let handler: (listener: StreamListeners<T>) => void;
 
     return getInjectable({
       setup: (di) => {
-        handler = init(di, this.baseToken);
+        handler = init(di, this.baseChannel);
       },
       instantiate: () => handler,
       injectionToken: this.token,
@@ -42,14 +41,14 @@ export class IpcOneWayStream<T> {
     });
   }
 
-  getMainInjectable(init: (di: DependencyInjectionContainer, baseToken: Channel<[], Promise<OneWayStreamChannels>>) => void) {
+  getMainInjectable(init: (di: DependencyInjectionContainer, baseChannel: string) => void) {
     return getInjectable({
       setup: (di) => {
-        init(di, this.baseToken);
+        init(di, this.baseChannel);
       },
       instantiate: () => (listeners): void => {
         void listeners;
-        throw new Error(`Cannot start a one way channel for ${this.baseToken.channel} on main`);
+        throw new Error(`Cannot start a one way channel for ${this.baseChannel} on main`);
       },
       injectionToken: this.token,
       lifecycle: lifecycleEnum.singleton,

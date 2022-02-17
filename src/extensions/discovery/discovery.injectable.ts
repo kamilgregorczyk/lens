@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { ExtensionDiscovery } from "./extension-discovery";
+import { ExtensionDiscovery } from "./discovery";
 import extensionLoaderInjectable from "../extension-loader/extension-loader.injectable";
 import isCompatibleExtensionInjectable from "./is-compatible-extension/is-compatible-extension.injectable";
 import isCompatibleBundledExtensionInjectable from "./is-compatible-bundled-extension/is-compatible-bundled-extension.injectable";
@@ -12,6 +12,8 @@ import installExtensionInjectable from "../extension-installer/install-extension
 import extensionPackageRootDirectoryInjectable from "../extension-installer/extension-package-root-directory/extension-package-root-directory.injectable";
 import installExtensionsInjectable from "../extension-installer/install-extensions/install-extensions.injectable";
 import { extensionsStoreInjectionToken } from "../../common/extensions/store-injection-token";
+import isProductionInjectable from "../../common/vars/is-production.injectable";
+import extensionsDiscoverLoggerInjectable from "./logger.injectable";
 
 const extensionDiscoveryInjectable = getInjectable({
   instantiate: (di) => new ExtensionDiscovery({
@@ -23,6 +25,8 @@ const extensionDiscoveryInjectable = getInjectable({
     installExtension: di.inject(installExtensionInjectable),
     installExtensions: di.inject(installExtensionsInjectable),
     extensionPackageRootDirectory: di.inject(extensionPackageRootDirectoryInjectable),
+    isProduction: di.inject(isProductionInjectable),
+    logger: di.inject(extensionsDiscoverLoggerInjectable),
   }),
 
   lifecycle: lifecycleEnum.singleton,

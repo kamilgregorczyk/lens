@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { InstalledExtension } from "./extension-discovery/extension-discovery";
+import type { InstalledExtension } from "./discovery/discovery";
 import { action, observable, makeObservable, computed } from "mobx";
 import logger from "../main/logger";
 import type { ProtocolHandlerRegistration } from "./registries";

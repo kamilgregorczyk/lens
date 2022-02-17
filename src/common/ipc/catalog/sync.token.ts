@@ -4,7 +4,6 @@
  */
 
 import type { CatalogSyncMessage } from "../../catalog/entity/sync-types";
-import { getStreamChannelsInjectionToken, getStreamInjectionToken } from "../channel";
+import { getStreamInjectionToken } from "../channel";
 
-export const requestCatalogSyncStreamChannelsInjectionToken = getStreamChannelsInjectionToken("catalog:sync");
-export const requestCatalogSyncStreamInjectionToken = getStreamInjectionToken<CatalogSyncMessage>(requestCatalogSyncStreamChannelsInjectionToken);
+export const requestCatalogSyncStreamInjectionToken = getStreamInjectionToken<CatalogSyncMessage>("catalog:sync");

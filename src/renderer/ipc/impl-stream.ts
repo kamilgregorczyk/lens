@@ -3,13 +3,15 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { IpcOneWayStream } from "../../common/ipc/steam";
+import type { IpcOneWayStream, OneWayStreamChannels } from "../../common/ipc/steam";
+import invokeMainInjectable from "./invoke-main.injectable";
 import ipcRendererInjectable from "./ipc-renderer.injectable";
 
 export function implOneWayStream<T>(token: IpcOneWayStream<T>) {
   return token.getRendererInjectable((di, connectChannel) => {
     const ipcRenderer = di.inject(ipcRendererInjectable);
-    const requestChannels = di.inject(connectChannel.token);
+    const invoke = di.inject(invokeMainInjectable);
+    const requestChannels = (): Promise<OneWayStreamChannels> => invoke(connectChannel);
 
     return (listeners) => {
       (async () => {

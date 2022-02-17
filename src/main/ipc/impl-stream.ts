@@ -6,8 +6,10 @@
 import type { DependencyInjectionContainer } from "@ogre-tools/injectable";
 import type TypedEventEmitter from "typed-emitter";
 import type { IpcOneWayStream, OneWayStreamChannels } from "../../common/ipc/steam";
+import { disposer } from "../../common/utils";
 import broadcastMessageInjectable from "./broadcast/message.injectable";
 import ipcMainInjectable from "./ipc-main.injectable";
+import * as uuid from "uuid";
 
 export interface StreamSource<T> {
   data: (data: T) => void;
@@ -19,32 +21,44 @@ export interface StreamSource<T> {
   ready: () => void;
 }
 
-export interface ImplStreamOutput<T> {
-  channels: OneWayStreamChannels;
-  emitter: TypedEventEmitter<StreamSource<T>>;
-}
-
-export function implOneWayStream<T>(token: IpcOneWayStream<T>, init: (di: DependencyInjectionContainer) => () => ImplStreamOutput<T>) {
-  return token.getMainInjectable((di, baseToken) => {
+export function implOneWayStream<T>(token: IpcOneWayStream<T>, init: (di: DependencyInjectionContainer) => () => TypedEventEmitter<StreamSource<T>>) {
+  return token.getMainInjectable((di, baseChannel) => {
     const broadcast = di.inject(broadcastMessageInjectable);
     const ipcMain = di.inject(ipcMainInjectable);
 
     const handler = init(di);
 
-    ipcMain.handle(baseToken.channel, () => {
-      const { channels, emitter } = handler();
+    ipcMain.handle(baseChannel, () => {
+      const channels: OneWayStreamChannels = {
+        close: `${baseChannel}:close:${uuid.v4()}`,
+        data: `${baseChannel}:data:${uuid.v4()}`,
+        ready: `${baseChannel}:ready:${uuid.v4()}`,
+      };
+      const emitter = handler();
       const onData = (data: T) => broadcast(channels.data, data);
       const onReady = () => emitter.emit("ready");
+      const onClose = disposer();
 
       emitter.on("data", onData);
-      ipcMain.on(channels.ready, onReady);
-      emitter.once("close", () => {
-        broadcast(channels.close);
-        emitter.off("data", onData);
-        ipcMain.off(channels.ready, onReady);
-      });
+      onClose.push(() => emitter.off("data", onData));
 
-      return emitter;
+      ipcMain.on(channels.ready, onReady);
+      onClose.push(() => ipcMain.off(channels.ready, onReady));
+
+      // Set up back channel for the other side closing the stream
+      ipcMain.once(channels.close, onClose);
+      onClose.push(() => ipcMain.off(channels.close, onClose));
+
+      // Set up closing the stream from this side
+      const onEmitterClose = () => {
+        onClose();
+        broadcast(channels.close);
+      };
+
+      emitter.once("close", onEmitterClose);
+      onClose.push(() => emitter.off("close", onEmitterClose));
+
+      return channels;
     });
   });
 }

@@ -5,7 +5,7 @@
 import type { ExtensionLoader } from "../../../../extensions/extension-loader";
 import { extensionDisplayName, LensExtensionId } from "../../../../extensions/lens-extension";
 import logger from "../../../../main/logger";
-import type { ExtensionDiscovery } from "../../../../extensions/extension-discovery/extension-discovery";
+import type { ExtensionDiscovery } from "../../../../extensions/discovery/discovery";
 import { Notifications } from "../../notifications";
 import React from "react";
 import { when } from "mobx";

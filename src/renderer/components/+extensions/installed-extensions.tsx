@@ -8,7 +8,7 @@ import React, { useMemo } from "react";
 import type {
   ExtensionDiscovery,
   InstalledExtension,
-} from "../../../extensions/extension-discovery/extension-discovery";
+} from "../../../extensions/discovery/discovery";
 import { Icon } from "../icon";
 import { List } from "../list/list";
 import { MenuActions, MenuItem } from "../menu";
@@ -18,7 +18,7 @@ import { observer } from "mobx-react";
 import type { Row } from "react-table";
 import type { LensExtensionId } from "../../../extensions/lens-extension";
 import extensionDiscoveryInjectable
-  from "../../../extensions/extension-discovery/extension-discovery.injectable";
+  from "../../../extensions/discovery/discovery.injectable";
 
 import { withInjectables } from "@ogre-tools/injectable-react";
 import extensionInstallationStateStoreInjectable

@@ -4,33 +4,34 @@
  */
 
 import { watch } from "chokidar";
-import { ipcRenderer } from "electron";
 import { EventEmitter } from "events";
 import fse from "fs-extra";
-import { makeObservable, observable, reaction, when } from "mobx";
+import { action, makeObservable, observable, when } from "mobx";
 import os from "os";
 import path from "path";
-import { broadcastMessage, ipcMainHandle, ipcRendererOn } from "../../common/ipc";
-import { toJS } from "../../common/utils";
-import logger from "../../main/logger";
 import type { ExtensionsStore } from "../../common/extensions/store";
 import type { ExtensionLoader } from "../extension-loader";
 import type { LensExtensionId, LensExtensionManifest } from "../lens-extension";
 import type { ExtensionInstallationStateStore } from "../extension-installation-state-store/extension-installation-state-store";
 import type { PackageJson } from "type-fest";
-import { extensionDiscoveryStateChannel } from "../../common/ipc/extension-handling";
-import { requestInitialExtensionDiscovery } from "../../renderer/ipc";
+import type { LensLogger } from "../../common/logger";
+import { toJS } from "../../common/utils";
 
 interface Dependencies {
-  extensionLoader: ExtensionLoader;
-  extensionsStore: ExtensionsStore;
-  extensionInstallationStateStore: ExtensionInstallationStateStore;
+  readonly extensionLoader: ExtensionLoader;
+  readonly extensionsStore: ExtensionsStore;
+  readonly extensionInstallationStateStore: ExtensionInstallationStateStore;
   isCompatibleBundledExtension: (manifest: LensExtensionManifest) => boolean;
   isCompatibleExtension: (manifest: LensExtensionManifest) => boolean;
   installExtension: (name: string) => Promise<void>;
   installExtensions: (packageJsonPath: string, packagesJson: PackageJson) => Promise<void>
-  extensionPackageRootDirectory: string;
-  isProduction: boolean;
+  readonly extensionPackageRootDirectory: string;
+  readonly isProduction: boolean;
+  readonly logger: LensLogger;
+}
+
+export interface ExtensionDiscoveryState {
+  isLoaded: boolean;
 }
 
 export interface InstalledExtension {
@@ -49,13 +50,7 @@ export interface InstalledExtension {
   isEnabled: boolean;
 }
 
-const logModule = "[EXTENSION-DISCOVERY]";
-
 export const manifestFilename = "package.json";
-
-interface ExtensionDiscoveryChannelMessage {
-  isLoaded: boolean;
-}
 
 /**
  * Returns true if the lstat is for a directory-like file (e.g. isDirectory or symbolic link)
@@ -92,7 +87,7 @@ export class ExtensionDiscovery {
 
   public events = new EventEmitter();
 
-  constructor(protected dependencies : Dependencies) {
+  constructor(protected readonly dependencies : Dependencies) {
     makeObservable(this);
   }
 
@@ -117,41 +112,11 @@ export class ExtensionDiscovery {
   }
 
   /**
-   * Initializes the class and setups the file watcher for added/removed local extensions.
-   */
-  async init(): Promise<void> {
-    if (ipcRenderer) {
-      await this.initRenderer();
-    } else {
-      await this.initMain();
-    }
-  }
-
-  async initRenderer(): Promise<void> {
-    const onMessage = ({ isLoaded }: ExtensionDiscoveryChannelMessage) => {
-      this.isLoaded = isLoaded;
-    };
-
-    requestInitialExtensionDiscovery().then(onMessage);
-    ipcRendererOn(extensionDiscoveryStateChannel, (_event, message: ExtensionDiscoveryChannelMessage) => {
-      onMessage(message);
-    });
-  }
-
-  async initMain(): Promise<void> {
-    ipcMainHandle(extensionDiscoveryStateChannel, () => this.toJSON());
-
-    reaction(() => this.toJSON(), () => {
-      this.broadcast();
-    });
-  }
-
-  /**
    * Watches for added/removed local extensions.
    * Dependencies are installed automatically after an extension folder is copied.
    */
   async watchExtensions(): Promise<void> {
-    logger.info(`${logModule} watching extension add/remove in ${this.localFolderPath}`);
+    this.dependencies.logger.info(`watching extension add/remove in ${this.localFolderPath}`);
 
     // Wait until .load() has been called and has been resolved
     await this.whenLoaded;
@@ -202,11 +167,11 @@ export class ExtensionDiscovery {
           await this.dependencies.installExtension(extension.absolutePath);
 
           this.extensions.set(extension.id, extension);
-          logger.info(`${logModule} Added extension ${extension.manifest.name}`);
+          this.dependencies.logger.info(`Added extension ${extension.manifest.name}`);
           this.events.emit("add", extension);
         }
       } catch (error) {
-        logger.error(`${logModule}: failed to add extension: ${error}`, { error });
+        this.dependencies.logger.error(`failed to add extension: ${error}`, { error });
       } finally {
         this.dependencies.extensionInstallationStateStore.clearInstallingFromMain(manifestPath);
       }
@@ -243,13 +208,13 @@ export class ExtensionDiscovery {
       const lensExtensionId = extension.manifestPath;
 
       this.extensions.delete(extension.id);
-      logger.info(`${logModule} removed extension ${extensionName}`);
+      this.dependencies.logger.info(`removed extension ${extensionName}`);
       this.events.emit("remove", lensExtensionId);
 
       return;
     }
 
-    logger.warn(`${logModule} extension ${extensionFolderName} not found, can't remove`);
+    this.dependencies.logger.warn(`extension ${extensionFolderName} not found, can't remove`);
   };
 
   /**
@@ -270,7 +235,7 @@ export class ExtensionDiscovery {
   async uninstallExtension(extensionId: LensExtensionId): Promise<void> {
     const { manifest, absolutePath } = this.extensions.get(extensionId) ?? this.dependencies.extensionLoader.getExtension(extensionId);
 
-    logger.info(`${logModule} Uninstalling ${manifest.name}`);
+    this.dependencies.logger.info(`Uninstalling ${manifest.name}`);
 
     await this.removeSymlinkByPackageName(manifest.name);
 
@@ -286,8 +251,8 @@ export class ExtensionDiscovery {
 
     this.loadStarted = true;
 
-    logger.info(
-      `${logModule} loading extensions from ${this.dependencies.extensionPackageRootDirectory}`,
+    this.dependencies.logger.info(
+      `loading extensions from ${this.dependencies.extensionPackageRootDirectory}`,
     );
 
     // fs.remove won't throw if path is missing
@@ -353,7 +318,7 @@ export class ExtensionDiscovery {
       const isEnabled = this.dependencies.extensionsStore.isEnabled({ id, isBundled });
       const extensionDir = path.dirname(manifestPath);
       const npmPackage = path.join(extensionDir, `${manifest.name}-${manifest.version}.tgz`);
-      const absolutePath = (isProduction && await fse.pathExists(npmPackage)) ? npmPackage : extensionDir;
+      const absolutePath = (this.dependencies.isProduction && await fse.pathExists(npmPackage)) ? npmPackage : extensionDir;
       const isCompatible = (isBundled && this.dependencies.isCompatibleBundledExtension(manifest)) || this.dependencies.isCompatibleExtension(manifest);
 
       return {
@@ -368,9 +333,9 @@ export class ExtensionDiscovery {
     } catch (error) {
       if (error.code === "ENOTDIR") {
         // ignore this error, probably from .DS_Store file
-        logger.debug(`${logModule}: failed to load extension manifest through a not-dir-like at ${manifestPath}`);
+        this.dependencies.logger.debug(` failed to load extension manifest through a not-dir-like at ${manifestPath}`);
       } else {
-        logger.error(`${logModule}: can't load extension manifest at ${manifestPath}: ${error}`);
+        this.dependencies.logger.error(` can't load extension manifest at ${manifestPath}: ${error}`);
       }
 
       return null;
@@ -392,7 +357,7 @@ export class ExtensionDiscovery {
           const message = error.message || error || "unknown error";
           const { name, version } = extension.manifest;
 
-          logger.error(`${logModule}: failed to install user extension ${name}@${version}`, message);
+          this.dependencies.logger.error(` failed to install user extension ${name}@${version}`, message);
         }
       }
     }
@@ -426,7 +391,7 @@ export class ExtensionDiscovery {
         extensions.push(extension);
       }
     }
-    logger.debug(`${logModule}: ${extensions.length} extensions loaded`, { folderPath, extensions });
+    this.dependencies.logger.debug(` ${extensions.length} extensions loaded`, { folderPath, extensions });
 
     return extensions;
   }
@@ -443,25 +408,30 @@ export class ExtensionDiscovery {
 
       const absPath = path.resolve(folderPath, fileName);
 
-      if (!fse.existsSync(absPath)) {
-        continue;
-      }
+      try {
+        const lstat = await fse.lstat(absPath);
 
-      const lstat = await fse.lstat(absPath);
+        // skip non-directories
+        if (!isDirectoryLike(lstat)) {
+          continue;
+        }
 
-      // skip non-directories
-      if (!isDirectoryLike(lstat)) {
-        continue;
-      }
+        const extension = await this.loadExtensionFromFolder(absPath);
 
-      const extension = await this.loadExtensionFromFolder(absPath);
+        if (extension) {
+          extensions.push(extension);
+        }
+      } catch (error) {
+        if (error.code === "ENOENT") {
+          // ignore file not found
+          continue;
+        }
 
-      if (extension) {
-        extensions.push(extension);
+        throw error;
       }
     }
 
-    logger.debug(`${logModule}: ${extensions.length} extensions loaded`, { folderPath, extensions });
+    this.dependencies.logger.debug(` ${extensions.length} extensions loaded`, { folderPath, extensions });
 
     return extensions;
   }
@@ -476,13 +446,14 @@ export class ExtensionDiscovery {
     return this.getByManifest(manifestPath, { isBundled });
   }
 
-  toJSON(): ExtensionDiscoveryChannelMessage {
+  getState(): ExtensionDiscoveryState {
     return toJS({
       isLoaded: this.isLoaded,
     });
   }
 
-  broadcast(): void {
-    broadcastMessage(extensionDiscoveryStateChannel, this.toJSON());
+  @action
+  setState(state: ExtensionDiscoveryState) {
+    this.isLoaded = state.isLoaded;
   }
 }

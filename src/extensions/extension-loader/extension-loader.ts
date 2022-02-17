@@ -12,7 +12,7 @@ import { broadcastMessage, ipcMainOn, ipcRendererOn, ipcMainHandle } from "../..
 import { Disposer, toJS } from "../../common/utils";
 import logger from "../../main/logger";
 import type { KubernetesCluster } from "../common-api/catalog";
-import type { InstalledExtension } from "../extension-discovery/extension-discovery";
+import type { InstalledExtension } from "../discovery/discovery";
 import type { LensExtension, LensExtensionConstructor, LensExtensionId } from "../lens-extension";
 import type { LensRendererExtension } from "../lens-renderer-extension";
 import * as registries from "../registries";

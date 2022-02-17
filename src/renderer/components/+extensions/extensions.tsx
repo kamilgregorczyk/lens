@@ -13,7 +13,7 @@ import {
 } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import React from "react";
-import type { InstalledExtension } from "../../../extensions/extension-discovery/extension-discovery";
+import type { InstalledExtension } from "../../../extensions/discovery/discovery";
 import { DropFileInput } from "../input";
 import { Install } from "./install";
 import { InstalledExtensions } from "./installed-extensions";

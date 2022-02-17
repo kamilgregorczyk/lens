@@ -29,7 +29,7 @@ import { getDi } from "./getDi";
 import { DiContextProvider } from "@ogre-tools/injectable-react";
 import type { DependencyInjectionContainer } from "@ogre-tools/injectable";
 import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
-import extensionDiscoveryInjectable from "../extensions/extension-discovery/extension-discovery.injectable";
+import extensionDiscoveryInjectable from "../extensions/discovery/discovery.injectable";
 import extensionInstallationStateStoreInjectable from "../extensions/extension-installation-state-store/extension-installation-state-store.injectable";
 import initRootFrameInjectable from "./frames/root-frame/init.injectable";
 import initClusterFrameInjectable from "./frames/cluster-frame/init.injectable";
