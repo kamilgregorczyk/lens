@@ -2,20 +2,24 @@
  * Copyright (c) OpenLens Authors. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import fse from "fs-extra";
 import path from "path";
 import hb from "handlebars";
-import { ResourceApplier } from "../../main/resource-applier";
 import type { KubernetesCluster } from "../catalog/entity/declarations";
-import logger from "../../main/logger";
-import { app } from "electron";
 import yaml from "js-yaml";
 import { productName } from "../vars";
-import { requestKubectlApplyAll, requestKubectlDeleteAll } from "../../renderer/ipc";
 import { asLegacyGlobalFunctionForExtensionApi } from "../../extensions/di-legacy-globals/as-legacy-global-function-for-extension-api";
-import getClusterByIdInjectable from "../clusters/get-by-id.injectable";
+import { kubectlApplyAllInjectionToken } from "../ipc/kubectl/apply-all.token";
+import { kubectlDeleteAllInjectionToken } from "../ipc/kubectl/delete-all.token";
+import { asLegacyGlobalObjectForExtensionApi } from "../../extensions/di-legacy-globals/as-legacy-global-object-for-extension-api";
+import resourceStackLoggerInjectable from "./resource-stack-logger.injectable";
+import readDirInjectable from "../fs/read-dir.injectable";
+import readFileInjectable from "../fs/read-file.injectable";
 
-const getClusterById = asLegacyGlobalFunctionForExtensionApi(getClusterByIdInjectable);
+const kubectlApplyAll = asLegacyGlobalFunctionForExtensionApi(kubectlApplyAllInjectionToken.token);
+const kubectlDeleteAll = asLegacyGlobalFunctionForExtensionApi(kubectlDeleteAllInjectionToken.token);
+const logger = asLegacyGlobalObjectForExtensionApi(resourceStackLoggerInjectable);
+const readDir = asLegacyGlobalFunctionForExtensionApi(readDirInjectable);
+const readFile = asLegacyGlobalFunctionForExtensionApi(readFileInjectable);
 
 export class ResourceStack {
   constructor(protected cluster: KubernetesCluster, protected name: string) {}
@@ -42,75 +46,53 @@ export class ResourceStack {
     return this.deleteResources(resources, extraArgs);
   }
 
-  protected async applyResources(resources: string[], extraArgs?: string[]): Promise<string> {
-    const clusterModel = getClusterById(this.cluster.getId());
+  protected async applyResources(resources: string[], extraArgs: string[] = []): Promise<string> {
+    this.appendKubectlArgs(extraArgs);
 
-    if (!clusterModel) {
-      throw new Error(`cluster not found`);
+    const response = await kubectlApplyAll(this.cluster.getId(), resources, extraArgs);
+
+    if (response.stderr) {
+      throw new Error(response.stderr);
     }
 
-    let kubectlArgs = extraArgs || [];
-
-    kubectlArgs = this.appendKubectlArgs(kubectlArgs);
-
-    if (app) {
-      return await new ResourceApplier(clusterModel).kubectlApplyAll(resources, kubectlArgs);
-    } else {
-      const response = await requestKubectlApplyAll(this.cluster.getId(), resources, kubectlArgs);
-
-      if (response.stderr) {
-        throw new Error(response.stderr);
-      }
-
-      return response.stdout;
-    }
+    return response.stdout;
   }
 
   protected async deleteResources(resources: string[], extraArgs?: string[]): Promise<string> {
-    const clusterModel = getClusterById(this.cluster.getId());
+    this.appendKubectlArgs(extraArgs);
 
-    if (!clusterModel) {
-      throw new Error(`cluster not found`);
+    const response = await kubectlDeleteAll(this.cluster.getId(), resources, extraArgs);
+
+    if (response.stderr) {
+      throw new Error(response.stderr);
     }
 
-    let kubectlArgs = extraArgs || [];
-
-    kubectlArgs = this.appendKubectlArgs(kubectlArgs);
-
-    if (app) {
-      return await new ResourceApplier(clusterModel).kubectlDeleteAll(resources, kubectlArgs);
-    } else {
-      const response = await requestKubectlDeleteAll(this.cluster.getId(), resources, kubectlArgs);
-
-      if (response.stderr) {
-        throw new Error(response.stderr);
-      }
-
-      return response.stdout;
-    }
+    return response.stdout;
   }
 
   protected appendKubectlArgs(kubectlArgs: string[]) {
     if (!kubectlArgs.includes("-l") && !kubectlArgs.includes("--label")) {
-      return kubectlArgs.concat(["-l", `app.kubernetes.io/name=${this.name}`]);
+      kubectlArgs.push("-l", `app.kubernetes.io/name=${this.name}`);
     }
-
-    return kubectlArgs;
   }
 
   protected async renderTemplates(folderPath: string, templateContext: any): Promise<string[]> {
     const resources: string[] = [];
 
-    logger.info(`[RESOURCE-STACK]: render templates from ${folderPath}`);
-    const files = await fse.readdir(folderPath);
+    logger.info(`rendering templates from ${folderPath}`);
+    const entries = await readDir(folderPath, { withFileTypes: true });
 
-    for(const filename of files) {
-      const file = path.join(folderPath, filename);
-      const raw = await fse.readFile(file);
+    for(const entry of entries) {
+      if (!entry.isFile()) {
+        continue;
+      }
+
+      const file = path.join(folderPath, entry.name);
+      const raw = await readFile(file, { encoding: "utf-8" });
       const data = (
-        filename.endsWith(".hb")
-          ? hb.compile(raw.toString())(templateContext)
-          : raw.toString()
+        entry.name.endsWith(".hb")
+          ? hb.compile(raw)(templateContext)
+          : raw
       ).trim();
 
       if (!data) {

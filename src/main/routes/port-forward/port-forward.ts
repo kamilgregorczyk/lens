@@ -18,7 +18,7 @@ export interface PortForwardArgs {
   forwardPort: number;
 }
 
-interface Dependencies {
+export interface PortForwardDependencies {
   getKubectlBinPath: (bundled: boolean) => Promise<string>
 }
 
@@ -35,15 +35,15 @@ export class PortForward {
     ));
   }
 
-  public process: ChildProcessWithoutNullStreams;
-  public clusterId: string;
-  public kind: string;
-  public namespace: string;
-  public name: string;
-  public port: number;
+  public process?: ChildProcessWithoutNullStreams;
+  public readonly clusterId: string;
+  public readonly kind: string;
+  public readonly namespace: string;
+  public readonly name: string;
+  public readonly port: number;
   public forwardPort: number;
 
-  constructor(private dependencies: Dependencies, public pathToKubeConfig: string, args: PortForwardArgs) {
+  constructor(private dependencies: PortForwardDependencies, public readonly pathToKubeConfig: string, args: PortForwardArgs) {
     this.clusterId = args.clusterId;
     this.kind = args.kind;
     this.namespace = args.namespace;

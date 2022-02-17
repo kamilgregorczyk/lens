@@ -9,8 +9,7 @@ import type http from "http";
 import path from "path";
 import { readFile } from "fs-extra";
 import type { Cluster } from "../common/clusters/cluster";
-import { apiPrefix, appName, publicPath, isDevelopment, webpackDevServerPort } from "../common/vars";
-import { HelmApiRoute, KubeconfigRoute, MetricsRoute, PortForwardRoute, ResourceApplierApiRoute, VersionRoute } from "./routes";
+import { appName, publicPath, isDevelopment, webpackDevServerPort } from "../common/vars";
 import logger from "./logger";
 
 export interface RouterRequestOpts {
@@ -60,16 +59,23 @@ function getMimeType(filename: string) {
   return mimeTypes[path.extname(filename).slice(1)] || "text/plain";
 }
 
-interface Dependencies {
-  routePortForward: (request: LensApiRequest) => Promise<void>
+export type RouteHandler = (request: LensApiRequest) => Promise<void>;
+
+export interface RouteDescriptor {
+  method: "get" | "patch" | "delete" | "put" | "post" | "head";
+  path: string;
+  handler: RouteHandler;
 }
 
 export class Router {
   protected router = new Call.Router();
-  protected static rootPath = path.resolve(__static);
 
-  public constructor(private dependencies: Dependencies) {
-    this.addRoutes();
+  public constructor(routes: RouteDescriptor[]) {
+    this.addRoute({ method: "get", path: "/{path*}", handler: handleStaticFile });
+
+    for (const route of routes) {
+      this.addRoute(route);
+    }
   }
 
   public async route(cluster: Cluster, req: http.IncomingMessage, res: http.ServerResponse): Promise<boolean> {
@@ -83,11 +89,9 @@ export class Router {
       const request = await this.getRequest({ req, res, cluster, url, params: matchingRoute.params });
 
       await matchingRoute.route(request);
-
-      return true;
     }
 
-    return false;
+    return routeFound;
   }
 
   protected async getRequest(opts: RouterRequestOpts): Promise<LensApiRequest> {
@@ -110,84 +114,54 @@ export class Router {
     };
   }
 
-  protected static async handleStaticFile({ params, response, raw: { req }}: LensApiRequest): Promise<void> {
-    let filePath = params.path;
+  private addRoute({ handler, method, path }: RouteDescriptor): void {
+    this.router.add({ method, path }, handler);
+  }
+}
 
-    for (let retryCount = 0; retryCount < 5; retryCount += 1) {
-      const asset = path.join(Router.rootPath, filePath);
-      const normalizedFilePath = path.resolve(asset);
+const rootPath = path.resolve(__static);
 
-      if (!normalizedFilePath.startsWith(Router.rootPath)) {
+async function handleStaticFile({ params, response, raw: { req }}: LensApiRequest): Promise<void> {
+  let filePath = params.path;
+
+  for (let retryCount = 0; retryCount < 5; retryCount += 1) {
+    const asset = path.join(rootPath, filePath);
+    const normalizedFilePath = path.resolve(asset);
+
+    if (!normalizedFilePath.startsWith(rootPath)) {
+      response.statusCode = 404;
+
+      return response.end();
+    }
+
+    try {
+      const filename = path.basename(req.url);
+      // redirect requests to [appName].js, [appName].html /sockjs-node/ to webpack-dev-server (for hot-reload support)
+      const toWebpackDevServer = filename.includes(appName) || filename.includes("hot-update") || req.url.includes("sockjs-node");
+
+      if (isDevelopment && toWebpackDevServer) {
+        const redirectLocation = `http://localhost:${webpackDevServerPort}${req.url}`;
+
+        response.statusCode = 307;
+        response.setHeader("Location", redirectLocation);
+
+        return response.end();
+      }
+
+      const data = await readFile(asset);
+
+      response.setHeader("Content-Type", getMimeType(asset));
+      response.write(data);
+      response.end();
+    } catch (err) {
+      if (retryCount > 5) {
+        logger.error("handleStaticFile:", err.toString());
         response.statusCode = 404;
 
         return response.end();
       }
 
-      try {
-        const filename = path.basename(req.url);
-        // redirect requests to [appName].js, [appName].html /sockjs-node/ to webpack-dev-server (for hot-reload support)
-        const toWebpackDevServer = filename.includes(appName) || filename.includes("hot-update") || req.url.includes("sockjs-node");
-
-        if (isDevelopment && toWebpackDevServer) {
-          const redirectLocation = `http://localhost:${webpackDevServerPort}${req.url}`;
-
-          response.statusCode = 307;
-          response.setHeader("Location", redirectLocation);
-
-          return response.end();
-        }
-
-        const data = await readFile(asset);
-
-        response.setHeader("Content-Type", getMimeType(asset));
-        response.write(data);
-        response.end();
-      } catch (err) {
-        if (retryCount > 5) {
-          logger.error("handleStaticFile:", err.toString());
-          response.statusCode = 404;
-
-          return response.end();
-        }
-
-        filePath = `${publicPath}/${appName}.html`;
-      }
+      filePath = `${publicPath}/${appName}.html`;
     }
-
-  }
-
-  protected addRoutes() {
-    // Static assets
-    this.router.add({ method: "get", path: "/{path*}" }, Router.handleStaticFile);
-
-    this.router.add({ method: "get", path: "/version" }, VersionRoute.getVersion);
-    this.router.add({ method: "get", path: `${apiPrefix}/kubeconfig/service-account/{namespace}/{account}` }, KubeconfigRoute.routeServiceAccountRoute);
-
-    // Metrics API
-    this.router.add({ method: "post", path: `${apiPrefix}/metrics` }, MetricsRoute.routeMetrics);
-    this.router.add({ method: "get", path: `${apiPrefix}/metrics/providers` }, MetricsRoute.routeMetricsProviders);
-
-    // Port-forward API (the container port and local forwarding port are obtained from the query parameters)
-    this.router.add({ method: "post", path: `${apiPrefix}/pods/port-forward/{namespace}/{resourceType}/{resourceName}` }, this.dependencies.routePortForward);
-    this.router.add({ method: "get", path: `${apiPrefix}/pods/port-forward/{namespace}/{resourceType}/{resourceName}` }, PortForwardRoute.routeCurrentPortForward);
-    this.router.add({ method: "delete", path: `${apiPrefix}/pods/port-forward/{namespace}/{resourceType}/{resourceName}` }, PortForwardRoute.routeCurrentPortForwardStop);
-
-    // Helm API
-    this.router.add({ method: "get", path: `${apiPrefix}/v2/charts` }, HelmApiRoute.listCharts);
-    this.router.add({ method: "get", path: `${apiPrefix}/v2/charts/{repo}/{chart}` }, HelmApiRoute.getChart);
-    this.router.add({ method: "get", path: `${apiPrefix}/v2/charts/{repo}/{chart}/values` }, HelmApiRoute.getChartValues);
-
-    this.router.add({ method: "post", path: `${apiPrefix}/v2/releases` }, HelmApiRoute.installChart);
-    this.router.add({ method: `put`, path: `${apiPrefix}/v2/releases/{namespace}/{release}` }, HelmApiRoute.updateRelease);
-    this.router.add({ method: `put`, path: `${apiPrefix}/v2/releases/{namespace}/{release}/rollback` }, HelmApiRoute.rollbackRelease);
-    this.router.add({ method: "get", path: `${apiPrefix}/v2/releases/{namespace?}` }, HelmApiRoute.listReleases);
-    this.router.add({ method: "get", path: `${apiPrefix}/v2/releases/{namespace}/{release}` }, HelmApiRoute.getRelease);
-    this.router.add({ method: "get", path: `${apiPrefix}/v2/releases/{namespace}/{release}/values` }, HelmApiRoute.getReleaseValues);
-    this.router.add({ method: "get", path: `${apiPrefix}/v2/releases/{namespace}/{release}/history` }, HelmApiRoute.getReleaseHistory);
-    this.router.add({ method: "delete", path: `${apiPrefix}/v2/releases/{namespace}/{release}` }, HelmApiRoute.deleteRelease);
-
-    // Resource Applier API
-    this.router.add({ method: "post", path: `${apiPrefix}/stack` }, ResourceApplierApiRoute.applyResource);
-    this.router.add({ method: "patch", path: `${apiPrefix}/stack` }, ResourceApplierApiRoute.patchResource);
   }
 }

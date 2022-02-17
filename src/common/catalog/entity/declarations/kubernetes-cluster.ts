@@ -6,7 +6,6 @@
 import { CatalogEntity, CatalogEntityActionContext, CatalogEntityContextMenuContext, CatalogEntityMetadata, CatalogEntityStatus } from "../entity";
 import { CatalogCategory, CatalogCategorySpec } from "../../category/category";
 import type { CatalogEntitySpec } from "../entity";
-import { requestClusterDisconnection } from "../../../../renderer/ipc";
 import { activateClusterInjectionToken } from "../../../ipc/cluster/activate.token";
 import { disconnectClusterInjectionToken } from "../../../ipc/cluster/disconnect.token";
 import { asLegacyGlobalChannelForExtensionApi } from "../../../../extensions/di-legacy-globals/as-legacy-global-channel-for-extension-api";
@@ -100,7 +99,7 @@ export class KubernetesCluster<
         context.menuItems.push({
           title: "Disconnect",
           icon: "link_off",
-          onClick: () => requestClusterDisconnection(this.getId()),
+          onClick: () => disconnectCluster(this.getId()),
         });
         break;
       case LensKubernetesClusterStatus.DISCONNECTED:

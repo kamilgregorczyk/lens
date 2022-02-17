@@ -3,21 +3,31 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { Cluster } from "../common/clusters/cluster";
+import type { Cluster } from "../../common/clusters/cluster";
 import type { KubernetesObject } from "@kubernetes/client-node";
-import { exec } from "child_process";
-import fs from "fs-extra";
 import * as yaml from "js-yaml";
 import path from "path";
-import tempy from "tempy";
-import logger from "./logger";
-import { appEventBus } from "../common/app-event-bus/event-bus";
-import { cloneJsonObject } from "../common/utils";
+import type { AppEventBus } from "../../common/app-event-bus/event-bus";
+import { cloneJsonObject } from "../../common/utils";
 import type { Patch } from "rfc6902";
-import { promiseExecFile } from "../common/utils/promise-exec";
+import { promiseExecFile } from "../../common/utils/promise-exec";
+import type { LensLogger } from "../../common/logger";
+import type { WriteFile } from "../../common/fs/write-file.injectable";
+import type { Remove } from "../../common/fs/remove.injectable";
+import type { Unlink } from "../../common/fs/unlink.injectable";
+import * as uuid from "uuid";
+
+export interface ResourceApplierDependencies {
+  readonly appEventBus: AppEventBus;
+  readonly logger: LensLogger;
+  writeFile: WriteFile;
+  remove: Remove;
+  unlink: Unlink;
+  readonly tmpDir: string;
+}
 
 export class ResourceApplier {
-  constructor(protected cluster: Cluster) {}
+  constructor(protected readonly dependencies: ResourceApplierDependencies, protected cluster: Cluster) {}
 
   /**
    * Patch a kube resource's manifest, throwing any error that occurs.
@@ -27,7 +37,7 @@ export class ResourceApplier {
    * @param ns The optional namespace of the kube resource
    */
   async patch(name: string, kind: string, patch: Patch, ns?: string): Promise<string> {
-    appEventBus.emit({ name: "resource", action: "patch" });
+    this.dependencies.appEventBus.emit({ name: "resource", action: "patch" });
 
     const kubectl = await this.cluster.ensureKubectl();
     const kubectlPath = await kubectl.getPath();
@@ -60,7 +70,7 @@ export class ResourceApplier {
 
   async apply(resource: KubernetesObject | any): Promise<string> {
     resource = this.sanitizeObject(resource);
-    appEventBus.emit({ name: "resource", action: "apply" });
+    this.dependencies.appEventBus.emit({ name: "resource", action: "apply" });
 
     return this.kubectlApply(yaml.dump(resource));
   }
@@ -69,7 +79,7 @@ export class ResourceApplier {
     const kubectl = await this.cluster.ensureKubectl();
     const kubectlPath = await kubectl.getPath();
     const proxyKubeconfigPath = await this.cluster.getProxyKubeconfigPath();
-    const fileName = tempy.file({ name: "resource.yaml" });
+    const fileName = path.resolve(this.dependencies.tmpDir, uuid.v4(), "resource.yaml");
     const args = [
       "apply",
       "--kubeconfig", proxyKubeconfigPath,
@@ -77,7 +87,7 @@ export class ResourceApplier {
       "-f", fileName,
     ];
 
-    logger.debug(`shooting manifests with ${kubectlPath}`, { args });
+    this.dependencies.logger.debug(`shooting manifests with ${kubectlPath}`, { args });
 
     const execEnv = { ...process.env };
     const httpsProxy = this.cluster.preferences?.httpsProxy;
@@ -87,14 +97,14 @@ export class ResourceApplier {
     }
 
     try {
-      await fs.writeFile(fileName, content);
+      await this.dependencies.writeFile(fileName, content);
       const { stdout } = await promiseExecFile(kubectlPath, args);
 
       return stdout;
     } catch (error) {
       throw error?.stderr ?? error;
     } finally {
-      await fs.unlink(fileName);
+      await this.dependencies.unlink(fileName);
     }
   }
 
@@ -106,39 +116,43 @@ export class ResourceApplier {
     return this.kubectlCmdAll("delete", resources, extraArgs);
   }
 
-  protected async kubectlCmdAll(subCmd: string, resources: string[], args: string[] = []): Promise<string> {
+  protected async kubectlCmdAll(subCmd: string, resources: string[], extraArgs: string[] = []): Promise<string> {
     const kubectl = await this.cluster.ensureKubectl();
     const kubectlPath = await kubectl.getPath();
     const proxyKubeconfigPath = await this.cluster.getProxyKubeconfigPath();
+    const tmpDir = path.resolve(this.dependencies.tmpDir, uuid.v4());
 
-    return new Promise((resolve, reject) => {
-      const tmpDir = tempy.directory();
+    const args = [
+      subCmd,
+      "--kubeconfig", proxyKubeconfigPath,
+      ...extraArgs,
+      "-f", tmpDir,
+    ];
 
-      // Dump each resource into tmpDir
-      resources.forEach((resource, index) => {
-        fs.writeFileSync(path.join(tmpDir, `${index}.yaml`), resource);
-      });
-      args.push("-f", `"${tmpDir}"`);
-      const cmd = `"${kubectlPath}" ${subCmd} --kubeconfig "${proxyKubeconfigPath}" ${args.join(" ")}`;
+    args.push("-f", `"${tmpDir}"`);
 
-      logger.info(`[RESOURCE-APPLIER] running cmd ${cmd}`);
-      exec(cmd, (error, stdout) => {
-        if (error) {
-          logger.error(`[RESOURCE-APPLIER] cmd errored: ${error}`);
-          const splitError = error.toString().split(`.yaml": `);
+    await Promise.all(resources.map((resource, index) => this.dependencies.writeFile(
+      path.join(tmpDir, `${index}.yaml`),
+      resource,
+    )));
 
-          if (splitError[1]) {
-            reject(splitError[1]);
-          } else {
-            reject(error);
-          }
+    this.dependencies.logger.info(`[RESOURCE-APPLIER] running kubectl`, { args });
 
-          return;
+    try {
+      const { stdout } = await promiseExecFile(kubectlPath, args);
+
+      return stdout;
+    } catch (error) {
+      if (error?.stderr) {
+        const splitError = error.stderr.toString().split(`.yaml": `);
+
+        if (splitError) {
+          throw new Error(splitError);
         }
+      }
 
-        resolve(stdout);
-      });
-    });
+      throw error;
+    }
   }
 
   protected sanitizeObject(resource: KubernetesObject | any) {
