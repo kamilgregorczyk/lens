@@ -18,8 +18,8 @@ import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
 import extensionLoaderInjectable from "../../../../extensions/extension-loader/extension-loader.injectable";
 import { DiRender, renderFor } from "../../test-utils/renderFor";
 import extensionDiscoveryInjectable from "../../../../extensions/discovery/discovery.injectable";
-import directoryForUserDataInjectable from "../../../../common/directory-path/user-data.injectable";
-import directoryForDownloadsInjectable from "../../../../common/directory-path/downloads.injectable";
+import directoryForUserDataInjectable from "../../../../common/paths/user-data.injectable";
+import directoryForDownloadsInjectable from "../../../../common/paths/downloads.injectable";
 
 mockWindow();
 

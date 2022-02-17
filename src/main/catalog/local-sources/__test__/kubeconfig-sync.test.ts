@@ -10,7 +10,7 @@ import mockFs from "mock-fs";
 import fs from "fs";
 import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
 import { createClusterInjectionToken } from "../../../../common/clusters/create-cluster-injection-token";
-import directoryForKubeConfigsInjectable from "../../../../common/directory-path/local-kube-configs.injectable";
+import directoryForKubeConfigsInjectable from "../../../../common/paths/local-kube-configs.injectable";
 import type { CatalogEntity } from "../../../../common/catalog/entity/entity";
 
 

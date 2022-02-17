@@ -5,7 +5,7 @@
 
 import path from "path";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../../../common/paths/user-data.injectable";
 import moveInjectable from "../../../common/fs/move.injectable";
 import removeInjectable from "../../../common/fs/remove.injectable";
 

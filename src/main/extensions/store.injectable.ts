@@ -3,18 +3,18 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import createExtensionsStoreInjectable from "../../common/extensions/create-store.injectable";
+import createExtensionsPreferencesStoreInjectable from "../../common/extensions/preferences/create-store.injectable";
 import versionedMigrationsInjectable from "./migrations/versioned.injectable";
 
-const extensionsStoreInjectable = getInjectable({
+const extensionsPreferencesStoreInjectable = getInjectable({
   instantiate: (di) => {
-    const createExtensionsStore = di.inject(createExtensionsStoreInjectable);
+    const createExtensionsPreferencesStore = di.inject(createExtensionsPreferencesStoreInjectable);
 
-    return createExtensionsStore({
+    return createExtensionsPreferencesStore({
       migrations: di.inject(versionedMigrationsInjectable),
     });
   },
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default extensionsStoreInjectable;
+export default extensionsPreferencesStoreInjectable;

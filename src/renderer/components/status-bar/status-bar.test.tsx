@@ -13,7 +13,7 @@ import { computed, IObservableArray, observable } from "mobx";
 import type { ConfigurableDependencyInjectionContainer } from "@ogre-tools/injectable";
 import statusBarItemsInjectable from "./status-bar-items.injectable";
 import type { StatusBarRegistration } from "./status-bar-registration";
-import directoryForUserDataInjectable  from "../../../common/directory-path/user-data.injectable";
+import directoryForUserDataInjectable  from "../../../common/paths/user-data.injectable";
 import { LensRendererExtension } from "../../../extensions/lens-renderer-extension";
 import rendererExtensionsInjectable from "../../../extensions/renderer-extensions.injectable";
 

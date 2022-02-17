@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import directoryForBinariesInjectable from "../../../common/directory-path/binaries.injectable";
+import directoryForBinariesInjectable from "../../../common/paths/binaries.injectable";
 import path from "path";
 
 const directoryForKubectlBinariesInjectable = getInjectable({

@@ -6,7 +6,7 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { BaseStoreParams } from "../base-store";
 import { HotbarStore, HotbarStoreDependencies, HotbarStoreModel } from "./store";
 import hotbarStoreLoggerInjectable from "./logger.injectable";
-import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../paths/user-data.injectable";
 import createHotbarInjectable from "./create-hotbar.injectable";
 
 const createHotbarStoreInjectable = getInjectable({

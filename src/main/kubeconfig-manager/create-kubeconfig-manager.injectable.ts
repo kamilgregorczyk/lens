@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { Cluster } from "../../common/clusters/cluster";
-import directoryForTempInjectable from "../../common/directory-path/tempory-files.injectable";
+import directoryForTempInjectable from "../../common/paths/tempory-files.injectable";
 import { KubeconfigManager } from "./kubeconfig-manager";
 
 export interface KubeConfigManagerInstantiationParameter {

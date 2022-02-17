@@ -10,7 +10,7 @@ import { readFileSync } from "fs";
 import { getDisForUnitTesting } from "../../test-utils/get-dis-for-unit-testing";
 
 import directoryForUserDataInjectable
-  from "../directory-path/user-data.injectable";
+  from "../paths/user-data.injectable";
 
 jest.mock("electron", () => ({
   ipcMain: {

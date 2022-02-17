@@ -10,11 +10,56 @@ import type { ProtocolHandlerRegistration } from "./registries";
 import type { PackageJson } from "type-fest";
 import { Disposer, disposer } from "../common/utils";
 import { LensExtensionDependencies, extensionDependencies } from "./lens-extension-set-dependencies";
+import type { SemVer } from "semver";
 
 export type LensExtensionId = string; // path to manifest (package.json)
 export type LensExtensionConstructor = new (...args: ConstructorParameters<typeof LensExtension>) => LensExtension;
 
-export interface LensExtensionManifest extends PackageJson {
+export interface LensExtensionManifest {
+  /**
+   * Name of the extension, must be globally unique
+   */
+  name: string;
+
+  publisher?: string;
+  license?: string;
+  author?: PackageJson.Person;
+  description: string;
+
+  /**
+  The dependencies of the package.
+  */
+  dependencies?: PackageJson.Dependency;
+
+  /**
+  Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
+  */
+  devDependencies?: PackageJson.Dependency;
+
+  /**
+   * The parsed version of the extension
+   */
+  version: SemVer;
+
+  /**
+   * Path to the main side entry point
+   */
+  main?: string;
+
+  /**
+   * Path to the renderer side entry point
+   */
+  renderer?: string;
+
+  engines: {
+    /**
+     * supported version range for this extension
+     */
+    lens: string;
+  }
+}
+
+export interface RawLensExtensionManifest extends PackageJson {
   name: string;
   version: string;
   main?: string; // path to %ext/dist/main.js
@@ -125,6 +170,6 @@ export function sanitizeExtensionName(name: string) {
   return name.replace("@", "").replace("/", "--");
 }
 
-export function extensionDisplayName(name: string, version: string) {
-  return `${name}@${version}`;
+export function extensionDisplayName(name: string, version: SemVer) {
+  return `${name}@${version.format()}`;
 }

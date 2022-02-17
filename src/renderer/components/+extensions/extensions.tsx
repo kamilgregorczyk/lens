@@ -27,22 +27,24 @@ import enableExtensionInjectable from "./enable-extension/enable-extension.injec
 import disableExtensionInjectable from "./disable-extension/disable-extension.injectable";
 import confirmUninstallExtensionInjectable from "./confirm-uninstall-extension/confirm-uninstall-extension.injectable";
 import installFromInputInjectable from "./install-from-input/install-from-input.injectable";
-import installFromSelectFileDialogInjectable from "./install-from-select-file-dialog.injectable";
+import installFromSelectFileDialogInjectable, { InstallFromSelectFileDialog } from "./install-from-select-file-dialog.injectable";
 import type { LensExtensionId } from "../../../extensions/lens-extension";
 import installOnDropInjectable from "./install-on-drop/install-on-drop.injectable";
 import { supportedExtensionFormats } from "./supported-extension-formats";
-import extensionInstallationStateStoreInjectable from "../../../extensions/extension-installation-state-store/extension-installation-state-store.injectable";
-import type { ExtensionInstallationStateStore } from "../../../extensions/extension-installation-state-store/extension-installation-state-store";
+import extensionInstallationStateManagerInjectable from "../../../extensions/installation-state/manager.injectable";
+import type { ExtensionInstallationStateManager } from "../../../extensions/installation-state/manager";
+import type { InstallOnDrop } from "./install-on-drop/install-on-drop";
+import type { InstallFromInput } from "./install-from-input/install-from-input";
 
 interface Dependencies {
   userExtensions: IComputedValue<InstalledExtension[]>;
   enableExtension: (id: LensExtensionId) => void;
   disableExtension: (id: LensExtensionId) => void;
   confirmUninstallExtension: (extension: InstalledExtension) => Promise<void>;
-  installFromInput: (input: string) => Promise<void>;
-  installFromSelectFileDialog: () => Promise<void>;
-  installOnDrop: (files: File[]) => Promise<void>;
-  extensionInstallationStateStore: ExtensionInstallationStateStore
+  installFromInput: InstallFromInput;
+  installFromSelectFileDialog: InstallFromSelectFileDialog;
+  installOnDrop: InstallOnDrop;
+  extensionInstallationStateStore: ExtensionInstallationStateManager
 }
 
 @observer
@@ -115,6 +117,6 @@ export const Extensions = withInjectables<Dependencies>(NonInjectedExtensions, {
     installFromInput: di.inject(installFromInputInjectable),
     installOnDrop: di.inject(installOnDropInjectable),
     installFromSelectFileDialog: di.inject(installFromSelectFileDialogInjectable),
-    extensionInstallationStateStore: di.inject(extensionInstallationStateStoreInjectable),
+    extensionInstallationStateStore: di.inject(extensionInstallationStateManagerInjectable),
   }),
 });

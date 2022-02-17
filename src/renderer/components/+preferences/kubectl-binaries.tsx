@@ -13,7 +13,7 @@ import { SelectOption, Select } from "../select";
 import { Switch } from "../switch";
 import { packageMirrors } from "../../../common/user-preferences/preferences-helpers";
 import directoryForBinariesInjectable
-  from "../../../common/directory-path/binaries.injectable";
+  from "../../../common/paths/binaries.injectable";
 import { withInjectables } from "@ogre-tools/injectable-react";
 
 interface Dependencies {

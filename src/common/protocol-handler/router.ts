@@ -9,12 +9,12 @@ import { iter } from "../utils";
 import { pathToRegexp } from "path-to-regexp";
 import type Url from "url-parse";
 import { RoutingError, RoutingErrorType } from "./error";
-import type { ExtensionsStore } from "../extensions/store";
 import type { ExtensionLoader } from "../../extensions/extension-loader";
 import type { LensExtension } from "../../extensions/lens-extension";
 import type { RouteHandler, RouteParams } from "../../extensions/registries/protocol-handler";
 import { when } from "mobx";
 import type { LensLogger } from "../logger";
+import type { IsExtensionEnabled } from "../extensions/preferences/is-enabled.injectable";
 
 // IPC channel for protocol actions. Main broadcasts the open-url events to this channel.
 export const ProtocolHandlerIpcPrefix = "protocol-handler";
@@ -62,7 +62,7 @@ export function foldAttemptResults(mainAttempt: RouteAttempt, rendererAttempt: R
 
 export interface LensProtocolRouterDependencies {
   readonly extensionLoader: ExtensionLoader;
-  readonly extensionsStore: ExtensionsStore;
+  readonly isExtensionEnabled: IsExtensionEnabled;
   readonly logger: LensLogger;
 }
 
@@ -193,7 +193,7 @@ export abstract class LensProtocolRouter {
       return name;
     }
 
-    if (!this.dependencies.extensionsStore.isEnabled(extension)) {
+    if (!this.dependencies.isExtensionEnabled(extension.name, extension.isBundled)) {
       this.dependencies.logger.info(`Extension ${name} matched, but not enabled`);
 
       return name;

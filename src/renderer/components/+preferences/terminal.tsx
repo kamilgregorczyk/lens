@@ -11,7 +11,7 @@ import { Input, InputValidators } from "../input";
 import { isWindows } from "../../../common/vars";
 import { Switch } from "../switch";
 import { Select } from "../select";
-import { ThemeStore } from "../../theme.store";
+import { ThemeStore } from "../../themes/store";
 
 export const Terminal = observer(() => {
   const userStore = UserStore.getInstance();

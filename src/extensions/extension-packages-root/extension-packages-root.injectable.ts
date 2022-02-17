@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import directoryForUserDataInjectable
-  from "../../common/directory-path/user-data.injectable";
+  from "../../common/paths/user-data.injectable";
 
 const extensionPackagesRootInjectable = getInjectable({
   instantiate: (di) => di.inject(directoryForUserDataInjectable),

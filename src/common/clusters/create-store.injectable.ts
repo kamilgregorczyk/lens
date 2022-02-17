@@ -8,7 +8,7 @@ import type { BaseStoreParams } from "../base-store";
 import { createClusterInjectionToken } from "../clusters/create-cluster-injection-token";
 import { ClusterStore, ClusterStoreDependencies, ClusterStoreModel } from "./store";
 import clusterStoreLoggerInjectable from "./store-logger.injectable";
-import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../paths/user-data.injectable";
 
 const createClusterStoreInjectable = getInjectable({
   instantiate: (di) => {

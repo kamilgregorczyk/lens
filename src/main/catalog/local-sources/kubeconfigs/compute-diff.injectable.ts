@@ -19,7 +19,7 @@ import { homedir } from "os";
 import clearAsDeletingInjectable from "../../../clusters/clear-as-deleting.injectable";
 import configToModelsInjectable from "./config-to-models.injectable";
 import createClusterInjectable from "../../../clusters/create-cluster.injectable";
-import directoryForKubeConfigsInjectable from "../../../../common/directory-path/local-kube-configs.injectable";
+import directoryForKubeConfigsInjectable from "../../../../common/paths/local-kube-configs.injectable";
 import getClusterByIdInjectable from "../../../../common/clusters/get-by-id.injectable";
 import kubeconfigSyncManagerLoggerInjectable from "./logger.injectable";
 

@@ -6,7 +6,7 @@
 import type { CatalogEntityRegistry } from "../../catalog/entity/registry";
 import { KubernetesCluster, WebLink } from "../../../common/catalog/entity/declarations";
 import { CatalogCategory } from "../../../common/catalog/category/category";
-import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../../../common/paths/user-data.injectable";
 import catalogEntitySyncerInjectable from "../../catalog/entity/entity-syncer.injectable";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import catalogEntityRegistryInjectable from "../../catalog/entity/registry.injectable";

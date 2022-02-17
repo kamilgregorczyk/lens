@@ -7,7 +7,7 @@ import { LocalShellSession, LocalShellSessionArgs, LocalShellSessionDependencies
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import appEventBusInjectable from "../../../common/app-event-bus/app-event-bus.injectable";
 import appNameInjectable from "../../electron/app-name.injectable";
-import appVersionInjectable from "../../electron/app-version.injectable";
+import electronAppVersionInjectable from "../../electron/app-version.injectable";
 import ensureShellProcessInjectable from "../ensure-process.injectable";
 import localShellSessionLoggerInjectable from "./logger.injectable";
 import terminalShellEnvModifyInjectable from "../shell-env-modifier/modifier.injectable";
@@ -26,7 +26,7 @@ const openLocalShellSessionInjectable = getInjectable({
   instantiate: (di) => openLocalShellSession({
     appEventBus: di.inject(appEventBusInjectable),
     appName: di.inject(appNameInjectable),
-    appVersion: di.inject(appVersionInjectable),
+    appVersion: di.inject(electronAppVersionInjectable),
     ensureShellProcess: di.inject(ensureShellProcessInjectable),
     logger: di.inject(localShellSessionLoggerInjectable),
     shellEnvModify: di.inject(terminalShellEnvModifyInjectable),

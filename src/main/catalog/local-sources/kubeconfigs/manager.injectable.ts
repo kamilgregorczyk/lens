@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import directoryForKubeConfigsInjectable from "../../../../common/directory-path/local-kube-configs.injectable";
+import directoryForKubeConfigsInjectable from "../../../../common/paths/local-kube-configs.injectable";
 import { KubeconfigSyncManager } from "./manager";
 import addComputedSourceInjectable from "../../entity/add-computed-source.injectable";
 import kubeconfigSyncManagerLoggerInjectable from "./logger.injectable";

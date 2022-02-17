@@ -10,7 +10,7 @@ import React from "react";
 import fse from "fs-extra";
 import { Console } from "console";
 import { stderr, stdout } from "process";
-import { ThemeStore } from "../../../renderer/theme.store";
+import { ThemeStore } from "../../../renderer/themes/store";
 import { UserStore } from "../../../common/user-preferences";
 import { getDisForUnitTesting } from "../../../test-utils/get-dis-for-unit-testing";
 import mockFs from "mock-fs";

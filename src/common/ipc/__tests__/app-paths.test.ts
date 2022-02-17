@@ -8,7 +8,7 @@ import { getDisForUnitTesting } from "../../../test-utils/get-dis-for-unit-testi
 import type { PathName } from "../electron/app-path-names";
 import setElectronAppPathInjectable from "../../../main/electron/set-app-path.injectable";
 import appNameInjectable from "../../../main/electron/app-name.injectable";
-import directoryForIntegrationTestingInjectable from "../../directory-path/integration-testing.injectable";
+import directoryForIntegrationTestingInjectable from "../../paths/integration-testing.injectable";
 import path from "path";
 import { AppPaths, appPathsInjectionToken } from "../electron/app-paths.token";
 

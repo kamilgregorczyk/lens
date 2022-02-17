@@ -19,27 +19,17 @@ import { HelmRepoManager } from "../main/helm/helm-repo-manager";
 import { DefaultProps } from "./mui-base-theme";
 import configurePackages from "../common/configure-packages";
 import * as initializers from "./initializers";
-import logger from "../common/logger";
-import { HotbarStore } from "../common/hotbars/store";
-import { WeblinkStore } from "../common/weblinks/store";
-import { ThemeStore } from "./theme.store";
-import { SentryInit } from "../common/sentry";
 import { registerCustomThemes } from "./components/monaco-editor";
 import { getDi } from "./getDi";
 import { DiContextProvider } from "@ogre-tools/injectable-react";
 import type { DependencyInjectionContainer } from "@ogre-tools/injectable";
 import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
-import extensionDiscoveryInjectable from "../extensions/discovery/discovery.injectable";
-import extensionInstallationStateStoreInjectable from "../extensions/extension-installation-state-store/extension-installation-state-store.injectable";
 import initRootFrameInjectable from "./frames/root-frame/init.injectable";
 import initClusterFrameInjectable from "./frames/cluster-frame/init.injectable";
 import commandOverlayInjectable from "./components/command-palette/command-overlay.injectable";
 import userStoreInjectable from "./user-preferences/store.injectable";
-import clusterStoreInjectable from "./clusters/store.injectable";
-
-if (process.isMainFrame) {
-  SentryInit();
-}
+import initSentryInjectable from "../common/error-reporting/init-sentry.injectable";
+import createChildLoggerInjectable from "../common/logger/create-child-logger.injectable";
 
 configurePackages(); // global packages
 registerCustomThemes(); // monaco editor themes
@@ -58,8 +48,16 @@ async function attachChromeDebugger() {
 export async function bootstrap(di: DependencyInjectionContainer) {
   await di.runSetups();
 
+  if (process.isMainFrame) {
+    const initSentry = di.inject(initSentryInjectable);
+
+    initSentry();
+  }
+
   const rootElem = document.getElementById("app");
-  const logPrefix = `[BOOTSTRAP-${process.isMainFrame ? "ROOT" : "CLUSTER"}-FRAME]:`;
+  const createChildLogger = di.inject(createChildLoggerInjectable);
+  const frameName = process.isMainFrame ? "ROOT" : "CLUSTER";
+  const logger = createChildLogger(`BOOTSTRAP-${frameName}-FRAME`);
 
   // TODO: Remove temporal dependencies to make timing of initialization not important
   di.inject(userStoreInjectable);
@@ -67,25 +65,25 @@ export async function bootstrap(di: DependencyInjectionContainer) {
   await attachChromeDebugger();
   rootElem.classList.toggle("is-mac", isMac);
 
-  logger.info(`${logPrefix} initializing Registries`);
+  logger.info(`initializing Registries`);
   initializers.initRegistries();
 
-  logger.info(`${logPrefix} initializing EntitySettingsRegistry`);
+  logger.info(`initializing EntitySettingsRegistry`);
   initializers.initEntitySettingsRegistry();
 
-  logger.info(`${logPrefix} initializing KubeObjectDetailRegistry`);
+  logger.info(`initializing KubeObjectDetailRegistry`);
   initializers.initKubeObjectDetailRegistry();
 
-  logger.info(`${logPrefix} initializing WorkloadsOverviewDetailRegistry`);
+  logger.info(`initializing WorkloadsOverviewDetailRegistry`);
   initializers.initWorkloadsOverviewDetailRegistry();
 
-  logger.info(`${logPrefix} initializing CatalogEntityDetailRegistry`);
+  logger.info(`initializing CatalogEntityDetailRegistry`);
   initializers.initCatalogEntityDetailRegistry();
 
-  logger.info(`${logPrefix} initializing CatalogCategoryRegistryEntries`);
+  logger.info(`initializing CatalogCategoryRegistryEntries`);
   initializers.initCatalogCategoryRegistryEntries();
 
-  logger.info(`${logPrefix} initializing Catalog`);
+  logger.info(`initializing Catalog`);
   initializers.initCatalog({
     openCommandDialog: di.inject(commandOverlayInjectable).open,
   });
@@ -94,31 +92,7 @@ export async function bootstrap(di: DependencyInjectionContainer) {
 
   extensionLoader.init();
 
-  const extensionDiscovery = di.inject(extensionDiscoveryInjectable);
-
-  extensionDiscovery.init();
-
-  // ClusterStore depends on: UserStore
-  const clusterStore = di.inject(clusterStoreInjectable);
-
-  await clusterStore.loadInitialOnRenderer();
-
-  // HotbarStore depends on: ClusterStore
-  HotbarStore.createInstance();
-
-  // ThemeStore depends on: UserStore
-  ThemeStore.createInstance();
-
-  WeblinkStore.createInstance();
-
-  const extensionInstallationStateStore = di.inject(extensionInstallationStateStoreInjectable);
-
-  extensionInstallationStateStore.bindIpcListeners();
-
   HelmRepoManager.createInstance(); // initialize the manager
-
-  // Register additional store listeners
-  clusterStore.registerIpcListener();
 
   let App;
   let initializeApp;
@@ -126,7 +100,6 @@ export async function bootstrap(di: DependencyInjectionContainer) {
   // TODO: Introduce proper architectural boundaries between root and cluster iframes
   if (process.isMainFrame) {
     initializeApp = di.inject(initRootFrameInjectable);
-
     App = (await import("./frames/root-frame/root-frame")).RootFrame;
   } else {
     initializeApp = di.inject(initClusterFrameInjectable);
@@ -144,10 +117,8 @@ export async function bootstrap(di: DependencyInjectionContainer) {
   );
 }
 
-const di = getDi();
-
 // run
-bootstrap(di);
+bootstrap(getDi());
 
 /**
  * Exports for virtual package "@k8slens/extensions" for renderer-process.

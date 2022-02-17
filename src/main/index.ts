@@ -8,12 +8,10 @@ import * as Mobx from "mobx";
 import * as LensExtensionsCommonApi from "../extensions/common-api";
 import * as LensExtensionsMainApi from "../extensions/main-api";
 import { app, autoUpdater, dialog, powerMonitor } from "electron";
-import { appName, isIntegrationTesting, isMac, isWindows, productName } from "../common/vars";
+import { appName, isIntegrationTesting, productName } from "../common/vars";
 import { shellSync } from "./shell-sync";
 import { mangleProxyEnv } from "./proxy-env";
 import { registerFileProtocol } from "../common/register-protocol";
-import type { InstalledExtension } from "../extensions/discovery/discovery";
-import type { LensExtensionId } from "../extensions/lens-extension";
 import { installDeveloperTools } from "./developer-tools";
 import { disposer, getAppVersion } from "../common/utils";
 import { HelmRepoManager } from "./helm/helm-repo-manager";
@@ -23,8 +21,7 @@ import * as initializers from "./initializers";
 import { getDi } from "./getDi";
 import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
 import lensProtocolRouterMainInjectable from "./protocol-handler/router.injectable";
-import extensionDiscoveryInjectable from "../extensions/discovery/discovery.injectable";
-import directoryForExesInjectable from "../common/directory-path/executables.injectable";
+import directoryForExesInjectable from "../common/paths/executables.injectable";
 import kubeconfigSyncManagerInjectable from "./catalog/local-sources/kubeconfigs/manager.injectable";
 import baseLoggerInjectable from "./logger/base-logger.injectable";
 import appEventBusInjectable from "../common/app-event-bus/app-event-bus.injectable";
@@ -38,6 +35,9 @@ import startUpdateCheckingInjectable from "./updater/start-update-checking.injec
 import type { ConfigurableDependencyInjectionContainer } from "@ogre-tools/injectable";
 import cleanupShellProcessesInjectable from "./shell-session/cleanup-processes.injectable";
 import initSentryInjectable from "../common/error-reporting/init-sentry.injectable";
+import isWindowsInjectable from "../common/vars/is-windows.injectable";
+import isMacInjectable from "../common/vars/is-mac.injectable";
+import watchExtensionsInjectable from "./extensions/discovery/watch.injectable";
 
 app.setName(appName);
 injectSystemCAs();
@@ -54,6 +54,8 @@ async function main(di: ConfigurableDependencyInjectionContainer) {
   const appEventBus = di.inject(appEventBusInjectable);
   const windowManager = di.inject(windowManagerInjectable);
   const clusterManager = di.inject(clusterManagerInjectable);
+  const isWindows = di.inject(isWindowsInjectable);
+  const isMac = di.inject(isMacInjectable);
 
   logger.info(`📟 Setting ${productName} as protocol client for lens://`);
 
@@ -163,12 +165,10 @@ async function main(di: ConfigurableDependencyInjectionContainer) {
     }
 
     const extensionLoader = di.inject(extensionLoaderInjectable);
-    const extensionDiscovery = di.inject(extensionDiscoveryInjectable);
     const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
     const startUpdateChecking = di.inject(startUpdateCheckingInjectable);
 
     extensionLoader.init();
-    extensionDiscovery.init();
     kubeConfigSyncManager.startSync();
     startUpdateChecking();
 
@@ -196,23 +196,11 @@ async function main(di: ConfigurableDependencyInjectionContainer) {
 
     logger.info("🧩 Initializing extensions");
 
-    // call after windowManager to see splash earlier
     try {
-      const extensions = await extensionDiscovery.load();
+      const watchExtensions = di.inject(watchExtensionsInjectable);
 
-      // Start watching after bundled extensions are loaded
-      extensionDiscovery.watchExtensions();
-
-      // Subscribe to extensions that are copied or deleted to/from the extensions folder
-      extensionDiscovery.events
-        .on("add", (extension: InstalledExtension) => {
-          extensionLoader.addExtension(extension);
-        })
-        .on("remove", (lensExtensionId: LensExtensionId) => {
-          extensionLoader.removeExtension(lensExtensionId);
-        });
-
-      extensionLoader.initExtensions(extensions);
+      // call after windowManager to see splash earlier
+      await watchExtensions();
     } catch (error) {
       dialog.showErrorBox("Lens Error", `Could not load extensions${error?.message ? `: ${error.message}` : ""}`);
       console.error(error);

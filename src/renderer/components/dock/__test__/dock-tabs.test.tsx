@@ -10,14 +10,14 @@ import fse from "fs-extra";
 import { DockTabs } from "../dock-tabs";
 import { DockStore, DockTab, TabKind } from "../dock/store";
 import { noop } from "../../../utils";
-import { ThemeStore } from "../../../theme.store";
+import { ThemeStore } from "../../../themes/store";
 import { UserStore } from "../../../../common/user-preferences";
 import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
 import dockStoreInjectable from "../dock/store.injectable";
 import type { DiRender } from "../../test-utils/renderFor";
 import { renderFor } from "../../test-utils/renderFor";
 import directoryForUserDataInjectable
-  from "../../../../common/directory-path/user-data.injectable";
+  from "../../../../common/paths/user-data.injectable";
 
 jest.mock("electron", () => ({
   app: {

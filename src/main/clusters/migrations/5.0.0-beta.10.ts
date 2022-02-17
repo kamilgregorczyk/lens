@@ -8,7 +8,7 @@ import fse from "fs-extra";
 import type { ClusterModel } from "../../../common/cluster-types";
 import type { MigrationDeclaration } from "../../utils/join-migrations";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../../../common/paths/user-data.injectable";
 
 interface Pre500WorkspaceStoreModel {
   workspaces: {

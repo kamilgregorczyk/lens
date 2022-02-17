@@ -12,9 +12,8 @@ import { observer } from "mobx-react";
 import { Input, InputValidator, InputValidators } from "../input";
 import { SubTitle } from "../layout/sub-title";
 import { TooltipPosition } from "../tooltip";
-import type { ExtensionInstallationStateStore } from "../../../extensions/extension-installation-state-store/extension-installation-state-store";
-import extensionInstallationStateStoreInjectable
-  from "../../../extensions/extension-installation-state-store/extension-installation-state-store.injectable";
+import type { ExtensionInstallationStateManager } from "../../../extensions/installation-state/manager";
+import extensionInstallationStateManagerInjectable from "../../../extensions/installation-state/manager.injectable";
 import { withInjectables } from "@ogre-tools/injectable-react";
 
 interface Props {
@@ -26,7 +25,7 @@ interface Props {
 }
 
 interface Dependencies {
-  extensionInstallationStateStore: ExtensionInstallationStateStore;
+  extensionInstallationStateStore: ExtensionInstallationStateManager;
 }
 
 const installInputValidators = [
@@ -104,7 +103,7 @@ export const Install = withInjectables<Dependencies, Props>(
   {
     getProps: (di, props) => ({
       extensionInstallationStateStore: di.inject(
-        extensionInstallationStateStoreInjectable,
+        extensionInstallationStateManagerInjectable,
       ),
 
       ...props,

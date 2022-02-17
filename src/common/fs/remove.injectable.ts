@@ -5,8 +5,10 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import fsInjectable from "./fs.injectable";
 
+export type Remove = (path: string) => Promise<void>;
+
 const removeInjectable = getInjectable({
-  instantiate: (di) => di.inject(fsInjectable).remove,
+  instantiate: (di): Remove => di.inject(fsInjectable).remove,
   lifecycle: lifecycleEnum.singleton,
 });
 

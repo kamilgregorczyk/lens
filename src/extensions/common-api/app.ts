@@ -5,7 +5,7 @@
 
 import { getAppVersion } from "../../common/utils";
 import { asLegacyGlobalFunctionForExtensionApi } from "../di-legacy-globals/as-legacy-global-function-for-extension-api";
-import getEnabledExtensionsInjectable from "../../common/extensions/get-enabled.injectable";
+import getEnabledExtensionsInjectable from "../../common/extensions/preferences/get-enabled.injectable";
 import * as Preferences from "./user-preferences";
 
 export const version = getAppVersion();

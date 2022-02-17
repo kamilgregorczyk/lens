@@ -18,9 +18,9 @@ import catalogEntityStoreInjectable from "./catalog-entity-store/catalog-entity-
 import catalogEntityRegistryInjectable from "../../catalog/entity/registry.injectable";
 import type { DiRender } from "../test-utils/renderFor";
 import { renderFor } from "../test-utils/renderFor";
-import { ThemeStore } from "../../theme.store";
+import { ThemeStore } from "../../themes/store";
 import mockFs from "mock-fs";
-import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../../../common/paths/user-data.injectable";
 import { noop } from "../../utils";
 import { CatalogEntity, type CatalogEntityData, type CatalogEntityActionContext } from "../../../common/catalog/entity/entity";
 import catalogEntitySyncerInjectable from "../../catalog/entity/entity-syncer.injectable";

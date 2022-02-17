@@ -4,12 +4,12 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { confirmUninstallExtension } from "./confirm-uninstall-extension";
-import uninstallExtensionInjectable from "../uninstall-extension/uninstall-extension.injectable";
+import checkedUninstallExtensionInjectable from "../checked-uninstall-extension.injectable";
 
 const confirmUninstallExtensionInjectable = getInjectable({
   instantiate: (di) =>
     confirmUninstallExtension({
-      uninstallExtension: di.inject(uninstallExtensionInjectable),
+      uninstallExtension: di.inject(checkedUninstallExtensionInjectable),
     }),
 
   lifecycle: lifecycleEnum.singleton,

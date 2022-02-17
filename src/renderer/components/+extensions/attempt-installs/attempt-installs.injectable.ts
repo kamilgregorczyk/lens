@@ -7,10 +7,9 @@ import { attemptInstalls } from "./attempt-installs";
 import attemptInstallInjectable from "../attempt-install/attempt-install.injectable";
 
 const attemptInstallsInjectable = getInjectable({
-  instantiate: (di) =>
-    attemptInstalls({
-      attemptInstall: di.inject(attemptInstallInjectable),
-    }),
+  instantiate: (di) => attemptInstalls({
+    attemptInstall: di.inject(attemptInstallInjectable),
+  }),
 
   lifecycle: lifecycleEnum.singleton,
 });

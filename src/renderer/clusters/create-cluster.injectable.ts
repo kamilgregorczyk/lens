@@ -4,7 +4,7 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { Cluster, ClusterDependencies } from "../../common/clusters/cluster";
-import directoryForKubeConfigsInjectable from "../../common/directory-path/local-kube-configs.injectable";
+import directoryForKubeConfigsInjectable from "../../common/paths/local-kube-configs.injectable";
 import { createClusterInjectionToken } from "../../common/clusters/create-cluster-injection-token";
 import clusterLoggerInjectable from "../../common/clusters/cluster-logger.injectable";
 

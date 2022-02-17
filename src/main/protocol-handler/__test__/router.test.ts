@@ -7,13 +7,13 @@ import * as uuid from "uuid";
 
 import { delay, noop } from "../../../common/utils";
 import { LensExtension } from "../../../extensions/main-api";
-import type { ExtensionsStore } from "../../../common/extensions/store";
+import type { ExtensionsPreferencesStore } from "../../../common/extensions/preferences/store";
 import type { LensProtocolRouterMain } from "../router";
 import mockFs from "mock-fs";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
 import extensionLoaderInjectable from "../../../extensions/extension-loader/extension-loader.injectable";
 import lensProtocolRouterMainInjectable from "../router.injectable";
-import extensionsStoreInjectable from "../../extensions/store.injectable";
+import extensionsPreferencesStoreInjectable from "../../extensions/store.injectable";
 
 jest.mock("../../../common/ipc");
 
@@ -28,7 +28,7 @@ describe("protocol router tests", () => {
   // Unit tests are allowed to only public interfaces.
   let extensionLoader: any;
   let lpr: LensProtocolRouterMain;
-  let extensionsStore: ExtensionsStore;
+  let extensionsStore: ExtensionsPreferencesStore;
 
   beforeEach(async () => {
     const di = getDiForUnitTesting({ doGeneralOverrides: true });
@@ -40,7 +40,7 @@ describe("protocol router tests", () => {
     await di.runSetups();
 
     extensionLoader = di.inject(extensionLoaderInjectable);
-    extensionsStore = di.inject(extensionsStoreInjectable);
+    extensionsStore = di.inject(extensionsPreferencesStoreInjectable);
     lpr = di.inject(lensProtocolRouterMainInjectable);
 
     lpr.rendererLoaded = true;

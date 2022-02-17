@@ -29,7 +29,7 @@ import { stdout, stderr } from "process";
 import { getDisForUnitTesting } from "../../test-utils/get-dis-for-unit-testing";
 import userStoreInjectable from "../user-preferences/user-store.injectable";
 import type { DependencyInjectionContainer } from "@ogre-tools/injectable";
-import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../paths/user-data.injectable";
 import type { ClusterStoreModel } from "../clusters/store";
 import { defaultTheme } from "../vars";
 

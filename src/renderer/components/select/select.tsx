@@ -13,7 +13,7 @@ import { observer } from "mobx-react";
 import ReactSelect, { ActionMeta, components, OptionTypeBase, Props as ReactSelectProps, Styles } from "react-select";
 import Creatable, { CreatableProps } from "react-select/creatable";
 
-import { ThemeStore } from "../../theme.store";
+import { ThemeStore } from "../../themes/store";
 import { boundMethod, cssNames } from "../../utils";
 
 const { Menu } = components;

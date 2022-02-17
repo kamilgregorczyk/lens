@@ -4,25 +4,29 @@
  */
 import { readFileNotify } from "../read-file-notify/read-file-notify";
 import path from "path";
-import type { InstallRequest } from "../attempt-install/install-request";
+import type { AttemptInstall } from "../attempt-install/attempt-install.injectable";
+
+export type AttemptInstalls = (filePaths: string[]) => Promise<void>;
 
 interface Dependencies {
-  attemptInstall: (request: InstallRequest) => Promise<void>;
+  attemptInstall: AttemptInstall;
 }
 
-export const attemptInstalls =
-  ({ attemptInstall }: Dependencies) =>
-    async (filePaths: string[]): Promise<void> => {
-      const promises: Promise<void>[] = [];
+export const attemptInstalls = ({
+  attemptInstall,
+}: Dependencies): AttemptInstalls => (
+  async (filePaths) => {
+    const promises: Promise<void>[] = [];
 
-      for (const filePath of filePaths) {
-        promises.push(
-          attemptInstall({
-            fileName: path.basename(filePath),
-            dataP: readFileNotify(filePath),
-          }),
-        );
-      }
+    for (const filePath of filePaths) {
+      promises.push(
+        attemptInstall({
+          fileName: path.basename(filePath),
+          dataP: readFileNotify(filePath),
+        }),
+      );
+    }
 
-      await Promise.allSettled(promises);
-    };
+    await Promise.allSettled(promises);
+  }
+);

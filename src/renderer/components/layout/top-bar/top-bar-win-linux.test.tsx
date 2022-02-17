@@ -10,7 +10,7 @@ import { TopBar } from "./top-bar";
 import * as vars from "../../../../common/vars";
 import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
 import { DiRender, renderFor } from "../../test-utils/renderFor";
-import directoryForUserDataInjectable from "../../../../common/directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../../../../common/paths/user-data.injectable";
 import mockFs from "mock-fs";
 import { emitOpenAppMenuAsContextMenu, requestWindowAction } from "../../../ipc";
 

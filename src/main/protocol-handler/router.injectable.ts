@@ -5,7 +5,7 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import protocolHandlerRouterLoggerInjectable from "../../common/protocol-handler/router-logger.injectable";
 import extensionLoaderInjectable from "../../extensions/extension-loader/extension-loader.injectable";
-import extensionsStoreInjectable from "../extensions/store.injectable";
+import extensionsPreferencesStoreInjectable from "../extensions/store.injectable";
 import emitInvalidProtocolUrlInjectable from "../ipc/protocol-handler/invalid.injectable";
 import emitRouteProtocolExternalInjectable from "../ipc/protocol-handler/route-external.injectable";
 import emitRouteProtocolInternalInjectable from "../ipc/protocol-handler/route-internal.injectable";
@@ -15,7 +15,7 @@ import { LensProtocolRouterMain } from "./router";
 const lensProtocolRouterMainInjectable = getInjectable({
   instantiate: (di) => new LensProtocolRouterMain({
     extensionLoader: di.inject(extensionLoaderInjectable),
-    extensionsStore: di.inject(extensionsStoreInjectable),
+    extensionsPreferencesStore: di.inject(extensionsPreferencesStoreInjectable),
     emitInvalidProtocolUrl: di.inject(emitInvalidProtocolUrlInjectable),
     logger: di.inject(protocolHandlerRouterLoggerInjectable),
     windowManager: di.inject(windowManagerInjectable),

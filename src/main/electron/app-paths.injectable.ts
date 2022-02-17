@@ -5,7 +5,7 @@
 
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import path from "path";
-import directoryForIntegrationTestingInjectable from "../../common/directory-path/integration-testing.injectable";
+import directoryForIntegrationTestingInjectable from "../../common/paths/integration-testing.injectable";
 import { pathNames } from "../../common/ipc/electron/app-path-names";
 import { appPathsInjectionToken } from "../../common/ipc/electron/app-paths.token";
 import type { AppPaths } from "../../common/ipc/electron/app-paths.token";

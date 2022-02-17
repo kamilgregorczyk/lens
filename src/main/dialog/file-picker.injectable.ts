@@ -20,7 +20,10 @@ async function openFilePicker(browserWindow: BrowserWindow, options: OpenDialogO
     return { canceled };
   }
 
-  return { canceled, filePaths };
+  return {
+    canceled: false,
+    filePaths,
+  };
 }
 
 const openFileDialogInjectable = getInjectable({

@@ -7,7 +7,7 @@ import type { ClusterModel, ClusterPreferences, ClusterPrometheusPreferences } f
 import type { MigrationDeclaration } from "../../utils/join-migrations";
 import path from "path";
 import { moveSync, removeSync } from "fs-extra";
-import directoryForUserDataInjectable from "../../../common/directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../../../common/paths/user-data.injectable";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { generateNewIdFor } from "../../../common/utils/generate-new-id-for";
 

@@ -4,23 +4,25 @@
  */
 
 import { requestExtensionDiscoverySyncStreamInjectionToken } from "../../../common/ipc/extensions/discovery-sync.token";
-import extensionDiscoveryInjectable from "../../../extensions/discovery/discovery.injectable";
 import { implOneWayStream, StreamSource } from "../impl-stream";
 import type TypedEventEmitter from "typed-emitter";
 import type { ExtensionDiscoveryState } from "../../../extensions/discovery/discovery";
 import EventEmitter from "events";
 import { reaction } from "mobx";
-import { disposer } from "../../../common/utils";
+import { disposer, toJS } from "../../../common/utils";
+import isExtensionDiscoveryLoadedInjectable from "../../../common/extensions/is-loaded.injectable";
 
 const requestExtensionDiscoverySyncStreamInjectable = implOneWayStream(requestExtensionDiscoverySyncStreamInjectionToken, (di) => {
-  const discovery = di.inject(extensionDiscoveryInjectable);
+  const isExtensionDiscoveryLoaded = di.inject(isExtensionDiscoveryLoadedInjectable);
 
   return () => {
     const emitter: TypedEventEmitter<StreamSource<ExtensionDiscoveryState>> = new EventEmitter();
     const onClose = disposer();
     const onReady = () => {
       onClose.push(reaction(
-        () => discovery.getState(),
+        () => toJS({
+          isLoaded: isExtensionDiscoveryLoaded.get(),
+        }),
         state => emitter.emit("data", state),
         {
           fireImmediately: true,

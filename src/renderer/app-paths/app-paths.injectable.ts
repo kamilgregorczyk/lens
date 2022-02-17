@@ -3,7 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import { AppPaths, getAppPathsInjectionToken, appPathsIpcChannel } from "../../common/directory-path/app-path-injection-token";
+import { AppPaths, getAppPathsInjectionToken, appPathsIpcChannel } from "../../common/paths/app-path-injection-token";
 import getValueFromRegisteredChannelInjectable from "./get-value-from-registered-channel/get-value-from-registered-channel.injectable";
 
 let syncAppPaths: AppPaths;

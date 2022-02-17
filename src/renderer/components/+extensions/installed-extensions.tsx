@@ -6,7 +6,6 @@
 import styles from "./installed-extensions.module.scss";
 import React, { useMemo } from "react";
 import type {
-  ExtensionDiscovery,
   InstalledExtension,
 } from "../../../extensions/discovery/discovery";
 import { Icon } from "../icon";
@@ -14,18 +13,15 @@ import { List } from "../list/list";
 import { MenuActions, MenuItem } from "../menu";
 import { Spinner } from "../spinner";
 import { cssNames } from "../../utils";
-import { observer } from "mobx-react";
 import type { Row } from "react-table";
 import type { LensExtensionId } from "../../../extensions/lens-extension";
-import extensionDiscoveryInjectable
-  from "../../../extensions/discovery/discovery.injectable";
-
 import { withInjectables } from "@ogre-tools/injectable-react";
-import extensionInstallationStateStoreInjectable
-  from "../../../extensions/extension-installation-state-store/extension-installation-state-store.injectable";
-import type { ExtensionInstallationStateStore } from "../../../extensions/extension-installation-state-store/extension-installation-state-store";
+import extensionInstallationStateManagerInjectable from "../../../extensions/installation-state/manager.injectable";
+import type { ExtensionInstallationStateManager } from "../../../extensions/installation-state/manager";
+import { IObservableValue, observable } from "mobx";
+import isExtensionDiscoveryLoadedInjectable from "../../../common/extensions/is-loaded.injectable";
 
-interface Props {
+export interface InstalledExtensionsProps {
   extensions: InstalledExtension[];
   enable: (id: LensExtensionId) => void;
   disable: (id: LensExtensionId) => void;
@@ -33,8 +29,8 @@ interface Props {
 }
 
 interface Dependencies {
-  extensionDiscovery: ExtensionDiscovery;
-  extensionInstallationStateStore: ExtensionInstallationStateStore;
+  extensionInstallationStateStore: ExtensionInstallationStateManager;
+  isExtensionDiscoveryLoaded: IObservableValue<boolean>;
 }
 
 function getStatus(extension: InstalledExtension) {
@@ -45,11 +41,18 @@ function getStatus(extension: InstalledExtension) {
   return extension.isEnabled ? "Enabled" : "Disabled";
 }
 
-const NonInjectedInstalledExtensions : React.FC<Dependencies & Props> = (({ extensionDiscovery, extensionInstallationStateStore, extensions, uninstall, enable, disable }) => {
+const NonInjectedInstalledExtensions = observable(({
+  extensionInstallationStateStore,
+  isExtensionDiscoveryLoaded,
+  extensions,
+  uninstall,
+  enable,
+  disable,
+}: Dependencies & InstalledExtensionsProps) => {
   const filters = [
     (extension: InstalledExtension) => extension.manifest.name,
     (extension: InstalledExtension) => getStatus(extension),
-    (extension: InstalledExtension) => extension.manifest.version,
+    (extension: InstalledExtension) => extension.manifest.version.raw,
   ];
 
   const columns = useMemo(
@@ -146,7 +149,7 @@ const NonInjectedInstalledExtensions : React.FC<Dependencies & Props> = (({ exte
     }, [extensions, extensionInstallationStateStore.anyUninstalling],
   );
 
-  if (!extensionDiscovery.isLoaded) {
+  if (!isExtensionDiscoveryLoaded.get()) {
     return <div><Spinner center /></div>;
   }
 
@@ -175,15 +178,10 @@ const NonInjectedInstalledExtensions : React.FC<Dependencies & Props> = (({ exte
   );
 });
 
-export const InstalledExtensions = withInjectables<Dependencies, Props>(
-  observer(NonInjectedInstalledExtensions),
-
-  {
-    getProps: (di, props) => ({
-      extensionDiscovery: di.inject(extensionDiscoveryInjectable),
-      extensionInstallationStateStore: di.inject(extensionInstallationStateStoreInjectable),
-
-      ...props,
-    }),
-  },
-);
+export const InstalledExtensions = withInjectables<Dependencies, InstalledExtensionsProps>(NonInjectedInstalledExtensions, {
+  getProps: (di, props) => ({
+    ...props,
+    extensionInstallationStateStore: di.inject(extensionInstallationStateManagerInjectable),
+    isExtensionDiscoveryLoaded: di.inject(isExtensionDiscoveryLoadedInjectable),
+  }),
+});

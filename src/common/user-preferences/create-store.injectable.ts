@@ -5,7 +5,7 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import appEventBusInjectable from "../app-event-bus/app-event-bus.injectable";
 import type { BaseStoreParams } from "../base-store";
-import directoryForUserDataInjectable from "../directory-path/user-data.injectable";
+import directoryForUserDataInjectable from "../paths/user-data.injectable";
 import userStoreLoggerInjectable from "./logger.injectable";
 import { UserPereferencesStore, UserStoreDependencies, UserPereferencesStoreModel } from "./store";
 

@@ -16,7 +16,7 @@ import type { InstalledExtension } from "../discovery/discovery";
 import type { LensExtension, LensExtensionConstructor, LensExtensionId } from "../lens-extension";
 import type { LensRendererExtension } from "../lens-renderer-extension";
 import * as registries from "../registries";
-import type { LensExtensionState } from "../../common/extensions/store";
+import type { LensExtensionState } from "../../common/extensions/preferences/store";
 import { extensionLoaderFromMainChannel, extensionLoaderFromRendererChannel } from "../../common/ipc/extension-handling";
 import { requestExtensionLoaderInitialState } from "../../renderer/ipc";
 
@@ -36,7 +36,6 @@ export interface ExtensionLoading {
  * Loads installed extensions to the Lens application
  */
 export class ExtensionLoader {
-  protected extensions = observable.map<LensExtensionId, InstalledExtension>();
   protected instances = observable.map<LensExtensionId, LensExtension>();
 
   /**
@@ -60,7 +59,7 @@ export class ExtensionLoader {
     return when(() => this.isLoaded);
   }
 
-  constructor(protected dependencies : Dependencies) {
+  constructor(protected dependencies: Dependencies) {
     makeObservable(this);
 
     observe(this.instances, change => {

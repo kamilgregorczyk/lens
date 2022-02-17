@@ -11,7 +11,7 @@ import type { Cluster } from "../clusters/cluster";
 import { ClusterStore } from "../clusters/store";
 import { Console } from "console";
 import { stdout, stderr } from "process";
-import getCustomKubeConfigDirectoryInjectable from "../directory-path/get-custom-kube-config-directory.injectable";
+import getCustomKubeConfigDirectoryInjectable from "../paths/get-custom-kube-config-directory.injectable";
 import clusterStoreInjectable from "../clusters/cluster-store.injectable";
 import type { ClusterModel } from "../cluster-types";
 import type {
@@ -23,7 +23,7 @@ import { getDisForUnitTesting } from "../../test-utils/get-dis-for-unit-testing"
 import { createClusterInjectionToken } from "../cluster/create-cluster-injection-token";
 
 import directoryForUserDataInjectable
-  from "../directory-path/user-data.injectable";
+  from "../paths/user-data.injectable";
 
 console = new Console(stdout, stderr);
 
