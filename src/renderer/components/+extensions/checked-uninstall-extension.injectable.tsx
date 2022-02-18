@@ -2,10 +2,9 @@
  * Copyright (c) OpenLens Authors. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import type { ExtensionLoader } from "../../../extensions/extension-loader";
-import { extensionDisplayName, LensExtensionId } from "../../../extensions/lens-extension";
+import { extensionDisplayName } from "../../../extensions/lens-extension";
 import React from "react";
-import { when } from "mobx";
+import { IComputedValue, when } from "mobx";
 import { getMessageFromError } from "./get-message-from-error/get-message-from-error";
 import type { ExtensionInstallationStateManager } from "../../../extensions/installation-state/manager";
 import type { OkNotification } from "../notifications/ok.injectable";
@@ -13,17 +12,21 @@ import type { ErrorNotification } from "../notifications/error.injectable";
 import type { LensLogger } from "../../../common/logger";
 import type { UninstallExtension } from "../../../common/ipc/extensions/uninstall.token";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import extensionLoaderInjectable from "../../../extensions/extension-loader/extension-loader.injectable";
 import extensionInstallationStateManagerInjectable from "../../../extensions/installation-state/manager.injectable";
 import extensionsPageLoggerInjectable from "./logger.injectable";
 import errorNotificationInjectable from "../notifications/error.injectable";
 import okNotificationInjectable from "../notifications/ok.injectable";
 import requestUninstallExtensionInjectable from "../../ipc/extensions/uninstall.injectable";
+import type { LensExtensionId } from "../../../common/extensions/manifest";
+import type { InstalledExtensions } from "../../../common/extensions/installed.injectable";
+import installedExtensionsInjectable from "../../../common/extensions/installed.injectable";
+import enabledUserExtensionIdsInjectable from "../../../common/extensions/enabled-user-extension-ids.injectable";
 
 export type CheckedUninstallExtension = (extensionId: LensExtensionId) => Promise<boolean>;
 
 interface Dependencies {
-  extensionLoader: ExtensionLoader;
+  enabledUserExtensionIds: IComputedValue<Set<LensExtensionId>>;
+  installedExtensions: InstalledExtensions;
   extensionInstallationStateStore: ExtensionInstallationStateManager;
   okNotification: OkNotification;
   errorNotification: ErrorNotification;
@@ -32,7 +35,8 @@ interface Dependencies {
 }
 
 const checkedUninstallExtension = ({
-  extensionLoader,
+  enabledUserExtensionIds,
+  installedExtensions,
   uninstallExtension,
   extensionInstallationStateStore,
   okNotification,
@@ -40,7 +44,7 @@ const checkedUninstallExtension = ({
   logger,
 }: Dependencies): CheckedUninstallExtension => (
   async (extensionId) => {
-    const { manifest } = extensionLoader.getExtension(extensionId);
+    const { manifest } = installedExtensions.get(extensionId);
     const displayName = extensionDisplayName(manifest.name, manifest.version);
 
     try {
@@ -49,8 +53,8 @@ const checkedUninstallExtension = ({
 
       await uninstallExtension(extensionId);
 
-      // wait for the ExtensionLoader to actually uninstall the extension
-      await when(() => !extensionLoader.userExtensions.has(extensionId));
+      // wait for the extension to no longer be installed
+      await when(() => !enabledUserExtensionIds.get().has(extensionId));
 
       okNotification(
         <p>
@@ -79,7 +83,8 @@ const checkedUninstallExtension = ({
 
 const checkedUninstallExtensionInjectable = getInjectable({
   instantiate: (di) => checkedUninstallExtension({
-    extensionLoader: di.inject(extensionLoaderInjectable),
+    installedExtensions: di.inject(installedExtensionsInjectable),
+    enabledUserExtensionIds: di.inject(enabledUserExtensionIdsInjectable),
     uninstallExtension: di.inject(requestUninstallExtensionInjectable),
     extensionInstallationStateStore: di.inject(extensionInstallationStateManagerInjectable),
     logger: di.inject(extensionsPageLoggerInjectable),

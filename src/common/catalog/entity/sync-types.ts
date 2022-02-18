@@ -4,6 +4,7 @@
  */
 
 import type { PartialDeep, RequireAtLeastOne } from "type-fest";
+import type { SyncMessage } from "../../utils/sync-types";
 import type { CatalogEntityData } from "./entity";
 
 export interface EntityChangeEvents {
@@ -19,19 +20,16 @@ export interface RawCatalogEntity extends CatalogEntityData {
 
 export type RawCatalogEntityUpdate = RequireAtLeastOne<PartialDeep<CatalogEntityData>>;
 
-export interface CatalogSyncAddMessage {
-  type: "add";
+export interface CatalogSyncAddMessage extends SyncMessage<"add"> {
   data: RawCatalogEntity;
 }
 
-export interface CatalogSyncUpdateMessage {
-  type: "update",
+export interface CatalogSyncUpdateMessage extends SyncMessage<"update"> {
   uid: string;
   data: RawCatalogEntityUpdate;
 }
 
-export interface CatalogSyncDeleteMessage {
-  type: "delete",
+export interface CatalogSyncDeleteMessage  extends SyncMessage<"delete">{
   uid: string;
 }
 

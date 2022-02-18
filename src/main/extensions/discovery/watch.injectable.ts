@@ -4,7 +4,6 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { constants } from "fs";
-import type { IObservableValue } from "mobx";
 import path from "path";
 import type { Access } from "../../../common/fs/access.injectable";
 import accessInjectable from "../../../common/fs/access.injectable";
@@ -17,7 +16,6 @@ import removeInjectable from "../../../common/fs/remove.injectable";
 import type { LensLogger } from "../../../common/logger";
 import localExtensionsDirectoryInjectable from "../../../common/paths/local-extensions.injectable";
 import extensionsNodeModulesDirectoryInjectable from "../../../common/paths/node-modules.injectable";
-import isExtensionDiscoveryLoadedInjectable from "../../../common/extensions/is-loaded.injectable";
 import extensionsDiscoveryLoggerInjectable from "./logger.injectable";
 import type { InstalledExtensions } from "../../../common/extensions/installed.injectable";
 import installedExtensionsInjectable from "../../../common/extensions/installed.injectable";
@@ -44,7 +42,6 @@ interface Dependencies {
   ensureDir: EnsureDir;
   copyDir: CopyDir;
   ensureExtensions: EnsureExtensions;
-  isExtensionDiscoveryLoaded: IObservableValue<boolean>;
   onWatchAdd: OnWatchAdd;
   onWatchUnlink: OnWatchUnlink;
   createWatcher: CreateWatcher;
@@ -52,7 +49,6 @@ interface Dependencies {
 
 function watchExtensions( {
   installedExtensions,
-  isExtensionDiscoveryLoaded,
   logger,
   directoryForUserData,
   extensionsNodeModulesDirectory,
@@ -110,7 +106,6 @@ function watchExtensions( {
     await ensureDir(localExtensionsDirectory);
 
     installedExtensions.replace(await ensureExtensions(bundledFolderPath));
-    isExtensionDiscoveryLoaded.set(true);
 
     logger.info(`watching extension add/remove in ${localExtensionsDirectory}`);
 
@@ -146,7 +141,6 @@ const watchExtensionsInjectable = getInjectable({
     remove: di.inject(removeInjectable),
     directoryForUserData: di.inject(directoryForUserDataInjectable),
     extensionsNodeModulesDirectory: di.inject(extensionsNodeModulesDirectoryInjectable),
-    isExtensionDiscoveryLoaded: di.inject(isExtensionDiscoveryLoadedInjectable),
     localExtensionsDirectory: di.inject(localExtensionsDirectoryInjectable),
     ensureExtensions: di.inject(ensureExtensionsInjectable),
     onWatchAdd: di.inject(onWatchAddInjectable),

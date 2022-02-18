@@ -13,7 +13,6 @@ import {
 } from "mobx";
 import { disposeOnUnmount, observer } from "mobx-react";
 import React from "react";
-import type { InstalledExtension } from "../../../extensions/discovery/discovery";
 import { DropFileInput } from "../input";
 import { Install } from "./install";
 import { InstalledExtensions } from "./installed-extensions";
@@ -22,7 +21,7 @@ import { SettingLayout } from "../layout/setting-layout";
 import { docsUrl } from "../../../common/vars";
 import { withInjectables } from "@ogre-tools/injectable-react";
 
-import userExtensionsInjectable from "./user-extensions/user-extensions.injectable";
+import userExtensionsInjectable from "../../../common/extensions/user-extensions.injectable";
 import enableExtensionInjectable from "./enable-extension/enable-extension.injectable";
 import disableExtensionInjectable from "./disable-extension/disable-extension.injectable";
 import confirmUninstallExtensionInjectable from "./confirm-uninstall-extension/confirm-uninstall-extension.injectable";
@@ -35,6 +34,7 @@ import extensionInstallationStateManagerInjectable from "../../../extensions/ins
 import type { ExtensionInstallationStateManager } from "../../../extensions/installation-state/manager";
 import type { InstallOnDrop } from "./install-on-drop/install-on-drop";
 import type { InstallFromInput } from "./install-from-input/install-from-input";
+import type { InstalledExtension } from "../../../common/extensions/installed.injectable";
 
 interface Dependencies {
   userExtensions: IComputedValue<InstalledExtension[]>;

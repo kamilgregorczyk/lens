@@ -9,13 +9,13 @@ import fse from "fs-extra";
 import React from "react";
 import { UserStore } from "../../../../common/user-preferences";
 import type { ExtensionDiscovery } from "../../../../extensions/discovery/discovery";
-import type { ExtensionLoader } from "../../../../extensions/extension-loader";
+import type { ExtensionLoader } from "../../../../common/extensions/loader";
 import { ConfirmDialog } from "../../confirm-dialog";
 import { Extensions } from "../extensions";
 import mockFs from "mock-fs";
 import { mockWindow } from "../../../../../__mocks__/windowMock";
 import { getDiForUnitTesting } from "../../../getDiForUnitTesting";
-import extensionLoaderInjectable from "../../../../extensions/extension-loader/extension-loader.injectable";
+import extensionsLoaderInjectable from "../../../../common/extensions/loader/loader.injectable";
 import { DiRender, renderFor } from "../../test-utils/renderFor";
 import extensionDiscoveryInjectable from "../../../../extensions/discovery/discovery.injectable";
 import directoryForUserDataInjectable from "../../../../common/paths/user-data.injectable";
@@ -61,7 +61,7 @@ describe("Extensions", () => {
 
     render = renderFor(di);
 
-    extensionLoader = di.inject(extensionLoaderInjectable);
+    extensionLoader = di.inject(extensionsLoaderInjectable);
     extensionDiscovery = di.inject(extensionDiscoveryInjectable);
 
     extensionLoader.addExtension({

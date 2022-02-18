@@ -5,9 +5,6 @@
 
 import styles from "./installed-extensions.module.scss";
 import React, { useMemo } from "react";
-import type {
-  InstalledExtension,
-} from "../../../extensions/discovery/discovery";
 import { Icon } from "../icon";
 import { List } from "../list/list";
 import { MenuActions, MenuItem } from "../menu";
@@ -19,26 +16,21 @@ import { withInjectables } from "@ogre-tools/injectable-react";
 import extensionInstallationStateManagerInjectable from "../../../extensions/installation-state/manager.injectable";
 import type { ExtensionInstallationStateManager } from "../../../extensions/installation-state/manager";
 import { IObservableValue, observable } from "mobx";
-import isExtensionDiscoveryLoadedInjectable from "../../../common/extensions/is-loaded.injectable";
+import isExtensionDiscoveryLoadedInjectable from "../../extensions/discovery-is-loaded.injectable";
+import type { InstalledExtension } from "../../../common/extensions/installed.injectable";
+import type { IsExtensionEnabled } from "../../../common/extensions/preferences/is-enabled.injectable";
 
 export interface InstalledExtensionsProps {
   extensions: InstalledExtension[];
   enable: (id: LensExtensionId) => void;
   disable: (id: LensExtensionId) => void;
   uninstall: (extension: InstalledExtension) => void;
+  isExtensionEnabled: IsExtensionEnabled;
 }
 
 interface Dependencies {
   extensionInstallationStateStore: ExtensionInstallationStateManager;
   isExtensionDiscoveryLoaded: IObservableValue<boolean>;
-}
-
-function getStatus(extension: InstalledExtension) {
-  if (!extension.isCompatible) {
-    return "Incompatible";
-  }
-
-  return extension.isEnabled ? "Enabled" : "Disabled";
 }
 
 const NonInjectedInstalledExtensions = observable(({
@@ -48,7 +40,15 @@ const NonInjectedInstalledExtensions = observable(({
   uninstall,
   enable,
   disable,
+  isExtensionEnabled,
 }: Dependencies & InstalledExtensionsProps) => {
+  const getStatus = ({ isBundled, id, isCompatible }: InstalledExtension) => {
+    if (!isCompatible) {
+      return "Incompatible";
+    }
+
+    return isExtensionEnabled(id, isBundled) ? "Enabled" : "Disabled";
+  };
   const filters = [
     (extension: InstalledExtension) => extension.manifest.name,
     (extension: InstalledExtension) => getStatus(extension),
@@ -90,11 +90,12 @@ const NonInjectedInstalledExtensions = observable(({
   );
 
   const data = useMemo(
-    () => {
-      return extensions.map(extension => {
-        const { id, isEnabled, isCompatible, manifest } = extension;
+    () => (
+      extensions.map(extension => {
+        const { id, isCompatible, manifest, isBundled } = extension;
         const { name, description, version } = manifest;
         const isUninstalling = extensionInstallationStateStore.isExtensionUninstalling(id);
+        const isEnabled = isExtensionEnabled(id, isBundled);
 
         return {
           extension: (
@@ -145,8 +146,8 @@ const NonInjectedInstalledExtensions = observable(({
             </MenuActions>
           ),
         };
-      });
-    }, [extensions, extensionInstallationStateStore.anyUninstalling],
+      })
+    ), [extensions, extensionInstallationStateStore.anyUninstalling],
   );
 
   if (!isExtensionDiscoveryLoaded.get()) {

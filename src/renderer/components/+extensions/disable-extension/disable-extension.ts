@@ -2,8 +2,7 @@
  * Copyright (c) OpenLens Authors. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import type { LensExtensionId } from "../../../../extensions/lens-extension";
-import type { ExtensionLoader } from "../../../../extensions/extension-loader";
+import type { ExtensionLoader } from "../../../../common/extensions/loader";
 
 interface Dependencies {
   extensionLoader: ExtensionLoader;

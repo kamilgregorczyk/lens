@@ -3,10 +3,10 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { ExtensionLoader } from "../extension-loader";
+import type { ExtensionLoader } from "../../common/extensions/loader";
 import { Console } from "console";
 import { stdout, stderr } from "process";
-import extensionLoaderInjectable from "../extension-loader/extension-loader.injectable";
+import extensionsLoaderInjectable from "../../common/extensions/loader/loader.injectable";
 import { runInAction } from "mobx";
 import updateExtensionsStateInjectable from "../../common/extensions/preferences/update-store-state.injectable";
 import { getDisForUnitTesting } from "../../test-utils/get-dis-for-unit-testing";
@@ -120,7 +120,7 @@ describe("ExtensionLoader", () => {
 
     await dis.runSetups();
 
-    extensionLoader = dis.mainDi.inject(extensionLoaderInjectable);
+    extensionLoader = dis.mainDi.inject(extensionsLoaderInjectable);
   });
 
   afterEach(() => {

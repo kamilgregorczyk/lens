@@ -6,7 +6,7 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { InstallRequestValidated } from "./create-temp-files-and-validate.injectable";
 import { Disposer, extractTar, noop } from "../../../../common/utils";
 import { extensionDisplayName } from "../../../../extensions/lens-extension";
-import type { ExtensionLoader } from "../../../../extensions/extension-loader";
+import type { ExtensionLoader } from "../../../../common/extensions/loader";
 import { getMessageFromError } from "../get-message-from-error/get-message-from-error";
 import path from "path";
 import fse from "fs-extra";
@@ -16,7 +16,7 @@ import type { ExtensionInstallationStateManager } from "../../../../extensions/i
 import type { OkNotification } from "../../notifications/ok.injectable";
 import type { ErrorNotification } from "../../notifications/error.injectable";
 import type { LensLogger } from "../../../../common/logger";
-import extensionLoaderInjectable from "../../../../extensions/extension-loader/extension-loader.injectable";
+import extensionsLoaderInjectable from "../../../../common/extensions/loader/loader.injectable";
 import getExtensionDestFolderInjectable from "./get-extension-dest-folder.injectable";
 import extensionInstallationStateManagerInjectable from "../../../../extensions/installation-state/manager.injectable";
 import errorNotificationInjectable from "../../notifications/error.injectable";
@@ -114,7 +114,7 @@ const unpackExtension = ({
 
 const unpackExtensionInjectable = getInjectable({
   instantiate: (di) => unpackExtension({
-    extensionLoader: di.inject(extensionLoaderInjectable),
+    extensionLoader: di.inject(extensionsLoaderInjectable),
     getExtensionDestFolder: di.inject(getExtensionDestFolderInjectable),
     extensionInstallationStateStore: di.inject(extensionInstallationStateManagerInjectable),
     errorNotification: di.inject(errorNotificationInjectable),

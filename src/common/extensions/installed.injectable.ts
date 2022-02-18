@@ -4,12 +4,12 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { observable, ObservableMap } from "mobx";
-import type { LensExtensionId, LensExtensionManifest } from "../../extensions/lens-extension";
+import type { LensExtensionId, LensExtensionManifest } from "./manifest";
 
-export interface InstalledExtension {
+export interface BaseInstalledExtension<Manifest> {
   readonly id: LensExtensionId;
 
-  readonly manifest: LensExtensionManifest;
+  readonly manifest: Manifest;
 
   // Absolute path to the non-symlinked source folder,
   // e.g. "/Users/user/.k8slens/extensions/helloworld"
@@ -20,6 +20,8 @@ export interface InstalledExtension {
   readonly isBundled: boolean; // defined in project root's package.json
   readonly isCompatible: boolean;
 }
+
+export type InstalledExtension = BaseInstalledExtension<LensExtensionManifest>;
 
 export type InstalledExtensions = ObservableMap<LensExtensionId, InstalledExtension>;
 

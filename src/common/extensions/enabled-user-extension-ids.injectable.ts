@@ -4,16 +4,15 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { computed } from "mobx";
-import extensionLoaderInjectable from "./extension-loader/extension-loader.injectable";
+import userExtensionsInjectable from "./user-extensions.injectable";
 
-const extensionsInjectable = getInjectable({
+const enabledUserExtensionIdsInjectable = getInjectable({
   instantiate: (di) => {
-    const extensionLoader = di.inject(extensionLoaderInjectable);
+    const userExtensions = di.inject(userExtensionsInjectable);
 
-    return computed(() => extensionLoader.enabledExtensionInstances);
+    return computed(() => new Set(userExtensions.get().map(ext => ext.id)));
   },
-
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default extensionsInjectable;
+export default enabledUserExtensionIdsInjectable;

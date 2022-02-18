@@ -19,7 +19,7 @@ import configurePackages from "../common/configure-packages";
 import { PrometheusProviderRegistry } from "./prometheus";
 import * as initializers from "./initializers";
 import { getDi } from "./getDi";
-import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
+import extensionsLoaderInjectable from "../common/extensions/loader/loader.injectable";
 import lensProtocolRouterMainInjectable from "./protocol-handler/router.injectable";
 import directoryForExesInjectable from "../common/paths/executables.injectable";
 import kubeconfigSyncManagerInjectable from "./catalog/local-sources/kubeconfigs/manager.injectable";
@@ -164,7 +164,7 @@ async function main(di: ConfigurableDependencyInjectionContainer) {
       return app.exit();
     }
 
-    const extensionLoader = di.inject(extensionLoaderInjectable);
+    const extensionLoader = di.inject(extensionsLoaderInjectable);
     const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
     const startUpdateChecking = di.inject(startUpdateCheckingInjectable);
 
@@ -234,8 +234,6 @@ async function main(di: ConfigurableDependencyInjectionContainer) {
     logger.debug("will-quit message");
 
     // This is called when the close button of the main window is clicked
-
-
     logger.info("APP:QUIT");
     appEventBus.emit({ name: "app", action: "close" });
     clusterManager.stop(); // close cluster connections
@@ -249,8 +247,7 @@ async function main(di: ConfigurableDependencyInjectionContainer) {
     lensProtocolRouterMain.rendererLoaded = false;
 
     if (blockQuit) {
-    // Quit app on Cmd+Q (MacOS)
-
+      // Quit app on Cmd+Q (MacOS)
       event.preventDefault(); // prevent app's default shutdown (e.g. required for telemetry, etc.)
 
       return; // skip exit to make tray work, to quit go to app's global menu or tray's menu

@@ -3,10 +3,7 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
+import type { ExtensionDiscoverySyncMessage } from "../../extensions/sync-types";
 import { getStreamInjectionToken } from "../channel";
 
-export interface ExtensionsInitiallyLoaded {
-  isLoaded: boolean;
-}
-
-export const requestExtensionDiscoverySyncStreamInjectionToken = getStreamInjectionToken<ExtensionsInitiallyLoaded>("extensions:discovery:sync");
+export const requestExtensionDiscoverySyncStreamInjectionToken = getStreamInjectionToken<ExtensionDiscoverySyncMessage>("extensions:discovery:sync");

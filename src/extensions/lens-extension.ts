@@ -3,68 +3,16 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { InstalledExtension } from "./discovery/discovery";
-import { action, observable, makeObservable, computed } from "mobx";
+import { action, observable, makeObservable } from "mobx";
 import logger from "../main/logger";
 import type { ProtocolHandlerRegistration } from "./registries";
-import type { PackageJson } from "type-fest";
 import { Disposer, disposer } from "../common/utils";
 import { LensExtensionDependencies, extensionDependencies } from "./lens-extension-set-dependencies";
 import type { SemVer } from "semver";
+import type { InstalledExtension } from "../common/extensions/installed.injectable";
+import type { LensExtensionId, LensExtensionManifest } from "../common/extensions/manifest";
 
-export type LensExtensionId = string; // path to manifest (package.json)
 export type LensExtensionConstructor = new (...args: ConstructorParameters<typeof LensExtension>) => LensExtension;
-
-export interface LensExtensionManifest {
-  /**
-   * Name of the extension, must be globally unique
-   */
-  name: string;
-
-  publisher?: string;
-  license?: string;
-  author?: PackageJson.Person;
-  description: string;
-
-  /**
-  The dependencies of the package.
-  */
-  dependencies?: PackageJson.Dependency;
-
-  /**
-  Additional tooling dependencies that are not required for the package to work. Usually test, build, or documentation tooling.
-  */
-  devDependencies?: PackageJson.Dependency;
-
-  /**
-   * The parsed version of the extension
-   */
-  version: SemVer;
-
-  /**
-   * Path to the main side entry point
-   */
-  main?: string;
-
-  /**
-   * Path to the renderer side entry point
-   */
-  renderer?: string;
-
-  engines: {
-    /**
-     * supported version range for this extension
-     */
-    lens: string;
-  }
-}
-
-export interface RawLensExtensionManifest extends PackageJson {
-  name: string;
-  version: string;
-  main?: string; // path to %ext/dist/main.js
-  renderer?: string; // path to %ext/dist/renderer.js
-}
 
 export const Disposers = Symbol();
 
@@ -78,7 +26,10 @@ export class LensExtension<Dependencies extends LensExtensionDependencies = Lens
 
   @observable private _isEnabled = false;
 
-  @computed get isEnabled() {
+  /**
+   * This is a marker for "has been enabled", not "should be enabled"
+   */
+  get isEnabled() {
     return this._isEnabled;
   }
 

@@ -23,7 +23,7 @@ import { registerCustomThemes } from "./components/monaco-editor";
 import { getDi } from "./getDi";
 import { DiContextProvider } from "@ogre-tools/injectable-react";
 import type { DependencyInjectionContainer } from "@ogre-tools/injectable";
-import extensionLoaderInjectable from "../extensions/extension-loader/extension-loader.injectable";
+import extensionsLoaderInjectable from "../common/extensions/loader/loader.injectable";
 import initRootFrameInjectable from "./frames/root-frame/init.injectable";
 import initClusterFrameInjectable from "./frames/cluster-frame/init.injectable";
 import commandOverlayInjectable from "./components/command-palette/command-overlay.injectable";
@@ -88,7 +88,7 @@ export async function bootstrap(di: DependencyInjectionContainer) {
     openCommandDialog: di.inject(commandOverlayInjectable).open,
   });
 
-  const extensionLoader = di.inject(extensionLoaderInjectable);
+  const extensionLoader = di.inject(extensionsLoaderInjectable);
 
   extensionLoader.init();
 

@@ -4,14 +4,13 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { IComputedValue } from "mobx";
-import extensionsInjectable from "./extensions.injectable";
+import enabledInstancesInjectable from "../common/extensions/enabled-instances.injectable";
 import type { LensMainExtension } from "./lens-main-extension";
 
 const mainExtensionsInjectable = getInjectable({
   lifecycle: lifecycleEnum.singleton,
 
-  instantiate: (di) =>
-    di.inject(extensionsInjectable) as IComputedValue<LensMainExtension[]>,
+  instantiate: (di) => di.inject(enabledInstancesInjectable) as IComputedValue<LensMainExtension[]>,
 });
 
 export default mainExtensionsInjectable;

@@ -6,25 +6,22 @@
 import { ipcRenderer } from "electron";
 import { EventEmitter } from "events";
 import { isEqual } from "lodash";
-import { action, computed, makeObservable, observable, observe, reaction, when } from "mobx";
+import { action, makeObservable, reaction } from "mobx";
 import path from "path";
-import { broadcastMessage, ipcMainOn, ipcRendererOn, ipcMainHandle } from "../../common/ipc";
-import { Disposer, toJS } from "../../common/utils";
-import logger from "../../main/logger";
-import type { KubernetesCluster } from "../common-api/catalog";
-import type { InstalledExtension } from "../discovery/discovery";
-import type { LensExtension, LensExtensionConstructor, LensExtensionId } from "../lens-extension";
-import type { LensRendererExtension } from "../lens-renderer-extension";
-import * as registries from "../registries";
-import type { LensExtensionState } from "../../common/extensions/preferences/store";
-import { extensionLoaderFromMainChannel, extensionLoaderFromRendererChannel } from "../../common/ipc/extension-handling";
-import { requestExtensionLoaderInitialState } from "../../renderer/ipc";
-
-const logModule = "[EXTENSIONS-LOADER]";
+import type { Disposer } from "../../utils";
+import type { KubernetesCluster } from "../../../extensions/common-api/catalog";
+import type { LensExtension, LensExtensionConstructor, LensExtensionId } from "../../../extensions/lens-extension";
+import type { LensRendererExtension } from "../../../extensions/lens-renderer-extension";
+import * as registries from "../../../extensions/registries";
+import type { LensExtensionState } from "../preferences/store";
+import type { InstalledExtension } from "../installed.injectable";
+import type { CreateExtensionInstance } from "./create-extension-instance.injectable";
+import type { LensLogger } from "../../logger";
 
 interface Dependencies {
   updateExtensionsState: (extensionsState: Record<LensExtensionId, LensExtensionState>) => void
-  createExtensionInstance: (ExtensionClass: LensExtensionConstructor, extension: InstalledExtension) => LensExtension,
+  createExtensionInstance: CreateExtensionInstance;
+  readonly logger: LensLogger;
 }
 
 export interface ExtensionLoading {
@@ -36,92 +33,11 @@ export interface ExtensionLoading {
  * Loads installed extensions to the Lens application
  */
 export class ExtensionLoader {
-  protected instances = observable.map<LensExtensionId, LensExtension>();
-
-  /**
-   * This is the set of extensions that don't come with either
-   * - Main.LensExtension when running in the main process
-   * - Renderer.LensExtension when running in the renderer process
-   */
-  protected nonInstancesByName = observable.set<string>();
-
-  /**
-   * This is updated by the `observe` in the constructor. DO NOT write directly to it
-   */
-  protected instancesByName = observable.map<string, LensExtension>();
-
   // emits event "remove" of type LensExtension when the extension is removed
   private events = new EventEmitter();
 
-  @observable isLoaded = false;
-
-  get whenLoaded() {
-    return when(() => this.isLoaded);
-  }
-
   constructor(protected dependencies: Dependencies) {
     makeObservable(this);
-
-    observe(this.instances, change => {
-      switch (change.type) {
-        case "add":
-          if (this.instancesByName.has(change.newValue.name)) {
-            throw new TypeError("Extension names must be unique");
-          }
-
-          this.instancesByName.set(change.newValue.name, change.newValue);
-          break;
-        case "delete":
-          this.instancesByName.delete(change.oldValue.name);
-          break;
-        case "update":
-          throw new Error("Extension instances shouldn't be updated");
-      }
-    });
-  }
-
-  @computed get enabledExtensionInstances() : LensExtension[] {
-    return [...this.instances.values()].filter(extension => extension.isEnabled);
-  }
-
-  @computed get userExtensions(): Map<LensExtensionId, InstalledExtension> {
-    const extensions = this.toJSON();
-
-    extensions.forEach((ext, extId) => {
-      if (ext.isBundled) {
-        extensions.delete(extId);
-      }
-    });
-
-    return extensions;
-  }
-
-  /**
-   * Get the extension instance by its manifest name
-   * @param name The name of the extension
-   * @returns one of the following:
-   * - the instance of `Main.LensExtension` on the main process if created
-   * - the instance of `Renderer.LensExtension` on the renderer process if created
-   * - `null` if no class definition is provided for the current process
-   * - `undefined` if the name is not known about
-   */
-  getInstanceByName(name: string): LensExtension | null | undefined {
-    if (this.nonInstancesByName.has(name)) {
-      return null;
-    }
-
-    return this.instancesByName.get(name);
-  }
-
-  // Transform userExtensions to a state object for storing into ExtensionsStore
-  @computed get storeState() {
-    return Object.fromEntries(
-      Array.from(this.userExtensions)
-        .map(([extId, extension]) => [extId, {
-          enabled: extension.isEnabled,
-          name: extension.manifest.name,
-        }]),
-    );
   }
 
   @action
@@ -158,7 +74,7 @@ export class ExtensionLoader {
 
   @action
   removeInstance(lensExtensionId: LensExtensionId) {
-    logger.info(`${logModule} deleting extension instance ${lensExtensionId}`);
+    this.dependencies.logger.info(`deleting extension instance ${lensExtensionId}`);
     const instance = this.instances.get(lensExtensionId);
 
     if (!instance) {
@@ -171,7 +87,7 @@ export class ExtensionLoader {
       this.instances.delete(lensExtensionId);
       this.nonInstancesByName.delete(instance.name);
     } catch (error) {
-      logger.error(`${logModule}: deactivation extension error`, { lensExtensionId, error });
+      this.dependencies.logger.error(`deactivation extension error`, { lensExtensionId, error });
     }
   }
 
@@ -242,7 +158,7 @@ export class ExtensionLoader {
   }
 
   loadOnClusterManagerRenderer = () => {
-    logger.debug(`${logModule}: load on main renderer (cluster manager)`);
+    this.dependencies.logger.debug(`load on main renderer (cluster manager)`);
 
     return this.autoInitExtensions(async (extension: LensRendererExtension) => {
       const removeItems = [
@@ -264,7 +180,7 @@ export class ExtensionLoader {
   };
 
   loadOnClusterRenderer = (getCluster: () => KubernetesCluster) => {
-    logger.debug(`${logModule}: load on cluster renderer (dashboard)`);
+    this.dependencies.logger.debug(`load on cluster renderer (dashboard)`);
 
     this.autoInitExtensions(async (extension: LensRendererExtension) => {
       // getCluster must be a callback, as the entity might be available only after an extension has been loaded
@@ -326,7 +242,7 @@ export class ExtensionLoader {
               activated: instance.activate(),
             };
           } catch (err) {
-            logger.error(`${logModule}: error loading extension`, { ext: extension, err });
+            this.dependencies.logger.error(`error loading extension`, { ext: extension, err });
           }
         } else if (!extension.isEnabled && alreadyInit) {
           this.removeInstance(extId);
@@ -343,7 +259,7 @@ export class ExtensionLoader {
       extensions.map(extension =>
         // If extension activation fails, log error
         extension.activated.catch((error) => {
-          logger.error(`${logModule}: activation extension error`, { ext: extension.installedExtension, error });
+          this.dependencies.logger.error(`activation extension error`, { ext: extension.installedExtension, error });
         }),
       ),
     );
@@ -351,7 +267,7 @@ export class ExtensionLoader {
     // Return ExtensionLoading[]
     return extensions.map(extension => {
       const loaded = extension.instance.enable(register).catch((err) => {
-        logger.error(`${logModule}: failed to enable`, { ext: extension, err });
+        this.dependencies.logger.error(`failed to enable`, { ext: extension, err });
       });
 
       return {
@@ -383,24 +299,12 @@ export class ExtensionLoader {
       return __non_webpack_require__(extAbsolutePath).default;
     } catch (error) {
       if (ipcRenderer) {
-        console.error(`${logModule}: can't load ${entryPointName} for "${extension.manifest.name}": ${error.stack || error}`, extension);
+        console.error(`can't load ${entryPointName} for "${extension.manifest.name}": ${error.stack || error}`, extension);
       } else {
-        logger.error(`${logModule}: can't load ${entryPointName} for "${extension.manifest.name}": ${error}`, { extension });
+        this.dependencies.logger.error(`can't load ${entryPointName} for "${extension.manifest.name}": ${error}`, { extension });
       }
     }
 
     return null;
-  }
-
-  getExtension(extId: LensExtensionId): InstalledExtension {
-    return this.extensions.get(extId);
-  }
-
-  getInstanceById<E extends LensExtension>(extId: LensExtensionId): E {
-    return this.instances.get(extId) as E;
-  }
-
-  toJSON(): Map<LensExtensionId, InstalledExtension> {
-    return toJS(this.extensions);
   }
 }

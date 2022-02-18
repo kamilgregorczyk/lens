@@ -3,9 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
+import getInstanceByNameInjectable from "../../common/extensions/get-instance-by-name.injectable";
+import isExtensionEnabledInjectable from "../../common/extensions/preferences/is-enabled.injectable";
 import protocolHandlerRouterLoggerInjectable from "../../common/protocol-handler/router-logger.injectable";
-import extensionLoaderInjectable from "../../extensions/extension-loader/extension-loader.injectable";
-import extensionsPreferencesStoreInjectable from "../extensions/store.injectable";
 import emitInvalidProtocolUrlInjectable from "../ipc/protocol-handler/invalid.injectable";
 import emitRouteProtocolExternalInjectable from "../ipc/protocol-handler/route-external.injectable";
 import emitRouteProtocolInternalInjectable from "../ipc/protocol-handler/route-internal.injectable";
@@ -14,8 +14,8 @@ import { LensProtocolRouterMain } from "./router";
 
 const lensProtocolRouterMainInjectable = getInjectable({
   instantiate: (di) => new LensProtocolRouterMain({
-    extensionLoader: di.inject(extensionLoaderInjectable),
-    extensionsPreferencesStore: di.inject(extensionsPreferencesStoreInjectable),
+    getInstanceByName: di.inject(getInstanceByNameInjectable),
+    isExtensionEnabled: di.inject(isExtensionEnabledInjectable),
     emitInvalidProtocolUrl: di.inject(emitInvalidProtocolUrlInjectable),
     logger: di.inject(protocolHandlerRouterLoggerInjectable),
     windowManager: di.inject(windowManagerInjectable),

@@ -5,7 +5,7 @@
 import { delay } from "../../../common/utils";
 import type { LensLogger } from "../../../common/logger";
 import { unmountComponentAtNode } from "react-dom";
-import type { ExtensionLoading } from "../../../extensions/extension-loader";
+import type { ExtensionLoading } from "../../../common/extensions/loader";
 import type { BundledExtensionsLoaded } from "../../../common/ipc/extensions/bundled-loaded.token";
 
 interface Dependencies {

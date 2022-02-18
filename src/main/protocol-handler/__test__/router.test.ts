@@ -11,7 +11,7 @@ import type { ExtensionsPreferencesStore } from "../../../common/extensions/pref
 import type { LensProtocolRouterMain } from "../router";
 import mockFs from "mock-fs";
 import { getDiForUnitTesting } from "../../getDiForUnitTesting";
-import extensionLoaderInjectable from "../../../extensions/extension-loader/extension-loader.injectable";
+import extensionsLoaderInjectable from "../../../common/extensions/loader/loader.injectable";
 import lensProtocolRouterMainInjectable from "../router.injectable";
 import extensionsPreferencesStoreInjectable from "../../extensions/store.injectable";
 
@@ -39,7 +39,7 @@ describe("protocol router tests", () => {
 
     await di.runSetups();
 
-    extensionLoader = di.inject(extensionLoaderInjectable);
+    extensionLoader = di.inject(extensionsLoaderInjectable);
     extensionsStore = di.inject(extensionsPreferencesStoreInjectable);
     lpr = di.inject(lensProtocolRouterMainInjectable);
 

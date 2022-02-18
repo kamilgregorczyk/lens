@@ -4,7 +4,7 @@
  */
 import { disposer, ExtendableDisposer } from "../../../../common/utils";
 import { Button } from "../../button";
-import type { ExtensionLoader } from "../../../../extensions/extension-loader";
+import type { ExtensionLoader } from "../../../../common/extensions/loader";
 import React from "react";
 import { remove as removeDir } from "fs-extra";
 import { shell } from "electron";
@@ -17,7 +17,7 @@ import type { CreateTempFilesAndValidate } from "./create-temp-files-and-validat
 import type { GetExtensionDestFolder } from "./get-extension-dest-folder.injectable";
 import type { CheckedUninstallExtension } from "../checked-uninstall-extension.injectable";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import extensionLoaderInjectable from "../../../../extensions/extension-loader/extension-loader.injectable";
+import extensionsLoaderInjectable from "../../../../common/extensions/loader/loader.injectable";
 import unpackExtensionInjectable from "./unpack-extension.injectable";
 import getExtensionDestFolderInjectable from "./get-extension-dest-folder.injectable";
 import createTempFilesAndValidateInjectable from "./create-temp-files-and-validate.injectable";
@@ -143,7 +143,7 @@ const attemptInstall = ({
 
 const attemptInstallInjectable = getInjectable({
   instantiate: (di) => attemptInstall({
-    extensionLoader: di.inject(extensionLoaderInjectable),
+    extensionLoader: di.inject(extensionsLoaderInjectable),
     checkedUninstallExtension: di.inject(checkedUninstallExtensionInjectable),
     unpackExtension: di.inject(unpackExtensionInjectable),
     createTempFilesAndValidate: di.inject(createTempFilesAndValidateInjectable),

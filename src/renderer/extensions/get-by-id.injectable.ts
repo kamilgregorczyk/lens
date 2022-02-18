@@ -4,23 +4,23 @@
  */
 
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import type { ExtensionLoader } from "../../extensions/extension-loader";
-import extensionLoaderInjectable from "../../extensions/extension-loader/extension-loader.injectable";
 import type { LensRendererExtension } from "../../extensions/lens-renderer-extension";
+import type { ExtensionInstances } from "../../common/extensions/instances.injectable";
+import extensionInstancesInjectable from "../../common/extensions/instances.injectable";
 
 export type GetExtensionById = (extId: string) => LensRendererExtension | undefined;
 
 interface Dependencies {
-  extensionLoader: ExtensionLoader;
+  state: ExtensionInstances;
 }
 
-const getExtensionById = ({ extensionLoader }: Dependencies): GetExtensionById => (
-  (extId) => extensionLoader.getInstanceById(extId)
+const getExtensionById = ({ state }: Dependencies): GetExtensionById => (
+  (extId) => state.get(extId) as LensRendererExtension
 );
 
 const getExtensionByIdInjectable = getInjectable({
   instantiate: (di) => getExtensionById({
-    extensionLoader: di.inject(extensionLoaderInjectable),
+    state: di.inject(extensionInstancesInjectable),
   }),
   lifecycle: lifecycleEnum.singleton,
 });
