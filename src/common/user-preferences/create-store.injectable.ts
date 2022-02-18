@@ -7,7 +7,7 @@ import appEventBusInjectable from "../app-event-bus/app-event-bus.injectable";
 import type { BaseStoreParams } from "../base-store";
 import directoryForUserDataInjectable from "../paths/user-data.injectable";
 import userStoreLoggerInjectable from "./logger.injectable";
-import { UserPereferencesStore, UserStoreDependencies, UserPereferencesStoreModel } from "./store";
+import { UserPreferencesStore, UserStoreDependencies, UserPereferencesStoreModel } from "./store";
 
 const createUserStoreInjectable = getInjectable({
   instantiate: (di) => {
@@ -17,7 +17,7 @@ const createUserStoreInjectable = getInjectable({
       appEventBus: di.inject(appEventBusInjectable),
     };
 
-    return (params: BaseStoreParams<UserPereferencesStoreModel>) => new UserPereferencesStore(dependencies, params);
+    return (params: BaseStoreParams<UserPereferencesStoreModel>) => new UserPreferencesStore(dependencies, params);
   },
   lifecycle: lifecycleEnum.singleton,
 });

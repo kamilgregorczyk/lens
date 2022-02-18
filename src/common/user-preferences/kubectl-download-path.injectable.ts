@@ -4,11 +4,11 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { computed } from "mobx";
-import userPereferencesStoreInjectableInjectable from "../../main/user-pereferences/store.injectable";
+import userPreferencesStoreInjectableInjectable from "../../main/user-pereferences/store.injectable";
 
 const kubectlBinariesPathInjectable = getInjectable({
   instantiate: (di) => {
-    const store = di.inject(userPereferencesStoreInjectableInjectable);
+    const store = di.inject(userPreferencesStoreInjectableInjectable);
 
     return computed(() => store.kubectlBinariesPath);
   },

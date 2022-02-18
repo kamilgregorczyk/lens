@@ -17,9 +17,9 @@ const apiBaseInjectable = getInjectable({
     const proxyPort = di.inject(lensProxyPortInjectable);
 
     when(
-      () => typeof proxyPort.port.get() === "number",
+      () => typeof proxyPort.get() === "number",
       () => {
-        const port = proxyPort.port.get();
+        const port = proxyPort.get();
 
         apiBase = new JsonApi({
           serverAddress: `http://127.0.0.1:${port}`,

@@ -4,7 +4,6 @@
  */
 
 import { CatalogEntity, CatalogEntityActionContext, CatalogEntityContextMenuContext, CatalogEntityMetadata, CatalogEntityStatus } from "../entity";
-import { CatalogCategory, CatalogCategorySpec } from "../../category/category";
 import type { CatalogEntitySpec } from "../entity";
 import { activateClusterInjectionToken } from "../../../ipc/cluster/activate.token";
 import { disconnectClusterInjectionToken } from "../../../ipc/cluster/disconnect.token";
@@ -111,25 +110,4 @@ export class KubernetesCluster<
         break;
     }
   }
-}
-
-export class KubernetesClusterCategory extends CatalogCategory {
-  public readonly apiVersion = "catalog.k8slens.dev/v1alpha1";
-  public readonly kind = "CatalogCategory";
-  public metadata = {
-    name: "Clusters",
-    icon: require(`!!raw-loader!./icons/kubernetes.svg`).default, // eslint-disable-line
-  };
-  public spec: CatalogCategorySpec = {
-    group: "entity.k8slens.dev",
-    versions: [
-      {
-        name: "v1alpha1",
-        entityClass: KubernetesCluster,
-      },
-    ],
-    names: {
-      kind: "KubernetesCluster",
-    },
-  };
 }

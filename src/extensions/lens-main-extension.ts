@@ -32,13 +32,13 @@ export class LensMainExtension extends LensExtension<LensMainExtensionDependenci
    */
   terminalShellEnvModifier?: ShellEnvModifier;
 
-  navigate(pageId?: string, params?: Record<string, any>, frameId?: number): void;
+  navigate(pageId?: string, params?: Record<string, any>): void;
   /**
    * @deprecated this function isn't really async, it just returns a resolved promise
    */
   navigate(pageId?: string, params?: Record<string, any>, frameId?: number): Promise<void>;
-  navigate(pageId?: string, params?: Record<string, any>, frameId?: number): Promise<void> {
-    this[extensionDependencies].navigateExtension(this.id, pageId, params, frameId);
+  navigate(pageId?: string, params?: Record<string, any>): Promise<void> {
+    this[extensionDependencies].navigateExtension(this.id, pageId, params);
 
     return Promise.resolve();
   }

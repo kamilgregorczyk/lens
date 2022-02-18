@@ -4,9 +4,8 @@
  */
 
 import { CatalogEntity, CatalogEntityActionContext, CatalogEntityMetadata, CatalogEntitySpec, CatalogEntityStatus } from "../entity";
-import { CatalogCategory } from "../../category/category";
 
-interface GeneralEntitySpec extends CatalogEntitySpec {
+export interface GeneralEntitySpec extends CatalogEntitySpec {
   path: string;
   icon?: {
     material?: string;
@@ -21,25 +20,4 @@ export class GeneralEntity extends CatalogEntity<CatalogEntityMetadata, CatalogE
   onRun(context: CatalogEntityActionContext) {
     context.navigate(this.spec.path);
   }
-}
-
-export class GeneralCategory extends CatalogCategory {
-  public readonly apiVersion = "catalog.k8slens.dev/v1alpha1";
-  public readonly kind = "CatalogCategory";
-  public metadata = {
-    name: "General",
-    icon: "settings",
-  };
-  public spec = {
-    group: "entity.k8slens.dev",
-    versions: [
-      {
-        name: "v1alpha1",
-        entityClass: GeneralEntity,
-      },
-    ],
-    names: {
-      kind: "General",
-    },
-  };
 }

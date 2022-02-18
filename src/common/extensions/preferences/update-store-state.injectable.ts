@@ -3,9 +3,9 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
+import type { LensExtensionId } from "../manifest";
 import type { ExtensionsPreferencesStore, LensExtensionState } from "./store";
 import { extensionsPreferencesStoreInjectionToken } from "./store-injection-token";
-import type { LensExtensionId } from "../../../extensions/lens-extension";
 
 interface Dependencies {
   store: ExtensionsPreferencesStore;

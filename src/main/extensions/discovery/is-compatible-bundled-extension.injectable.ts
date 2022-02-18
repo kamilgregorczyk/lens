@@ -2,11 +2,11 @@
  * Copyright (c) OpenLens Authors. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import type { LensExtensionManifest } from "../../../extensions/lens-extension";
 import type { SemVer } from "semver";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import appVersionInjectable from "../../../common/vars/app-version.injectable";
 import isProductionInjectable from "../../../common/vars/is-production.injectable";
+import type { LensExtensionManifest } from "../../../common/extensions/manifest";
 
 export type IsCompatibleBundledExtension = (manifest: LensExtensionManifest) => boolean;
 

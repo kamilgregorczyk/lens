@@ -3,8 +3,6 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { InstalledExtension } from "../../../extensions/discovery/discovery";
-import type { LensExtensionId } from "../../../extensions/lens-extension";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import type { LensLogger } from "../../../common/logger";
 import type { LoadBundledExtensions } from "./load-bundled-extensions.injectable";
@@ -16,6 +14,8 @@ import lensPackageJsonPathInjectable from "../../../common/paths/package-json.in
 import type { InstallDependency } from "../../../extensions/deps-installer/install-dependency.injectable";
 import installDependencyInjectable from "../../../extensions/deps-installer/install-dependency.injectable";
 import loadExternalExtensionsInjectable, { LoadExternalExtensions } from "./load-external-extensions.injectable";
+import type { InstalledExtension } from "../../../common/extensions/installed.injectable";
+import type { LensExtensionId } from "../../../common/extensions/manifest";
 
 export type EnsureExtensions = (bundledFolderPath: string) => Promise<[LensExtensionId, InstalledExtension][]>;
 

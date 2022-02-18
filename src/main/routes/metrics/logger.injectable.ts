@@ -3,15 +3,15 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import createChildLoggerInjectable from "../../logger/create-child-logger.injectable";
+import createChildLoggerInjectable from "../../../common/logger/create-child-logger.injectable";
 
-const extensionInstallationStateManagerLoggerInjectable = getInjectable({
+const metricsRouteLoggerInjectable = getInjectable({
   instantiate: (di) => {
     const createChildLogger = di.inject(createChildLoggerInjectable);
 
-    return createChildLogger("EXTENSION-INSTALLATION-STATE-MANAGER");
+    return createChildLogger("METRICS-ROUTE");
   },
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default extensionInstallationStateManagerLoggerInjectable;
+export default metricsRouteLoggerInjectable;

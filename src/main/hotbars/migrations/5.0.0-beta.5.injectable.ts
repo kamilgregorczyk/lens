@@ -6,7 +6,8 @@
 import type { HotbarItems } from "../../../common/hotbars/hotbar-types";
 import type { MigrationDeclaration } from "../../utils/join-migrations";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import getEntityByIdInjectable, { GetEntityById } from "../../catalog/entity/get-by-id.injectable";
+import type { GetEntityById } from "../../../common/catalog/entity/get-by-id.injectable";
+import getEntityByIdInjectable from "../../../common/catalog/entity/get-by-id.injectable";
 
 interface Pre500Beta5Hotbar {
   id: string;

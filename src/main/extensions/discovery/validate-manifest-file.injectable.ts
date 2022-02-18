@@ -4,10 +4,10 @@
  */
 
 import type { JsonValue, PackageJson } from "type-fest";
-import type { LensExtensionManifest, RawLensExtensionManifest } from "../../../extensions/lens-extension";
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import Joi from "joi";
 import { SemVer } from "semver";
+import type { LensExtensionManifest, RawLensExtensionManifest } from "../../../common/extensions/manifest";
 
 export type ValidateManifestFile = (val: JsonValue) => LensExtensionManifest;
 

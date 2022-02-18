@@ -9,7 +9,7 @@ import request from "request";
 import { ensureDir, pathExists } from "fs-extra";
 import * as tar from "tar";
 import { isWindows } from "../common/vars";
-import type winston from "winston";
+import type { LensLogger } from "../common/logger";
 
 export type LensBinaryOpts = {
   version: string;
@@ -32,7 +32,8 @@ export class LensBinary {
   protected arch: string;
   protected originalBinaryName: string;
   protected requestOpts: request.Options;
-  protected logger: Console | winston.Logger;
+
+  public logger: LensLogger;
 
   constructor(opts: LensBinaryOpts) {
     const baseDir = opts.baseDir;
@@ -66,10 +67,6 @@ export class LensBinary {
     if (tarName) {
       this.tarPath = path.join(this.dirname, tarName);
     }
-  }
-
-  public setLogger(logger: Console | winston.Logger) {
-    this.logger = logger;
   }
 
   protected binaryDir() {
@@ -181,7 +178,7 @@ export class LensBinary {
     });
 
     stream.on("error", (error) => {
-      this.logger.error(error);
+      this.logger.error("failed to download binary", error);
       fs.unlink(binaryPath, () => {
         // do nothing
       });

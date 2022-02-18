@@ -11,7 +11,7 @@ import fileNameMigrationInjectable from "./migrations/file-name-migration.inject
 import versionedMigrationsInjectable from "./migrations/versioned.injectable";
 import setLoginItemSettingsInjectable from "../electron/set-login-item-settings.injectable";
 
-const userPereferencesStoreInjectableInjectable = getInjectable({
+const userPreferencesStoreInjectableInjectable = getInjectable({
   setup: async (di) => {
     const fileNameMigration = di.inject(fileNameMigrationInjectable);
 
@@ -47,4 +47,4 @@ const userPereferencesStoreInjectableInjectable = getInjectable({
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default userPereferencesStoreInjectableInjectable;
+export default userPreferencesStoreInjectableInjectable;

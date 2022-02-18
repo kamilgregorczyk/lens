@@ -4,7 +4,8 @@
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { observable, ObservableMap } from "mobx";
-import type { LensExtension, LensExtensionId } from "../../extensions/lens-extension";
+import type { LensExtension } from "../../extensions/lens-extension";
+import type { LensExtensionId } from "./manifest";
 
 export type ExtensionInstances = ObservableMap<LensExtensionId, LensExtension>;
 

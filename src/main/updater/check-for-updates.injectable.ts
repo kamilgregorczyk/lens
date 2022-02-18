@@ -5,14 +5,14 @@
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import emitCheckingForUpdatesInjectable from "../../common/ipc/updates/checking/emit.injectable";
 import type { LensLogger } from "../../common/logger";
-import type { UserPereferencesStore } from "../../common/user-preferences/store";
+import type { UserPreferencesStore } from "../../common/user-preferences/store";
 import { userPreferencesStoreInjectionToken } from "../../common/user-preferences/store-injection-token";
 import updaterLoggerInjectable from "./logger.injectable";
 import type { AppUpdater } from "electron-updater";
 import electronUpdaterInjectable from "./electron-updater.injectable";
 
 interface Dependencies {
-  store: UserPereferencesStore;
+  store: UserPreferencesStore;
   emitCheckingForUpdates: () => void;
   logger: LensLogger;
   autoUpdater: AppUpdater;

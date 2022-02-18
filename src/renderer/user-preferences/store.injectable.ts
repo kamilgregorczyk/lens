@@ -6,7 +6,7 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import createUserStoreInjectable from "../../common/user-preferences/create-store.injectable";
 import { userPreferencesStoreInjectionToken } from "../../common/user-preferences/store-injection-token";
 
-const userPereferencesStoreInjectableInjectable = getInjectable({
+const userPreferencesStoreInjectableInjectable = getInjectable({
   instantiate: (di) => {
     const createUserStore = di.inject(createUserStoreInjectable);
 
@@ -16,4 +16,4 @@ const userPereferencesStoreInjectableInjectable = getInjectable({
   lifecycle: lifecycleEnum.singleton,
 });
 
-export default userPereferencesStoreInjectableInjectable;
+export default userPreferencesStoreInjectableInjectable;

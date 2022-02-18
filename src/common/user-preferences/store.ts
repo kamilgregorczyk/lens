@@ -22,7 +22,7 @@ export interface UserStoreDependencies extends BaseStoreDependencies {
   readonly appEventBus: AppEventBus;
 }
 
-export class UserPereferencesStore extends BaseStore<UserPereferencesStoreModel> /* implements UserStoreFlatModel (when strict null is enabled) */ {
+export class UserPreferencesStore extends BaseStore<UserPereferencesStoreModel> /* implements UserStoreFlatModel (when strict null is enabled) */ {
   constructor(protected readonly dependencies: UserStoreDependencies, baseStoreParams: BaseStoreParams<UserPereferencesStoreModel> = {}) {
     super(dependencies, {
       ...baseStoreParams,

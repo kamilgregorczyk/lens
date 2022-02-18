@@ -4,10 +4,9 @@
  */
 
 import { action, computed, observable } from "mobx";
-import { disposer } from "../../renderer/utils";
-import type { ExtendableDisposer } from "../../renderer/utils";
 import * as uuid from "uuid";
-import type { LensLogger } from "../../common/logger";
+import type { LensLogger } from "../../logger";
+import { ExtendableDisposer, disposer } from "../../utils";
 
 export enum ExtensionInstallationState {
   INSTALLING = "installing",

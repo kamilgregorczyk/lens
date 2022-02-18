@@ -10,7 +10,7 @@ import type { UpdateAvailable } from "../../common/ipc/updates/available/emit.to
 import emitUpdateNotAvailableInjectable from "../../common/ipc/updates/not-available/emit.injectable";
 import type { UpdateNotAvailable } from "../../common/ipc/updates/not-available/emit.token";
 import type { LensLogger } from "../../common/logger";
-import type { UserPereferencesStore } from "../../common/user-preferences/store";
+import type { UserPreferencesStore } from "../../common/user-preferences/store";
 import { userPreferencesStoreInjectionToken } from "../../common/user-preferences/store-injection-token";
 import isTestEnvInjectable from "../../common/vars/is-test-env.injectable";
 import electronUpdaterInjectable from "./electron-updater.injectable";
@@ -25,7 +25,7 @@ import checkForUpdatesInjectable from "./check-for-updates.injectable";
 interface Dependencies {
   isAutoUpdateEnabled: IsAutoUpdateEnabled;
   isTestEnv: boolean;
-  store: UserPereferencesStore;
+  store: UserPreferencesStore;
   autoUpdater: AppUpdater;
   logger: LensLogger;
   emitUpdateAvailable: UpdateAvailable;

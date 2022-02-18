@@ -11,7 +11,7 @@ import { dumpConfigYaml } from "../../common/kube-helpers";
 import logger from "../logger";
 import type { LensProxyPort } from "../lens-proxy/port.injectable";
 
-interface Dependencies {
+export interface KubeconfigManagerDependencies {
   readonly directoryForTemp: string
   readonly proxyPort: LensProxyPort;
 }
@@ -30,7 +30,7 @@ export class KubeconfigManager {
     return this.cluster.contextHandler;
   }
 
-  constructor(private readonly dependencies: Dependencies, protected cluster: Cluster) {
+  constructor(private readonly dependencies: KubeconfigManagerDependencies, protected cluster: Cluster) {
   }
 
   /**

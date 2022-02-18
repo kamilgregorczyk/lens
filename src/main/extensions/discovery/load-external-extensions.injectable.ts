@@ -9,10 +9,10 @@ import type { ReadDir } from "../../../common/fs/read-dir.injectable";
 import readDirInjectable from "../../../common/fs/read-dir.injectable";
 import type { LensLogger } from "../../../common/logger";
 import localExtensionsDirectoryInjectable from "../../../common/paths/local-extensions.injectable";
-import type { InstalledExtension } from "../../../extensions/discovery/discovery";
 import extensionsDiscoveryLoggerInjectable from "./logger.injectable";
 import type { LoadExtensionFromFolder } from "./load-extension-from-folder.injectable";
 import loadExtensionFromFolderInjectable from "./load-extension-from-folder.injectable";
+import type { InstalledExtension } from "../../../common/extensions/installed.injectable";
 
 export type LoadExternalExtensions = (bundledExtensionNames: Set<string>) => Promise<InstalledExtension[]>;
 

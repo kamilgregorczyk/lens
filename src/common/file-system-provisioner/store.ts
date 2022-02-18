@@ -9,7 +9,7 @@ import fse from "fs-extra";
 import { action, makeObservable, observable } from "mobx";
 import path from "path";
 import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../base-store";
-import type { LensExtensionId } from "../../extensions/lens-extension";
+import type { LensExtensionId } from "../extensions/manifest";
 import { getOrInsertWith, toJS } from "../utils";
 
 export interface FileSystemProvisionerModel {

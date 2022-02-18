@@ -110,7 +110,7 @@ export class StorageHelper<T> {
 
       this.storage.onChange?.({ value, oldValue, key: this.key });
     } catch (error) {
-      logger.error(`${StorageHelper.logPrefix} updating storage: ${error}`, this, { value, oldValue });
+      logger.error(`${StorageHelper.logPrefix} updating storage: ${error}`, { this: this, value, oldValue });
     }
   }
 

@@ -8,8 +8,8 @@ import path from "path";
 import packageInfo from "../../package.json";
 import { asLegacyGlobalObjectForExtensionApi } from "../extensions/di-legacy-globals/as-legacy-global-object-for-extension-api";
 import { defineGlobal } from "./utils/defineGlobal";
-import isLinuxInjectable from "./vars/is-linux.injectable";
 import isMacInjectable from "./vars/is-mac.injectable";
+import isProductionInjectable from "./vars/is-production.injectable";
 import isTestEnvInjectable from "./vars/is-test-env.injectable";
 import isWindowsInjectable from "./vars/is-windows.injectable";
 
@@ -24,11 +24,6 @@ export const isMac = asLegacyGlobalObjectForExtensionApi(isMacInjectable);
 export const isWindows = asLegacyGlobalObjectForExtensionApi(isWindowsInjectable);
 
 /**
- * @deprecated use di.inject(isLinuxInjectable) instead
- */
-export const isLinux = asLegacyGlobalObjectForExtensionApi(isLinuxInjectable);
-
-/**
  * @deprecated use di.inject(isTestEnvInjectable) instead
  */
 export const isTestEnv = asLegacyGlobalObjectForExtensionApi(isTestEnvInjectable);
@@ -36,10 +31,9 @@ export const isTestEnv = asLegacyGlobalObjectForExtensionApi(isTestEnvInjectable
 /**
  * @deprecated use di.inject(isProductionInjectable) instead
  */
-export const isProduction = process.env.NODE_ENV === "production";
+export const isProduction = asLegacyGlobalObjectForExtensionApi(isProductionInjectable);
 
 export const isDebugging = ["true", "1", "yes", "y", "on"].includes((process.env.DEBUG ?? "").toLowerCase());
-export const isSnap = !!process.env.SNAP;
 export const isDevelopment = !isTestEnv && !isProduction;
 
 export const integrationTestingArg = "--integration-testing";

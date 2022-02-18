@@ -7,7 +7,7 @@ import { observable } from "mobx";
 
 export interface LensProxyPort {
   set: (port: number) => void;
-  get: () => number;
+  get: () => number | undefined;
 }
 
 const lensProxyPortInjectable = getInjectable({

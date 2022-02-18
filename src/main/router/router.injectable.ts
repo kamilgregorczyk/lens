@@ -6,6 +6,7 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { apiPrefix } from "../../common/vars";
 import { Router } from "../router";
 import { VersionRoute, KubeconfigRoute, MetricsRoute, PortForwardRoute, HelmApiRoute } from "../routes";
+import getMetricsInjectable from "../routes/metrics/get.injectable";
 import routePortForwardInjectable from "../routes/port-forward/route-port-forward.injectable";
 import applyResourceRouteInjectable from "../routes/resource-applier/apply.injectable";
 import patchResourceRouteInjectable from "../routes/resource-applier/patch.injectable";
@@ -29,7 +30,11 @@ const routerInjectable = getInjectable({
     },
     { method: "get", path: "/version", handler: VersionRoute.getVersion },
     { method: "get", path: `${apiPrefix}/kubeconfig/service-account/{namespace}/{account}`, handler: KubeconfigRoute.routeServiceAccountRoute },
-    { method: "post", path: `${apiPrefix}/metrics`, handler: MetricsRoute.routeMetrics },
+    {
+      method: "post",
+      path: `${apiPrefix}/metrics`,
+      handler: di.inject(getMetricsInjectable),
+    },
     { method: "get", path: `${apiPrefix}/metrics/providers`, handler: MetricsRoute.routeMetricsProviders },
     { method: "get", path: `${apiPrefix}/pods/port-forward/{namespace}/{resourceType}/{resourceName}`, handler: PortForwardRoute.routeCurrentPortForward },
     { method: "delete", path: `${apiPrefix}/pods/port-forward/{namespace}/{resourceType}/{resourceName}`, handler: PortForwardRoute.routeCurrentPortForwardStop },
