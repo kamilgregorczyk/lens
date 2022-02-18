@@ -13,8 +13,6 @@ export interface LensProtocolRouterRendererDependencies extends LensProtocolRout
 }
 
 export class LensProtocolRouterRenderer extends LensProtocolRouter {
-  readonly placement: string = "renderer";
-
   constructor(protected readonly dependencies: LensProtocolRouterRendererDependencies) {
     super(dependencies);
   }

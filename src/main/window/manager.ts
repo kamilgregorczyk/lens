@@ -7,12 +7,12 @@ import { app, BrowserWindow, dialog, shell } from "electron";
 import windowStateKeeper from "electron-window-state";
 import type { AppEventBus } from "../../common/app-event-bus/event-bus";
 import { delay } from "../../common/utils";
-import logger from "../logger";
-import { isMac, productName } from "../../common/vars";
+import { productName } from "../../common/vars";
 import type { ClusterFrameInfo } from "../clusters/frames.injectable";
 import type TypedEventEmitter from "typed-emitter";
 import type { BundledExtensionsEvents } from "../extensions/bundled-loaded.injectable";
 import type { LensProxyPort } from "../lens-proxy/port.injectable";
+import type { LensLogger } from "../../common/logger";
 
 function isHideable(window: BrowserWindow | null): boolean {
   return Boolean(window && !window.isDestroyed());
@@ -28,6 +28,8 @@ export interface WindowManagerDependencies {
   readonly bundledExtensionsEmitter: TypedEventEmitter<BundledExtensionsEvents>;
   readonly appEventBus: AppEventBus;
   readonly proxyPort: LensProxyPort;
+  readonly logger: LensLogger;
+  readonly isMac: boolean;
 }
 
 export class WindowManager {
@@ -63,8 +65,8 @@ export class WindowManager {
         show: false,
         minWidth: 700,  // accommodate 800 x 600 display minimum
         minHeight: 500, // accommodate 800 x 600 display minimum
-        titleBarStyle: isMac ? "hiddenInset" : "hidden",
-        frame: isMac,
+        titleBarStyle: this.dependencies.isMac ? "hiddenInset" : "hidden",
+        frame: this.dependencies.isMac,
         backgroundColor: "#1e2124",
         webPreferences: {
           nodeIntegration: true,
@@ -96,30 +98,30 @@ export class WindowManager {
           this.dependencies.appEventBus.emit({ name: "app", action: "dom-ready" });
         })
         .on("did-fail-load", (_event, code, desc) => {
-          logger.error(`[WINDOW-MANAGER]: Failed to load Main window`, { code, desc });
+          this.dependencies.logger.error(`[WINDOW-MANAGER]: Failed to load Main window`, { code, desc });
         })
         .on("did-finish-load", () => {
-          logger.info("[WINDOW-MANAGER]: Main window loaded");
+          this.dependencies.logger.info("[WINDOW-MANAGER]: Main window loaded");
         })
         .on("will-attach-webview", (event, webPreferences, params) => {
-          logger.debug("[WINDOW-MANAGER]: Attaching webview");
+          this.dependencies.logger.debug("[WINDOW-MANAGER]: Attaching webview");
           // Following is security recommendations because we allow webview tag (webviewTag: true)
           // suggested by https://www.electronjs.org/docs/tutorial/security#11-verify-webview-options-before-creation
           // and https://www.electronjs.org/docs/tutorial/security#10-do-not-use-allowpopups
 
           if (webPreferences.preload) {
-            logger.warn("[WINDOW-MANAGER]: Strip away preload scripts of webview");
+            this.dependencies.logger.warn("[WINDOW-MANAGER]: Strip away preload scripts of webview");
             delete webPreferences.preload;
           }
 
           // @ts-expect-error some electron version uses webPreferences.preloadURL/webPreferences.preload
           if (webPreferences.preloadURL) {
-            logger.warn("[WINDOW-MANAGER]: Strip away preload scripts of webview");
+            this.dependencies.logger.warn("[WINDOW-MANAGER]: Strip away preload scripts of webview");
             delete webPreferences.preload;
           }
 
           if (params.allowpopups) {
-            logger.warn("[WINDOW-MANAGER]: We do not allow allowpopups props, stop webview from renderer");
+            this.dependencies.logger.warn("[WINDOW-MANAGER]: We do not allow allowpopups props, stop webview from renderer");
 
             // event.preventDefault() will destroy the guest page.
             event.preventDefault();
@@ -139,10 +141,10 @@ export class WindowManager {
 
     try {
       if (showSplash) await this.showSplash();
-      logger.info(`[WINDOW-MANAGER]: Loading Main window from url: ${this.mainUrl} ...`);
+      this.dependencies.logger.info(`[WINDOW-MANAGER]: Loading Main window from url: ${this.mainUrl} ...`);
       await this.mainWindow.loadURL(this.mainUrl);
     } catch (error) {
-      logger.error("Loading main window failed", { error });
+      this.dependencies.logger.error("Loading main window failed", { error });
       dialog.showErrorBox("ERROR!", error.toString());
     }
   }
@@ -153,7 +155,23 @@ export class WindowManager {
 
     if (!this.mainWindow) {
       viewHasLoaded = new Promise<void>(resolve => {
-        this.dependencies.bundledExtensionsEmitter.once("loaded", resolve);
+        const timeoutId = setTimeout(() => showWindow(true), 10_000);
+
+        const showWindow = (showWarning = false) => {
+          resolve();
+          this.dependencies.bundledExtensionsEmitter.off("loaded", showWindow);
+          clearTimeout(timeoutId);
+
+          if (showWarning) {
+            dialog.showErrorBox(
+              "Failed to load bundled extensions",
+              "The loading of bundled extensions took too long, some functionality may not be availble",
+            );
+          }
+        };
+
+        this.dependencies.bundledExtensionsEmitter.once("loaded", showWindow);
+
       });
       await this.initMainWindow(showSplash);
     }
@@ -161,7 +179,7 @@ export class WindowManager {
     try {
       await viewHasLoaded;
       await delay(50); // wait just a bit longer to let the first round of rendering happen
-      logger.info("[WINDOW-MANAGER]: Main window has reported that it has loaded");
+      this.dependencies.logger.info("[WINDOW-MANAGER]: Main window has reported that it has loaded");
 
       this.mainWindow.show();
       this.splashWindow?.close();
@@ -170,7 +188,7 @@ export class WindowManager {
         this.dependencies.appEventBus.emit({ name: "app", action: "start" });
       }, 1000);
     } catch (error) {
-      logger.error(`Showing main window failed: ${error.stack || error}`);
+      this.dependencies.logger.error(`Showing main window failed: ${error.stack || error}`);
       dialog.showErrorBox("ERROR!", error.toString());
     }
 

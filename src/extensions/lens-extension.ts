@@ -4,13 +4,13 @@
  */
 
 import { action, observable, makeObservable } from "mobx";
-import logger from "../main/logger";
 import type { ProtocolHandlerRegistration } from "./registries";
-import { Disposer, disposer } from "../common/utils";
+import { disposer } from "../common/utils";
 import { LensExtensionDependencies, extensionDependencies } from "./lens-extension-set-dependencies";
 import type { SemVer } from "semver";
 import type { InstalledExtension } from "../common/extensions/installed.injectable";
 import type { LensExtensionId, LensExtensionManifest } from "../common/extensions/manifest";
+import type { RegisterExtension } from "../common/extensions/loader/load-instances.injectable";
 
 export type LensExtensionConstructor = new (...args: ConstructorParameters<typeof LensExtension>) => LensExtension;
 
@@ -72,7 +72,7 @@ export class LensExtension<Dependencies extends LensExtensionDependencies = Lens
   }
 
   @action
-  async enable(register: (ext: LensExtension) => Promise<Disposer[]>) {
+  async enable(register: RegisterExtension) {
     if (this._isEnabled) {
       return;
     }
@@ -80,10 +80,10 @@ export class LensExtension<Dependencies extends LensExtensionDependencies = Lens
     try {
       this._isEnabled = true;
 
-      this[Disposers].push(...await register(this));
-      logger.info(`[EXTENSION]: enabled ${this.name}@${this.version}`);
+      this[Disposers].push(await register(this));
+      this[extensionDependencies].logger.info(`enabled ${this.name}@${this.version}`);
     } catch (error) {
-      logger.error(`[EXTENSION]: failed to activate ${this.name}@${this.version}: ${error}`);
+      this[extensionDependencies].logger.error(`failed to activate ${this.name}@${this.version}: ${error}`);
     }
   }
 
@@ -98,9 +98,9 @@ export class LensExtension<Dependencies extends LensExtensionDependencies = Lens
     try {
       await this.onDeactivate();
       this[Disposers]();
-      logger.info(`[EXTENSION]: disabled ${this.name}@${this.version}`);
+      this[extensionDependencies].logger.info(`disabled ${this.name}@${this.version}`);
     } catch (error) {
-      logger.error(`[EXTENSION]: disabling ${this.name}@${this.version} threw an error: ${error}`);
+      this[extensionDependencies].logger.error(`disabling ${this.name}@${this.version} threw an error: ${error}`);
     }
   }
 

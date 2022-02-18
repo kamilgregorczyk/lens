@@ -20,7 +20,7 @@ const extensionInstancesByNameInjectable = getInjectable({
   instantiate: (di): GetInstanceByName => {
     const state = observable.map();
     const instances = di.inject(extensionInstancesInjectable);
-    const nonInstanceExtensionName = di.inject(nonInstanceExtensionNamesInjectable);
+    const nonInstanceExtensionNames = di.inject(nonInstanceExtensionNamesInjectable);
 
     observe(instances, change => {
       switch (change.type) {
@@ -40,7 +40,7 @@ const extensionInstancesByNameInjectable = getInjectable({
     });
 
     return (name) => {
-      if (nonInstanceExtensionName.has(name)) {
+      if (nonInstanceExtensionNames.has(name)) {
         return false;
       }
 

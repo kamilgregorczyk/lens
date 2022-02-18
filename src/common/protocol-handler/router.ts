@@ -15,6 +15,7 @@ import { when } from "mobx";
 import type { LensLogger } from "../logger";
 import type { IsExtensionEnabled } from "../extensions/preferences/is-enabled.injectable";
 import type { GetInstanceByName } from "../extensions/get-instance-by-name.injectable";
+import type { LensProcess } from "../vars/process.token";
 
 // IPC channel for protocol actions. Main broadcasts the open-url events to this channel.
 export const ProtocolHandlerIpcPrefix = "protocol-handler";
@@ -64,10 +65,10 @@ export interface LensProtocolRouterDependencies {
   readonly getInstanceByName: GetInstanceByName;
   readonly isExtensionEnabled: IsExtensionEnabled;
   readonly logger: LensLogger;
+  readonly lensProcess: LensProcess;
 }
 
 export abstract class LensProtocolRouter {
-  protected abstract readonly placement: string;
   // Map between path schemas and the handlers
   protected readonly internalRoutes = new Map<string, RouteHandler>();
 
@@ -186,12 +187,12 @@ export abstract class LensProtocolRouter {
     const extension = this.dependencies.getInstanceByName(name);
 
     if (!extension) {
-      this.dependencies.logger.info(`Extension ${name} matched, but does not have a class for ${this.placement}`);
+      this.dependencies.logger.info(`Extension ${name} matched, but does not have a class for ${this.dependencies.lensProcess}`);
 
       return name;
     }
 
-    if (!this.dependencies.isExtensionEnabled(extension.name, extension.isBundled)) {
+    if (!this.dependencies.isExtensionEnabled(extension)) {
       this.dependencies.logger.info(`Extension ${name} matched, but not enabled`);
 
       return name;

@@ -5,6 +5,7 @@
 
 import type { RequestDirectory } from "../common/file-system-provisioner/request-directory.injectable";
 import type { NavigateExtension } from "../common/ipc/window/navigate-extension.token";
+import type { LensLogger } from "../common/logger";
 import type { AddComputedSource } from "../main/catalog/entity/add-computed-source.injectable";
 import type { AddCategoryFilter } from "../renderer/catalog/category/add-filter.injectable";
 import type { AddEntityFilter } from "../renderer/catalog/entity/add-filter.injectable";
@@ -16,6 +17,7 @@ export const extensionDependencies = Symbol("lens-extension-dependencies");
 
 export interface LensExtensionDependencies {
   requestDirectory: RequestDirectory;
+  readonly logger: LensLogger;
 }
 
 export interface LensRendererExtensionDependencies extends LensExtensionDependencies {

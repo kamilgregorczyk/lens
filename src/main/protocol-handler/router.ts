@@ -43,8 +43,6 @@ export interface LensProtocolRouterMainDependencies extends LensProtocolRouterDe
 }
 
 export class LensProtocolRouterMain extends LensProtocolRouter {
-  protected readonly placement: string = "main";
-
   private missingExtensionHandlers: FallbackHandler[] = [];
 
   @observable rendererLoaded = false;

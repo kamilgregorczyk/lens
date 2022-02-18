@@ -13,7 +13,6 @@ import readJsonFileInjectable from "../../../common/fs/read-json-file.injectable
 import type { LensLogger } from "../../../common/logger";
 import isProductionInjectable from "../../../common/vars/is-production.injectable";
 import manifestFilenameInjectable from "../../../common/vars/manifest-filename.injectable";
-import type { InstalledExtension } from "../../../extensions/discovery/discovery";
 import extensionsDiscoveryLoggerInjectable from "./logger.injectable";
 import type { GetInstallPath } from "./get-install-path.injectable";
 import getInstallPathInjectable from "./get-install-path.injectable";
@@ -23,6 +22,7 @@ import type { IsCompatibleExtension } from "./is-compatible-extension.injectable
 import isCompatibleExtensionInjectable from "./is-compatible-extension.injectable";
 import type { ValidateManifestFile } from "./validate-manifest-file.injectable";
 import validateManifestFileInjectable from "./validate-manifest-file.injectable";
+import type { InstalledExtension } from "../../../common/extensions/installed.injectable";
 
 export interface LoadFromFolderOptions {
   isBundled: boolean;
@@ -60,7 +60,7 @@ const loadExtensionFromFolder = ({
     try {
       const manifest = validateManifestFile(await readJsonFile(manifestPath));
       const id = path.join(getInstallPath(manifest.name), manifestFilename);
-      const isEnabled = isExtensionEnabled(id, isBundled);
+      const isEnabled = isExtensionEnabled({ id, isBundled });
       const extensionDir = path.dirname(manifestPath);
       const npmPackage = path.join(extensionDir, `${manifest.name}-${manifest.version}.tgz`);
       const absolutePath = (isProduction && await pathExists(npmPackage)) ? npmPackage : extensionDir;

@@ -3,12 +3,16 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
-import clusterFramesInjectable from "../clusters/frames.injectable";
+import appEventBusInjectable from "../../common/app-event-bus/app-event-bus.injectable";
+import bundledExtensionsEventEmitterInjectable from "../extensions/bundled-loaded.injectable";
+import lensProxyPortInjectable from "../lens-proxy/port.injectable";
 import { WindowManager } from "./manager";
 
 const windowManagerInjectable = getInjectable({
   instantiate: (di) => new WindowManager({
-    clusterFrames: di.inject(clusterFramesInjectable),
+    appEventBus: di.inject(appEventBusInjectable),
+    bundledExtensionsEmitter: di.inject(bundledExtensionsEventEmitterInjectable),
+    proxyPort: di.inject(lensProxyPortInjectable),
   }),
   lifecycle: lifecycleEnum.singleton,
 });

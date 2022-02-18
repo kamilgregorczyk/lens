@@ -5,11 +5,17 @@
 import { Singleton } from "../../common/utils";
 import type { LensExtension } from "../lens-extension";
 import { createHash } from "crypto";
-import { broadcastMessage } from "../../common/ipc";
+import { asLegacyGlobalFunctionForExtensionApi } from "../di-legacy-globals/as-legacy-global-function-for-extension-api";
+import { broadcastMessageInjectionToken } from "../../common/ipc/broadcast/message.token";
 
 export const IpcPrefix = Symbol();
 
+const broadcastMessage = asLegacyGlobalFunctionForExtensionApi(broadcastMessageInjectionToken.token);
+
 export abstract class IpcRegistrar extends Singleton {
+  /**
+   * @internal
+   */
   readonly [IpcPrefix]: string;
 
   constructor(protected extension: LensExtension) {

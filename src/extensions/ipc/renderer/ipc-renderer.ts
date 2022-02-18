@@ -3,13 +3,17 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 import { ipcRenderer } from "electron";
-import { IpcPrefix, IpcRegistrar } from "./ipc-registrar";
-import { Disposers } from "../lens-extension";
-import type { LensRendererExtension } from "../lens-renderer-extension";
-import type { Disposer } from "../../common/utils";
+import { IpcPrefix, IpcRegistrar } from "../ipc-registrar";
+import { Disposers } from "../../lens-extension";
+import type { LensRendererExtension } from "../../lens-renderer-extension";
+import type { Disposer } from "../../../common/utils";
 import { once } from "lodash";
+import extensionIpcRendererLoggerInjectable from "./logger.injectable";
+import { asLegacyGlobalObjectForExtensionApi } from "../../di-legacy-globals/as-legacy-global-object-for-extension-api";
 
 export abstract class IpcRenderer extends IpcRegistrar {
+  protected readonly logger = asLegacyGlobalObjectForExtensionApi(extensionIpcRendererLoggerInjectable);
+
   constructor(extension: LensRendererExtension) {
     super(extension);
 
@@ -28,12 +32,12 @@ export abstract class IpcRenderer extends IpcRegistrar {
   listen(channel: string, listener: (event: Electron.IpcRendererEvent, ...args: any[]) => any): Disposer {
     const prefixedChannel = `extensions@${this[IpcPrefix]}:${channel}`;
     const cleanup = once(() => {
-      console.info(`[IPC-RENDERER]: removing extension listener`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
+      this.logger.info(`removing extension listener`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
 
       return ipcRenderer.removeListener(prefixedChannel, listener);
     });
 
-    console.info(`[IPC-RENDERER]: adding extension listener`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
+    this.logger.info(`adding extension listener`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
     ipcRenderer.addListener(prefixedChannel, listener);
     this.extension[Disposers].push(cleanup);
 

@@ -3,10 +3,11 @@
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
 
-import type { LensExtensionId } from "../../../extensions/lens-extension";
 import { action, computed, makeObservable, observable } from "mobx";
 import { toJS } from "../../utils";
 import { BaseStore, BaseStoreDependencies, BaseStoreParams } from "../../base-store";
+import type { LensExtensionId } from "../manifest";
+import type { InstalledExtension } from "../installed.injectable";
 
 export interface ExtensionsPreferencesStoreModel {
   extensions: Record<LensExtensionId, LensExtensionState>;
@@ -37,10 +38,10 @@ export class ExtensionsPreferencesStore extends BaseStore<ExtensionsPreferencesS
 
   protected state = observable.map<LensExtensionId, LensExtensionState>();
 
-  isEnabled(extId: LensExtensionId, isBundled: boolean): boolean {
+  isEnabled({ isBundled, id }: Pick<InstalledExtension, "id" | "isBundled">): boolean {
     // By default false, so that copied extensions are disabled by default.
     // If user installs the extension from the UI, the Extensions component will specifically enable it.
-    return isBundled || Boolean(this.state.get(extId)?.enabled);
+    return isBundled || Boolean(this.state.get(id)?.enabled);
   }
 
   mergeState(extensionsState: Partial<Record<LensExtensionId, LensExtensionState>>) {

@@ -2,14 +2,17 @@
  * Copyright (c) OpenLens Authors. All rights reserved.
  * Licensed under MIT License. See LICENSE in root directory for more information.
  */
-import { ipcMain } from "electron";
-import { IpcPrefix, IpcRegistrar } from "./ipc-registrar";
-import { Disposers } from "../lens-extension";
-import type { LensMainExtension } from "../lens-main-extension";
-import type { Disposer } from "../../common/utils";
+import { IpcPrefix, IpcRegistrar } from "../ipc-registrar";
+import { Disposers } from "../../lens-extension";
+import type { LensMainExtension } from "../../lens-main-extension";
+import type { Disposer } from "../../../common/utils";
 import { once } from "lodash";
-import { ipcMainHandle } from "../../common/ipc";
-import logger from "../../main/logger";
+import { asLegacyGlobalObjectForExtensionApi } from "../../di-legacy-globals/as-legacy-global-object-for-extension-api";
+import extensionIpcMainLoggerInjectable from "./logger.injectable";
+import ipcMainInjectable from "../../../main/ipc/ipc-main.injectable";
+
+const logger = asLegacyGlobalObjectForExtensionApi(extensionIpcMainLoggerInjectable);
+const ipcMain = asLegacyGlobalObjectForExtensionApi(ipcMainInjectable);
 
 export abstract class IpcMain extends IpcRegistrar {
   constructor(extension: LensMainExtension) {
@@ -28,12 +31,12 @@ export abstract class IpcMain extends IpcRegistrar {
   listen(channel: string, listener: (event: Electron.IpcRendererEvent, ...args: any[]) => any): Disposer {
     const prefixedChannel = `extensions@${this[IpcPrefix]}:${channel}`;
     const cleanup = once(() => {
-      logger.info(`[IPC-RENDERER]: removing extension listener`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
+      logger.info(`removing extension listener`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
 
       return ipcMain.removeListener(prefixedChannel, listener);
     });
 
-    logger.info(`[IPC-RENDERER]: adding extension listener`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
+    logger.info(`adding extension listener`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
     ipcMain.addListener(prefixedChannel, listener);
     this.extension[Disposers].push(cleanup);
 
@@ -48,10 +51,10 @@ export abstract class IpcMain extends IpcRegistrar {
   handle(channel: string, handler: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any): void {
     const prefixedChannel = `extensions@${this[IpcPrefix]}:${channel}`;
 
-    logger.info(`[IPC-RENDERER]: adding extension handler`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
-    ipcMainHandle(prefixedChannel, handler);
+    logger.info(`adding extension handler`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
+    ipcMain.handle(prefixedChannel, handler);
     this.extension[Disposers].push(() => {
-      logger.info(`[IPC-RENDERER]: removing extension handler`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
+      logger.info(`removing extension handler`, { channel, extension: { name: this.extension.name, version: this.extension.version }});
 
       return ipcMain.removeHandler(prefixedChannel);
     });

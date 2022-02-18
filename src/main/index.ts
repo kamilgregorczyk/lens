@@ -13,13 +13,12 @@ import { shellSync } from "./shell-sync";
 import { mangleProxyEnv } from "./proxy-env";
 import { registerFileProtocol } from "../common/register-protocol";
 import { installDeveloperTools } from "./developer-tools";
-import { disposer, getAppVersion } from "../common/utils";
+import { disposer, getAppVersion, noop } from "../common/utils";
 import { HelmRepoManager } from "./helm/helm-repo-manager";
 import configurePackages from "../common/configure-packages";
 import { PrometheusProviderRegistry } from "./prometheus";
 import * as initializers from "./initializers";
 import { getDi } from "./getDi";
-import extensionsLoaderInjectable from "../common/extensions/loader/loader.injectable";
 import lensProtocolRouterMainInjectable from "./protocol-handler/router.injectable";
 import directoryForExesInjectable from "../common/paths/executables.injectable";
 import kubeconfigSyncManagerInjectable from "./catalog/local-sources/kubeconfigs/manager.injectable";
@@ -38,6 +37,7 @@ import initSentryInjectable from "../common/error-reporting/init-sentry.injectab
 import isWindowsInjectable from "../common/vars/is-windows.injectable";
 import isMacInjectable from "../common/vars/is-mac.injectable";
 import watchExtensionsInjectable from "./extensions/discovery/watch.injectable";
+import loadInstancesInjectable from "../common/extensions/loader/load-instances.injectable";
 
 app.setName(appName);
 injectSystemCAs();
@@ -164,11 +164,11 @@ async function main(di: ConfigurableDependencyInjectionContainer) {
       return app.exit();
     }
 
-    const extensionLoader = di.inject(extensionsLoaderInjectable);
+    const loadInstances = di.inject(loadInstancesInjectable);
     const kubeConfigSyncManager = di.inject(kubeconfigSyncManagerInjectable);
     const startUpdateChecking = di.inject(startUpdateCheckingInjectable);
 
-    extensionLoader.init();
+    loadInstances(async () => noop);
     kubeConfigSyncManager.startSync();
     startUpdateChecking();
 

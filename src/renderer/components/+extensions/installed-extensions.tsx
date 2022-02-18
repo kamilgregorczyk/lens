@@ -11,14 +11,14 @@ import { MenuActions, MenuItem } from "../menu";
 import { Spinner } from "../spinner";
 import { cssNames } from "../../utils";
 import type { Row } from "react-table";
-import type { LensExtensionId } from "../../../extensions/lens-extension";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import extensionInstallationStateManagerInjectable from "../../../extensions/installation-state/manager.injectable";
-import type { ExtensionInstallationStateManager } from "../../../extensions/installation-state/manager";
 import { IObservableValue, observable } from "mobx";
 import isExtensionDiscoveryLoadedInjectable from "../../extensions/discovery-is-loaded.injectable";
 import type { InstalledExtension } from "../../../common/extensions/installed.injectable";
 import type { IsExtensionEnabled } from "../../../common/extensions/preferences/is-enabled.injectable";
+import type { ExtensionInstallationStateManager } from "../../../common/extensions/installation-state/manager";
+import extensionInstallationStateManagerInjectable from "../../../common/extensions/installation-state/manager.injectable";
+import type { LensExtensionId } from "../../../common/extensions/manifest";
 
 export interface InstalledExtensionsProps {
   extensions: InstalledExtension[];
@@ -42,12 +42,12 @@ const NonInjectedInstalledExtensions = observable(({
   disable,
   isExtensionEnabled,
 }: Dependencies & InstalledExtensionsProps) => {
-  const getStatus = ({ isBundled, id, isCompatible }: InstalledExtension) => {
-    if (!isCompatible) {
+  const getStatus = (extension: InstalledExtension) => {
+    if (!extension.isCompatible) {
       return "Incompatible";
     }
 
-    return isExtensionEnabled(id, isBundled) ? "Enabled" : "Disabled";
+    return isExtensionEnabled(extension) ? "Enabled" : "Disabled";
   };
   const filters = [
     (extension: InstalledExtension) => extension.manifest.name,
@@ -92,10 +92,10 @@ const NonInjectedInstalledExtensions = observable(({
   const data = useMemo(
     () => (
       extensions.map(extension => {
-        const { id, isCompatible, manifest, isBundled } = extension;
+        const { id, isCompatible, manifest } = extension;
         const { name, description, version } = manifest;
         const isUninstalling = extensionInstallationStateStore.isExtensionUninstalling(id);
-        const isEnabled = isExtensionEnabled(id, isBundled);
+        const isEnabled = isExtensionEnabled(extension);
 
         return {
           extension: (

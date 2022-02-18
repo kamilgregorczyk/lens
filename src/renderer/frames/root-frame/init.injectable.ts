@@ -6,7 +6,7 @@ import { getInjectable, lifecycleEnum } from "@ogre-tools/injectable";
 import { initRootFrame } from "./init";
 import extensionsLoaderInjectable from "../../../common/extensions/loader/loader.injectable";
 import initCatalogEntityRunListenerInjectable from "../../ipc/catalog/listeners/entity-run.injectable";
-import bundledExtensionsLoadedInjectable from "../../ipc/extensions/bundled-loaded.injectable";
+import extensionLoadedInjectable from "../../ipc/extensions/loaded.injectable";
 import initNavigateInAppListenerInjectable from "../../ipc/window/listeners/navigate-in-app.injectable";
 import initNetworkEmittersInjectable from "../../window/init-network-emitters.injectable";
 import initUpdateAvailableListenerInjectable from "../../ipc/updates/listeners/available.injectable";
@@ -19,7 +19,7 @@ const initRootFrameInjectable = getInjectable({
   instantiate: (di) => initRootFrame({
     loadExtensions: di.inject(extensionsLoaderInjectable).loadOnClusterManagerRenderer,
     initCatalogEnityRunListener: di.inject(initCatalogEntityRunListenerInjectable),
-    emitBundledExtensionsLoaded: di.inject(bundledExtensionsLoadedInjectable),
+    emitBundledExtensionsLoaded: di.inject(extensionLoadedInjectable),
     initNavigateInAppListener: di.inject(initNavigateInAppListenerInjectable),
     initNetworkEmitters: di.inject(initNetworkEmittersInjectable),
     initUpdateAvailableListener: di.inject(initUpdateAvailableListenerInjectable),

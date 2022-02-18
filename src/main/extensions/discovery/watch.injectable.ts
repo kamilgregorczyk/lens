@@ -105,6 +105,11 @@ function watchExtensions( {
     await ensureDir(extensionsNodeModulesDirectory);
     await ensureDir(localExtensionsDirectory);
 
+    /**
+     * NOTE: this MUST be a replace so that all bundled extensions are added at once.
+     *
+     * REF: EXTENSIONS-DISCOVERY-BUNDLED
+     */
     installedExtensions.replace(await ensureExtensions(bundledFolderPath));
 
     logger.info(`watching extension add/remove in ${localExtensionsDirectory}`);

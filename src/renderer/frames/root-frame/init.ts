@@ -6,7 +6,7 @@ import { delay } from "../../../common/utils";
 import type { LensLogger } from "../../../common/logger";
 import { unmountComponentAtNode } from "react-dom";
 import type { ExtensionLoading } from "../../../common/extensions/loader";
-import type { BundledExtensionsLoaded } from "../../../common/ipc/extensions/bundled-loaded.token";
+import type { ExtensionLoaded } from "../../../common/ipc/extensions/loaded.token";
 
 interface Dependencies {
   loadExtensions: () => Promise<ExtensionLoading[]>;
@@ -19,7 +19,7 @@ interface Dependencies {
   initVisibleClusterChanged: () => void;
   initNavigateInAppListener: () => void;
   initNetworkEmitters: () => void;
-  emitBundledExtensionsLoaded: BundledExtensionsLoaded;
+  emitBundledExtensionsLoaded: ExtensionLoaded;
   logger: LensLogger;
 }
 

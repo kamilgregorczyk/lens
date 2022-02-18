@@ -8,10 +8,10 @@ import path from "path";
 import type { ReadDir } from "../../../common/fs/read-dir.injectable";
 import readDirInjectable from "../../../common/fs/read-dir.injectable";
 import type { LensLogger } from "../../../common/logger";
-import type { InstalledExtension } from "../../../extensions/discovery/discovery";
 import extensionsDiscoveryLoggerInjectable from "./logger.injectable";
 import type { LoadExtensionFromFolder } from "./load-extension-from-folder.injectable";
 import loadExtensionFromFolderInjectable from "./load-extension-from-folder.injectable";
+import type { InstalledExtension } from "../../../common/extensions/installed.injectable";
 
 export type LoadBundledExtensions = (bundledFolderPath: string) => Promise<InstalledExtension[]>;
 
