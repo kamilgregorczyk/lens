@@ -13,12 +13,13 @@ import { cssNames, IClassName } from "../../utils";
 import { Icon } from "../icon";
 import { HotbarIcon } from "./hotbar-icon";
 import { LensKubernetesClusterStatus } from "../../../common/catalog/entity/declarations/kubernetes-cluster";
-import type { CatalogEntity, CatalogEntityContextMenu, NavigateAction } from "../../../common/catalog/entity/entity";
+import type { CatalogEntity, CatalogEntityContextMenu } from "../../../common/catalog/entity/entity";
 import { withInjectables } from "@ogre-tools/injectable-react";
 import type { GetCategoryForEntity } from "../../catalog/category/get-for-entity.injectable";
 import activeEntityInjectable from "../../catalog/entity/active-entity.injectable";
 import getCategoryForEntityInjectable from "../../catalog/category/get-for-entity.injectable";
-import navigateActionInjectable from "../../window/navigate-action.injectable";
+import type { OnContextMenuOpen } from "../../catalog/category/on-context-menu-open.injectable";
+import onContextMenuOpenInjectable from "../../catalog/category/on-context-menu-open.injectable";
 
 export interface HotbarEntityIconProps extends HTMLAttributes<HTMLElement> {
   entity: CatalogEntity;
@@ -32,7 +33,7 @@ export interface HotbarEntityIconProps extends HTMLAttributes<HTMLElement> {
 interface Dependencies {
   activeEntity: IComputedValue<CatalogEntity | undefined>;
   getCategoryForEntity: GetCategoryForEntity;
-  navigate: NavigateAction;
+  onContextMenuOpen: OnContextMenuOpen;
 }
 
 @observer
@@ -79,10 +80,7 @@ class NonInjectedHotbarEntityIcon extends React.Component<HotbarEntityIconProps 
       onClick: () => this.props.remove(this.props.entity.getId()),
     }]);
 
-    this.props.entity.onContextMenuOpen({
-      menuItems: this.menuItems,
-      navigate: this.props.navigate,
-    });
+    this.props.onContextMenuOpen(this.props.entity, this.menuItems);
   }
 
   render() {
@@ -116,6 +114,6 @@ export const HotbarEntityIcon = withInjectables<Dependencies, HotbarEntityIconPr
     ...props,
     activeEntity: di.inject(activeEntityInjectable),
     getCategoryForEntity: di.inject(getCategoryForEntityInjectable),
-    navigate: di.inject(navigateActionInjectable),
+    onContextMenuOpen: di.inject(onContextMenuOpenInjectable),
   }),
 });

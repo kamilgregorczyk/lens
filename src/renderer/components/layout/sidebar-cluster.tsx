@@ -14,11 +14,12 @@ import { Tooltip } from "../tooltip";
 import { LoadingSidebarCluster } from "./loading-sidebar-cluster";
 import { observer } from "mobx-react";
 import { withInjectables } from "@ogre-tools/injectable-react";
-import navigateActionInjectable from "../../window/navigate-action.injectable";
 import activeEntityInjectable from "../../catalog/entity/active-entity.injectable";
-import type { CatalogEntityContextMenu, CatalogEntity, NavigateAction } from "../../../common/catalog/entity/entity";
+import type { CatalogEntityContextMenu, CatalogEntity } from "../../../common/catalog/entity/entity";
 import type { Hotbar } from "../../../common/hotbars/hotbar";
 import activeHotbarInjectable from "../../../common/hotbars/active-hotbar.injectable";
+import type { OnContextMenuOpen } from "../../catalog/category/on-context-menu-open.injectable";
+import onContextMenuOpenInjectable from "../../catalog/category/on-context-menu-open.injectable";
 
 function onMenuItemClick(menuItem: CatalogEntityContextMenu) {
   if (menuItem.confirm) {
@@ -41,12 +42,16 @@ export interface SidebarClusterProps {
 }
 
 interface Dependencies {
-  navigate: NavigateAction;
   entity: IComputedValue<CatalogEntity | null | undefined>;
   activeHotbar: IComputedValue<Hotbar>;
+  onContextMenuOpen: OnContextMenuOpen;
 }
 
-const NonInjectedSidebarCluster = observer(({ navigate, entity, activeHotbar }: Dependencies & SidebarClusterProps) => {
+const NonInjectedSidebarCluster = observer(({
+  entity,
+  activeHotbar,
+  onContextMenuOpen,
+}: Dependencies & SidebarClusterProps) => {
   const [opened, setOpened] = useState(false);
   const [menuItems] = useState(observable.array<CatalogEntityContextMenu>());
   const clusterEntity = entity.get();
@@ -69,11 +74,7 @@ const NonInjectedSidebarCluster = observer(({ navigate, entity, activeHotbar }: 
       ];
 
     menuItems.replace([{ title, onClick }]);
-    clusterEntity.onContextMenuOpen({
-      menuItems,
-      navigate,
-    });
-
+    onContextMenuOpen(clusterEntity, menuItems);
     toggle();
   };
 
@@ -138,8 +139,8 @@ const NonInjectedSidebarCluster = observer(({ navigate, entity, activeHotbar }: 
 export const SidebarCluster = withInjectables<Dependencies, SidebarClusterProps>(NonInjectedSidebarCluster, {
   getProps: (di, props) => ({
     ...props,
-    navigate: di.inject(navigateActionInjectable),
     entity: di.inject(activeEntityInjectable),
     activeHotbar: di.inject(activeHotbarInjectable),
+    onContextMenuOpen: di.inject(onContextMenuOpenInjectable),
   }),
 });
